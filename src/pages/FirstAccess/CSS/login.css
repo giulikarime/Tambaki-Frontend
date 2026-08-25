@@ -1,0 +1,8 @@
+body{
+    background-color: #fff8e9;
+}
+
+#imgTambaki-left{
+    display: flex;
+    justify-content: flex-end;
+}

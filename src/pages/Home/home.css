@@ -1,0 +1,128 @@
+main {
+    width: 100vw;
+    height: 80vh;
+    background-color: #fff8e9;
+}
+
+img {
+    width: 40px;
+    height: 40px;
+}
+
+button {
+    background-color: transparent;
+}
+
+button:hover {
+    cursor: pointer;
+}
+
+.search-input {
+    background-image: url('../../assets/header/search_icon.svg');
+    background-repeat: no-repeat;
+    background-position: 10px center;
+    background-size: 40px 25px;
+}
+
+#principal-menu {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 100px;
+    top: 60%;
+    left: 50%;
+    position: absolute;
+    transform: translate(-50%, -60%);
+}
+
+#btn-group {
+    display: flex;
+    flex-direction: row;
+    gap: 50px;
+}
+
+.principal-btn {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 35px;
+    border-radius: 20px;
+    width: 350px;
+    height: 230px;
+    text-align: left;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.226);
+    transition: transform 0.30s ease;
+}
+
+.principal-btn:hover{
+    transform: translateY(-10px);
+}
+
+.principal-btn p {
+    font-size: 16px;
+}
+
+.principal-btn h2 {
+    font-size: 20px;
+}
+
+#tables-group {
+    max-width: 800px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+#tables-list {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 30px;
+    overflow-x: auto;
+    padding-bottom: 10px;
+    width: 100%;
+    cursor: grab;
+    user-select: none;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+#tables-list::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Edge novo */
+}
+
+#tables-list.grabbing {
+    cursor: grabbing;
+}
+
+.table-card{
+    width: 70px;
+    height: 35px;
+    flex-shrink: 0;
+    border-radius: 30px;
+    padding: 15px 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    font-size: 18px;
+}
+
+.table-card.blue{
+    border: 4px solid #87b3f2;
+    color: black;
+}
+
+.table-card.blue #p-table-status{
+    color: #3553b5;
+}
+
+.table-card.orange{
+    border: 4px solid #191444;
+    background-color: #191444;
+    color: white; 
+}
+
+.table-card.orange #p-table-status{
+    color: #f5ae47;
+}
