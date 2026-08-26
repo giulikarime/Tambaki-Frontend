@@ -70,6 +70,10 @@ button:hover {
     max-width: 800px;
     width: 100%;
     margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 50px;
+    align-items: center;
 }
 
 #tables-list {

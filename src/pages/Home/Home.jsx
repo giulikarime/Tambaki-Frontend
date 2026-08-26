@@ -105,7 +105,7 @@ function Home() {
                             <p>Reservar uma mesa para um cliente.</p>
                         </button>
                     </div>
-                    <div id="tables-group" style={{display:'flex',flexDirection:'column',gap:30,alignItems:'center'}}>
+                    <div id="tables-group">
                         <button onClick={()=>redirect('/create_table')} style={{fontSize:20,display:'flex',alignItems:'center',gap:5}}>
                             <b>Mesas da unidade</b>
                             <Plus size={26}></Plus>
@@ -123,11 +123,7 @@ function Home() {
                             ) : (
                                 tablesList.map((table)=>(
                                     <div key={table.id} className={`table-card ${table.table_number % 2 === 0 ? 'blue' : 'orange'}`}>
-                                        {table.table_number < 10 ? (
-                                            <p><b>0{table.table_number}</b></p>
-                                        ) : (
-                                            <p><b>{table.table_number}</b></p>
-                                        )}
+                                        <p><b>{String(table.table_number).padStart(2,"0")}</b></p>
                                         <p id="p-table-status"><b>{table.status}</b></p>
                                     </div>
                                 ))
