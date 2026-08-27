@@ -1,0 +1,24 @@
+#group-logo img {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background-color: #fff;
+    margin-bottom: 12px;
+}
+
+#group-texts {
+    display: flex;
+    flex-direction: column;
+}
+
+#group-texts h2 {
+    color: #f5ae47;
+    font-size: 35px;
+    font-weight: 800;
+    margin-top: 4px;
+}
+
+#group-texts p {
+    color: #fcf5bb;
+    font-size: 18px;
+}
