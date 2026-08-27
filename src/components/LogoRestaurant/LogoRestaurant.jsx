@@ -1,4 +1,5 @@
 import logo from '../../assets/Tambaki_Prototype.png'
+import './logo_restaurant.css'
 
 function LogoRestaurant() {
     return (
