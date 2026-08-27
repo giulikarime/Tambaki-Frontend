@@ -7,6 +7,7 @@ import { getTables } from "../../services/tables";
 import { getOrders } from "../../services/orders";
 import { getReservations } from "../../services/reserves";
 import { useNavigate } from "react-router-dom";
+import Modal from 'react-modal'
 
 function Home() {
     const [tablesList,setTablesList] = useState([]);
@@ -17,6 +18,8 @@ function Home() {
     const orderSize = String(orderList.length).padStart(2, "0");
     const bookSize = String(bookTableList.length).padStart(2, "0");
     const navigate = useNavigate();
+    const [editTableModalIsOpen, setEditTableModalIsOpen] = useState(false);
+    const [createTableModalIsOpen, setCreateTableModalIsOpen] = useState(false);
 
     const tablesListRef = useRef(null);
     const isDragging = useRef(false);
@@ -106,7 +109,7 @@ function Home() {
                         </button>
                     </div>
                     <div id="tables-group">
-                        <button onClick={()=>redirect('/create_table')} style={{fontSize:20,display:'flex',alignItems:'center',gap:5}}>
+                        <button onClick={()=>setCreateTableModalIsOpen(true)} style={{fontSize:20,display:'flex',alignItems:'center',gap:5}}>
                             <b>Mesas da unidade</b>
                             <Plus size={26}></Plus>
                         </button>
@@ -119,17 +122,39 @@ function Home() {
                             onMouseMove={handleMouseMove}
                         >
                             {tablesList.length === 0 ? (
-                                <p>Nenhuma mesa foi criada.</p>
+                                <div clasName='table-card'>
+                                    <p>Nenhuma mesa foi criada.</p>
+                                </div>
                             ) : (
                                 tablesList.map((table)=>(
-                                    <div key={table.id} className={`table-card ${table.table_number % 2 === 0 ? 'blue' : 'orange'}`}>
+                                    <button key={table.id} className={`table-card ${table.table_number % 2 === 0 ? 'blue' : 'orange'}`}>
                                         <p><b>{String(table.table_number).padStart(2,"0")}</b></p>
                                         <p id="p-table-status"><b>{table.status}</b></p>
-                                    </div>
+                                    </button>
                                 ))
                             )}
                         </div>
                     </div>
+                    <Modal
+                        isOpen={createTableModalIsOpen}
+                        onRequestClose={() => setCreateTableModalIsOpen(false)}
+                        contentLabel="Criar Nova Mesa"
+                        shouldCloseOnOverlayClick={true}
+                        id='modal-create-table'
+                    >
+                        <h2>Criar Nova Mesa</h2>
+                        <form action="" method="post">
+                            <div className='fields'>
+                                <label>Número da Mesa</label>
+                                <input type="number" name="table_number" placeholder="Digite o número da mesa" required />
+                            </div>
+                            <div className='fields'>
+                                <label>Capacidade da Mesa</label>
+                                <input type="number" name="table_number" placeholder="Digite o número da mesa" required />
+                            </div>
+                            <button type='submit'>Salvar</button>
+                        </form>
+                    </Modal>
                 </div>
             </main>
         </>
