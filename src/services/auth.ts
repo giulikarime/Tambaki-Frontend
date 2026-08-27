@@ -26,3 +26,26 @@ export async function login(payload: LoginPayload): Promise<LoginResponse> {
 
   return data as LoginResponse;
 }
+
+export async function logout(): Promise<{ message: string }> {
+  const token = localStorage.getItem('accessToken');
+
+  const response = await fetch(`${API_URL}/auth/logout`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || 'Erro ao fazer logout');
+  }
+
+  localStorage.removeItem('accessToken');
+  localStorage.removeItem('account');
+
+  return data as { message: string };
+}
