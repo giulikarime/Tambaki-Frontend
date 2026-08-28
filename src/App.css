@@ -6,3 +6,12 @@
     margin: 0;
     font-family: 'Montserrat', sans-serif;
 }
+
+.btn-back-base{
+    background-color: rgb(27, 27, 27);
+    color: white;
+    border-radius: 50px;
+    padding: 3px;
+    display: flex;
+    align-items: center;
+}

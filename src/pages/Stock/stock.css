@@ -1,0 +1,75 @@
+#principal-menu{
+    width: 70%;
+    top: 15%;
+    left: 50%;
+    transform: translate(-50%,-15%);
+    display: flex;
+    flex-direction: column;
+}
+
+#top-container{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.groups-top-container{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 15px;
+}
+
+#btn-plus-stock{
+    background-color: #cae2ff;
+    border-radius: 10px;
+    padding: 6px;
+    display: flex;
+    align-items: center;
+}
+
+.btn-stock-base{
+    background-color: #87b3f2;
+    padding: 10px 20px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    width: inherit;
+    height: 35px;
+    font-size: 15px;
+    font-weight: bolder;
+    letter-spacing: 0.5px;
+}
+
+#btn-funnel-base{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 20px;
+}
+
+#filters-container{
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.btn-filters{
+    padding: 8px;
+    border-radius: 50px;
+    border: 1px solid #1b1343;
+    width: 200px;
+}
+
+.btn-filters.clicked{
+    background-color: #1b1343;
+    color: white;
+}
+
+.btn-filters.notClicked{
+    background-color: transparent;
+    color: black;
+}
