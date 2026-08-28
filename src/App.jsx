@@ -28,8 +28,8 @@ function hasValidAccessToken() {
   }
 }
 
-function ProtectedRoute({ page }) {
-  return hasValidAccessToken() ? page : <Navigate to="/" replace />;
+function ProtectedRoute({ children }) {
+  return hasValidAccessToken() ? children : <Navigate to="/" replace />;
 }
 
 function App() {
