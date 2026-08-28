@@ -210,3 +210,9 @@ button:hover {
     justify-content: space-between;
     align-items: center;
 }
+
+#container-delete-btn{
+    display: flex;
+    flex-direction: row;
+    gap:10px
+}
