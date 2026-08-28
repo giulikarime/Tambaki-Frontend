@@ -1,21 +1,26 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import LogoRestaurant from "../../components/LogoRestaurant/LogoRestaurant";
-/*remoção do sealogin pelas ondas animadas framer-motion*/
 import { login } from "../../services/auth";
 import { m, LazyMotion, domAnimation } from "framer-motion";
+import { Eye, EyeOff } from 'lucide-react';
 import "./CSS/login.css";
-
 
 function Login() {
     const [form, setForm] = useState({ email: "", password: "" });
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [type, setType] = useState('password');   
     const navigate = useNavigate();
 
     const handleChange = (e) => {
         setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
     };
+
+    const handleToggle = () => {                     
+        setType((prev) => (prev === 'password' ? 'text' : 'password'));
+    };
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -52,16 +57,21 @@ function Login() {
                             value={form.email}
                             onChange={handleChange}
                             required
-                        />
-                        <input
-                            type="password"
-                            name="password"
-                            id="password"
-                            placeholder="Senha"
-                            value={form.password}
-                            onChange={handleChange}
-                            required
-                        />
+                        /><div id="senha">
+                            <input
+                                type={type}
+                                name="password"
+                                id="password"
+                                placeholder="Senha"
+                                value={form.password}
+                                onChange={handleChange}
+                                required
+                            />
+                            <span className="toggle-icon" onClick={handleToggle}>
+                                {type === 'password' ? <EyeOff size={18} /> : <Eye size={18} />}
+                            </span>
+                        </div>
+
 
                         {error && (
                             <p>{error}</p>
@@ -80,17 +90,17 @@ function Login() {
                 </div>
 
                 <div id="logo">
-                    <LogoRestaurant/>
+                    <LogoRestaurant />
                 </div>
-                
+
             </section>
 
-            
-        
-            
+
+
+
             <div id="waves" aria-hidden="true">
                 <LazyMotion features={domAnimation} strict>
-                    {}
+                    { }
                     <m.div
                         className="wave-track wave-back"
                         animate={{
@@ -131,7 +141,7 @@ function Login() {
                             />
                         </svg>
                     </m.div>
-                    {}
+                    { }
                     <m.div
                         className="wave-track wave-front"
                         animate={{
@@ -171,7 +181,7 @@ function Login() {
                             />
                         </svg>
                     </m.div>
-                    {}
+                    { }
                     <div className="wave-bottom-fill" />
                 </LazyMotion>
             </div>

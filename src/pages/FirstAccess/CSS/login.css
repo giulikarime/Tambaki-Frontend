@@ -135,3 +135,39 @@ form p {
   height: calc(50% - 148px);
   background-color: #15133C;
 }
+
+
+#senha {
+  position: relative;
+  width: 100%; 
+}
+
+#senha input {
+  width: 100%;
+  padding: 10px 40px 10px 12px; 
+  border: 2px solid #f7f7f7;
+  box-sizing: border-box;
+  border-radius: 20px;
+  font-size: 14px;
+}
+
+#senha input:focus {
+  outline: none;
+  border-color: #ffff;
+}
+
+.toggle-icon {
+  position: absolute;
+  right: 13px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #ffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toggle-icon:hover {
+  color: #f5ae47;
+}
