@@ -86,6 +86,9 @@ cd react-frontend
 
 ```
 npm install
+npm install react-modal
+npm install lucide-react
+npm install framer-motion
 ```
 
 3. Configure o arquivo `.env` de acordo com o modelo disponibilizado em `.env.example`.
@@ -101,6 +104,8 @@ O frontend estará disponível em:
 ```
 http://localhost:5173
 ```
+
+5. Acesso o backend em [Tambaki-Backend](https://github.com/giulikarime/Tambaki-Backend.git)
 
 ## Variáveis de Ambiente
 
