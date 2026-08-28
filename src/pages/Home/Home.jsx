@@ -20,6 +20,7 @@ function Home() {
     const navigate = useNavigate();
     const [editTableModalIsOpen, setEditTableModalIsOpen] = useState(false);
     const [createTableModalIsOpen, setCreateTableModalIsOpen] = useState(false);
+    const [confirmDeleteModalIsOpen, setConfirmDeleteModalIsOpen] = useState(false);
     const [editTableStatus,setEditTableStatus] = useState(false);
     const [selectedTable, setSelectedTable] = useState(null);
     const [formError, setFormError] = useState("");
@@ -117,7 +118,7 @@ function Home() {
             table_number: Number(formData.get('table_number')),
             capacity: Number(formData.get('table_max')),
             status: "Livre",
-            unitId: 1 // ajuste se a unidade não for fixa
+            unitId: 1
         };
 
         try{
@@ -151,22 +152,26 @@ function Home() {
         }
     }
 
-    async function handleDeleteTable(){
+    async function handleDeleteTable() {
         if (!selectedTable) return;
-        const confirmDelete = window.confirm(`Tem certeza que deseja excluir a Mesa ${selectedTable.table_number}?`);
-        if (!confirmDelete) return;
-
-        try{
-            await deleteTable(selectedTable.id);
-            await refreshTables();
-            setEditTableModalIsOpen(false);
-            setEditTableStatus(false);
-            setSelectedTable(null);
-        } catch(error){
-            console.error("Erro ao excluir mesa: ", error);
-            setFormError("Não foi possível excluir a mesa.");
+        setConfirmDeleteModalIsOpen(true);
+        setEditTableModalIsOpen(false);
         }
+
+    async function confirmDeleteTable() {
+    try {
+        await deleteTable(selectedTable.id);
+        await refreshTables();
+        setEditTableModalIsOpen(false);
+        setEditTableStatus(false);
+        setSelectedTable(null);
+        setConfirmDeleteModalIsOpen(false);
+    } catch (error) {
+        console.error("Erro ao excluir mesa: ", error);
+        setFormError("Não foi possível excluir a mesa.");
     }
+    }
+
 
     return (
         <>
@@ -306,6 +311,19 @@ function Home() {
                             )}
                             
                         </form>
+                    </Modal>
+                    <Modal
+                        isOpen={confirmDeleteModalIsOpen}
+                        onRequestClose={()=>setConfirmDeleteModalIsOpen(false)}
+                        contentLabel="Confirmar Delete de Mesa"
+                        shouldCloseOnOverlayClick={true}
+                        style={modalCreateTableStyle}
+                    >
+                        <h2>Tem certeza que deseja excluir a Mesa {selectedTable?.table_number}?</h2>
+                        <div id="container-delete-btn">
+                            <button className='btn-modal-table' onClick={confirmDeleteTable}>Sim, tenho certeza</button>
+                            <button className='btn-modal-table' onClick={()=>{setConfirmDeleteModalIsOpen(!confirmDeleteModalIsOpen); setEditTableModalIsOpen(true)}}>Não</button>
+                        </div>
                     </Modal>
                 </div>
             </main>
