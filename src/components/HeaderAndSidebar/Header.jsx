@@ -5,6 +5,7 @@ import './header.css'
 import Modal from 'react-modal'
 import React from 'react';
 import { useNavigate } from "react-router-dom"
+import {logout} from '../../services/auth'
 
 function Header({ expanded, setExpand,setHasInteracted }){
 
@@ -88,6 +89,19 @@ function Header({ expanded, setExpand,setHasInteracted }){
 
     function closeModalUser() {
         setUserModalIsOpen(false);
+    }
+
+    
+    async function logOut(){
+        try{
+            await logout();
+            window.location.href = '/';
+        } catch(error){
+            console.error("Erro ao fazer logout no servidor: ",error);
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('account');
+            window.location.href = '/';
+        }
     }
 
     return(
@@ -177,7 +191,7 @@ function Header({ expanded, setExpand,setHasInteracted }){
                         <button className="btn-user-modal" onClick={()=>redirect('/configuration')}><Settings color='black'></Settings>Configuração</button>
                     </li>
                     <li>
-                        <button className="btn-user-modal" style={{color:'red'}} onClick={()=>redirect('/logout')}><LogOut color='red'></LogOut>Sair</button>
+                        <button className="btn-user-modal" style={{color:'red'}} onClick={logOut}><LogOut color='red'></LogOut>Sair</button>
                     </li>
                 </ul>
             </Modal>
