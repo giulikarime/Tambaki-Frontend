@@ -1,9 +1,9 @@
-import { Plus, CalendarFold, ClipboardCheck} from "lucide-react"
+import { Plus, CalendarFold, ClipboardCheck, SquarePen, Trash2} from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import './home.css'
 import Header from "../../components/HeaderAndSidebar/Header"
 import Sidebar from "../../components/HeaderAndSidebar/Sidebar";
-import { getTables } from "../../services/tables";
+import { getTables, createTable, updateTable, deleteTable } from "../../services/tables";
 import { getOrders } from "../../services/orders";
 import { getReservations } from "../../services/reserves";
 import { useNavigate } from "react-router-dom";
@@ -20,11 +20,39 @@ function Home() {
     const navigate = useNavigate();
     const [editTableModalIsOpen, setEditTableModalIsOpen] = useState(false);
     const [createTableModalIsOpen, setCreateTableModalIsOpen] = useState(false);
+    const [editTableStatus,setEditTableStatus] = useState(false);
+    const [selectedTable, setSelectedTable] = useState(null);
+    const [formError, setFormError] = useState("");
 
     const tablesListRef = useRef(null);
     const isDragging = useRef(false);
     const startX = useRef(0);
     const scrollLeftStart = useRef(0);
+
+    const modalCreateTableStyle = {
+        overlay:{
+            backgroundColor: '#191444be',
+            position: 'fixed',
+            zIndex: 100,
+            inset: 0
+        },
+        content:{
+            position: 'absolute',
+            top: '50%',
+            left:'50%',
+            transform: 'translate(-50%,-50%)',
+            bottom: 'auto',
+            width: '500px',
+            padding: '20px',
+            borderRadius: '16px',
+            border: 'none',
+            boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+            backgroundColor: '#fff',
+            display:'flex',
+            flexDirection:'column',
+            gap:'20px'
+        }
+    }
 
     function redirect(url){
         navigate(url);
@@ -53,17 +81,17 @@ function Home() {
         el.scrollLeft = scrollLeftStart.current - walk;
     }
 
-    useEffect(()=>{
-        async function loadTables(){
-            try{
-                const tables = await getTables();
-                setTablesList(tables);
-            } catch (error){
-                console.error("Erro ao carregar mesas: ",error.message);
-            }
+    async function refreshTables(){
+        try{
+            const tables = await getTables();
+            setTablesList(tables);
+        } catch (error){
+            console.error("Erro ao carregar mesas: ",error.message);
         }
- 
-        loadTables();
+    }
+
+    useEffect(()=>{
+        refreshTables();
     },[])
 
     useEffect(()=>{
@@ -80,6 +108,65 @@ function Home() {
 
         loadOrders();
     },[])
+
+    async function handleCreateTable(e){
+        e.preventDefault();
+        setFormError("");
+        const formData = new FormData(e.target);
+        const payload = {
+            table_number: Number(formData.get('table_number')),
+            capacity: Number(formData.get('table_max')),
+            status: "Livre",
+            unitId: 1 // ajuste se a unidade não for fixa
+        };
+
+        try{
+            await createTable(payload);
+            await refreshTables();
+            setCreateTableModalIsOpen(false);
+            e.target.reset();
+        } catch(error){
+            console.error("Erro ao criar mesa: ", error);
+            setFormError("Não foi possível criar a mesa. Verifique os dados e tente novamente.");
+        }
+    }
+
+    async function handleUpdateTable(e){
+        e.preventDefault();
+        setFormError("");
+        const formData = new FormData(e.target);
+        const payload = {
+            table_number: Number(formData.get('table_number')),
+            capacity: Number(formData.get('table_max')),
+        };
+
+        try{
+            await updateTable(selectedTable.id, payload);
+            await refreshTables();
+            setEditTableModalIsOpen(false);
+            setEditTableStatus(false);
+        } catch(error){
+            console.error("Erro ao atualizar mesa: ", error);
+            setFormError("Não foi possível atualizar a mesa. Verifique os dados e tente novamente.");
+        }
+    }
+
+    async function handleDeleteTable(){
+        if (!selectedTable) return;
+        const confirmDelete = window.confirm(`Tem certeza que deseja excluir a Mesa ${selectedTable.table_number}?`);
+        if (!confirmDelete) return;
+
+        try{
+            await deleteTable(selectedTable.id);
+            await refreshTables();
+            setEditTableModalIsOpen(false);
+            setEditTableStatus(false);
+            setSelectedTable(null);
+        } catch(error){
+            console.error("Erro ao excluir mesa: ", error);
+            setFormError("Não foi possível excluir a mesa.");
+        }
+    }
 
     return (
         <>
@@ -122,12 +209,21 @@ function Home() {
                             onMouseMove={handleMouseMove}
                         >
                             {tablesList.length === 0 ? (
-                                <div clasName='table-card'>
+                                <div>
                                     <p>Nenhuma mesa foi criada.</p>
                                 </div>
                             ) : (
                                 tablesList.map((table)=>(
-                                    <button key={table.id} className={`table-card ${table.table_number % 2 === 0 ? 'blue' : 'orange'}`}>
+                                    <button 
+                                        onClick={()=>{
+                                            setSelectedTable(table);
+                                            setEditTableModalIsOpen(true);
+                                            setEditTableStatus(false);
+                                            setFormError("");
+                                        }} 
+                                        key={table.id} 
+                                        className={`table-card ${table.table_number % 2 === 0 ? 'blue' : 'orange'}`}
+                                    >
                                         <p><b>{String(table.table_number).padStart(2,"0")}</b></p>
                                         <p id="p-table-status"><b>{table.status}</b></p>
                                     </button>
@@ -140,19 +236,75 @@ function Home() {
                         onRequestClose={() => setCreateTableModalIsOpen(false)}
                         contentLabel="Criar Nova Mesa"
                         shouldCloseOnOverlayClick={true}
-                        id='modal-create-table'
+                        style={modalCreateTableStyle}
                     >
-                        <h2>Criar Nova Mesa</h2>
-                        <form action="" method="post">
+                        <div style={{display:'flex',flexDirection:'row',justifyContent:'space-between',alignItems:'center'}}>
+                            <h2>Adicionar Nova Mesa</h2>
+                            <button onClick={()=> setCreateTableModalIsOpen(false)} style={{fontSize:'30px'}}>&times;</button>
+                        </div>
+                        <form className="form-modal-table" onSubmit={handleCreateTable}>
                             <div className='fields'>
-                                <label>Número da Mesa</label>
-                                <input type="number" name="table_number" placeholder="Digite o número da mesa" required />
+                                <label htmlFor='table_number'>Número da Mesa</label>
+                                <input className="input-modal-table" type="number" name="table_number" placeholder="Digite o número da mesa..." required />
                             </div>
                             <div className='fields'>
-                                <label>Capacidade da Mesa</label>
-                                <input type="number" name="table_number" placeholder="Digite o número da mesa" required />
+                                <label htmlFor='table_max'>Capacidade da Mesa</label>
+                                <input className="input-modal-table" type="number" name="table_max" placeholder="Digite a capacidade de pessoas da mesa..." required />
                             </div>
-                            <button type='submit'>Salvar</button>
+                            {formError && <p style={{color:'#c0392b'}}>{formError}</p>}
+                            <button className='btn-modal-table' type='submit'>Salvar</button>
+                        </form>
+                    </Modal>
+                    <Modal
+                        isOpen={editTableModalIsOpen}
+                        onRequestClose={() => setEditTableModalIsOpen(false)}
+                        contentLabel="Editar Mesa"
+                        shouldCloseOnOverlayClick={true}
+                        style={modalCreateTableStyle}
+                    >
+                        {editTableStatus ? (
+                                <div className="edit-table-field">
+                                    <h2>Edite Mesa {selectedTable?.table_number}</h2>
+                                    <button onClick={()=>setEditTableStatus(!editTableStatus)}>Desabilitar Edição<SquarePen></SquarePen></button>
+                                    <button onClick={()=> setEditTableModalIsOpen(false)} style={{fontSize:'30px'}}>&times;</button>
+                                </div>
+                            ) : (
+                                <div className="edit-table-field">
+                                    <h2>Mesa {selectedTable?.table_number}</h2>
+                                    <button onClick={()=>setEditTableStatus(!editTableStatus)}>Habilitar Edição<SquarePen></SquarePen></button>
+                                    <button onClick={()=> setEditTableModalIsOpen(false)} style={{fontSize:'30px'}}>&times;</button>
+                                </div>
+                        )}
+                        <form className="form-modal-table" onSubmit={handleUpdateTable}>
+                            {editTableStatus ? (
+                            <div className="container-fields">
+                                <div className='fields'>
+                                    <label htmlFor='table_number'>Número da Mesa</label>
+                                    <input className="input-modal-table" type="number" name="table_number" defaultValue={selectedTable?.table_number} required />
+                                </div>
+                                <div className='fields'>
+                                    <label htmlFor='table_max'>Capacidade da Mesa</label>
+                                    <input className="input-modal-table" type="number" name="table_max" defaultValue={selectedTable?.capacity} required />
+                                </div>
+                                {formError && <p style={{color:'#c0392b'}}>{formError}</p>}
+                                <div className="delete-modal-table">
+                                    <button className='btn-modal-table' type='submit'>Salvar</button>
+                                    <button className='delete-btn-modal-table' type='button' onClick={handleDeleteTable}><Trash2></Trash2></button>
+                                </div>
+                            </div>
+                            ) : (
+                            <div className="container-fields">
+                                <div className='fields'>
+                                    <label htmlFor='table_number'>Número da Mesa</label>
+                                    <input readOnly className="input-modal-table" type="number" name="table_number" value={selectedTable?.table_number ?? ""} />
+                                </div>
+                                <div className='fields'>
+                                    <label htmlFor='table_max'>Capacidade da Mesa</label>
+                                    <input readOnly className="input-modal-table" type="number" name="table_max" value={selectedTable?.capacity ?? ""} />
+                                </div>
+                            </div>
+                            )}
+                            
                         </form>
                     </Modal>
                 </div>

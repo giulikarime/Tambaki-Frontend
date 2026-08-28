@@ -1,6 +1,6 @@
 main {
     width: 100vw;
-    height: 80vh;
+    height: 93vh;
     background-color: #fff8e9;
 }
 
@@ -127,4 +127,86 @@ button:hover {
 
 .table-card.orange #p-table-status{
     color: #f5ae47;
+}
+
+.form-modal-table{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    box-sizing: border-box;
+    gap: 20px;
+}
+
+.container-fields{
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.edit-table-field button{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    font-size: 16px;
+}
+
+.fields{
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.delete-modal-table{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.delete-btn-modal-table{
+    width: 100px;
+    padding: 9px 16px;
+    font-size: 1rem;
+    font-family: inherit;
+    color: #2b2a2a;
+    background-color: #f5ae47;
+    border-radius: 8px;
+    font-weight: bold;
+    outline: none;
+}
+
+.input-modal-table{
+    width: 100%;
+    padding: 12px 16px;
+    box-sizing: border-box;
+    font-size: 1rem;
+    font-family: inherit;
+    color: #333333;
+    background-color: #f7f2f2;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+
+.btn-modal-table{
+    width: 100%;
+    padding: 12px 16px;
+    font-size: 1rem;
+    font-family: inherit;
+    color: #2b2a2a;
+    background-color: #f5ae47;
+    border-radius: 8px;
+    font-weight: bold;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.edit-table-field{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
 }
