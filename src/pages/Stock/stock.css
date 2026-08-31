@@ -1,10 +1,24 @@
-#principal-menu{
+main{
+    width: 100vw;
+    height: 93vh;
+    background-color: #fff8e9;
+}
+
+#principal-menu-stock{
     width: 70%;
-    top: 15%;
+    position: absolute;
+    top: 150px;
     left: 50%;
-    transform: translate(-50%,-15%);
+    transform: translateX(-50%);
     display: flex;
     flex-direction: column;
+    gap: 40px;
+}
+
+#container{
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
 }
 
 #top-container{
@@ -62,6 +76,7 @@
     border-radius: 50px;
     border: 1px solid #1b1343;
     width: 200px;
+    font-size: 15px;
 }
 
 .btn-filters.clicked{
@@ -72,4 +87,136 @@
 .btn-filters.notClicked{
     background-color: transparent;
     color: black;
+}
+
+.modal-products-header{
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.top-container-modal-products{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.top-container-modal-products button{
+    font-size: 30px;
+}
+
+.text-under-top-container{
+    font-size: 15px;
+    color: #777171ff;
+}
+
+.modal-products-form{
+    display: grid;
+    grid-template-rows: repeat(4, 1fr);
+    grid-auto-flow: column;
+    gap: 20px;
+}
+
+.modal-products-form-entrance{
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.modal-products-form-remove{
+    display: grid;
+    grid-template-rows: repeat(2, 1fr);
+    grid-auto-flow: column;
+    gap: 20px;
+}
+
+.fields{
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.fields-double{
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+}
+
+.fields label{
+    font-size: 16px;
+    font-weight: bold;
+    color: #121213;
+}
+
+.input-modal-add-product{
+    width: 100%;
+    padding: 12px 16px;
+    box-sizing: border-box;
+    font-size: 1rem;
+    font-family: inherit;
+    color: #333333;
+    background-color: #f7f2f2;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.select-modal-add-product{
+    width: 100%;
+    padding: 12px 16px;
+    box-sizing: border-box;
+    font-size: 1rem;
+    font-family: inherit;
+    color: #333333;
+    background-color: #f7f2f2;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.btn-modal-add-products{
+    width: 200px;
+    padding: 12px 16px;
+    font-size: 15px;
+    font-family: inherit;
+    color: #2b2a2a;
+    background-color: #f5ae47;
+    border-radius: 8px;
+    font-weight: bold;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.btn-modal-add-products:hover{
+    box-shadow: 0px 0px 4px rgb(145, 56, 56);
+}
+
+.btn-modal-file{
+    padding: 12px 16px;
+    font-size: 16px;
+    font-family: inherit;
+    color: #f2f2f5;
+    background-color: #3d50b2;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.fields-full-width{
+    width: 100%;
+}
+
+.textarea-modal-add-product{
+    width: 100%;
+    min-height: 90px;
+    padding: 12px 16px;
+    box-sizing: border-box;
+    font-size: 1rem;
+    font-family: inherit;
+    color: #333333;
+    background-color: #f7f2f2;
+    border-radius: 8px;
+    outline: none;
+    resize: vertical;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
 }

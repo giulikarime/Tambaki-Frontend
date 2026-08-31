@@ -1,4 +1,4 @@
-import { House, Utensils, HandCoins, PackageOpen, UserCheck} from "lucide-react"
+import { House, Utensils, HandCoins, PackageOpen, UserCheck, Store} from "lucide-react"
 import {useNavigate} from 'react-router-dom'
 import './sidebar.css'
 
@@ -11,10 +11,11 @@ function Sidebar({ expanded,hasInteracted }){
     }
 
     const menuItems = [
-        {icon: House, label: "Tela Inicial", url: '/dashboard'},
-        {icon: HandCoins, label: "Financeiro", url: '/financial'},
+        {icon: House, label: "Tela Inicial", url: '/home'},
+        {icon: HandCoins, label: "Financeiro", url: '/dashboard'},
         {icon: Utensils, label: "Cardápio", url: '/menu'},
         {icon: PackageOpen, label: "Estoque", url: '/stock'},
+        {icon: Store, label: "Fornecedor", url:'/suppliers'},
         {icon: UserCheck, label: "Usuários", url:'/users'},
     ]
 

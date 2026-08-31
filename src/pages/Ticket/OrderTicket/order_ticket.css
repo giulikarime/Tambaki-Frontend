@@ -1,0 +1,121 @@
+main{
+    width: 100vw;
+    height: 93vh;
+    background-color: #fff8e9;
+}
+
+#principal-menu-order{
+    width: 70%;
+    position: absolute;
+    top: 150px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+}
+
+#input-client-order{
+    width: 53%;
+    padding: 12px 16px;
+    box-sizing: border-box;
+    font-size: 18px;
+    font-family: inherit;
+    color: #333333;
+    background-color: #f7f2f2;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+#sec-container{
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    justify-content: space-between;
+}
+
+#tables-list-order{
+    width: 55%;
+    display: grid;
+    grid-template-rows: repeat(2, 1fr);
+    grid-auto-flow: column;
+    overflow-x: auto;
+    gap: 20px;
+    scrollbar-width: none;
+    user-select: none;
+    cursor: grab;
+    -ms-overflow-style: none;
+}
+
+#tables-list-order::-webkit-scrollbar {
+    display: none;
+}
+
+.selected-table{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 90px;
+    height: 90px;
+    padding: 5px 10px;
+    border-radius: 20px;
+    background-color: #fff;
+    gap: 4px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.selected-table.select{
+    background-color: #1b1343;
+    color: white;
+    border: 2px solid #1b1343;
+}
+
+.selected-table.not-select{
+    background-color: transparent;
+    color: black;
+    border: 2px solid #000000;
+}
+
+.selected-table.occupied{
+    background-color: transparent;
+    color: rgb(134, 134, 134);
+    border: 2px solid rgb(134, 134, 134);
+    cursor:grab;
+}
+
+#clients-list{
+    width: 300px;
+    height: auto;
+    background-color: #f5ae47;
+    padding: 20px;
+    box-shadow: 5px 5px 10px rgba(139, 85, 31, 0.5);
+}
+
+#post-it-fix{
+    width: 100px;
+    height: 40px;
+    background-color: #d95064;
+    transform: translate(95px,-40px) rotate(1.5deg);
+    box-shadow: 1px 1px 5px rgba(139, 85, 31, 0.5);
+}
+
+#btn-select-table{
+    width: 200px;
+    padding: 12px 16px;
+    font-size: 15px;
+    font-family: inherit;
+    color: #2b2a2a;
+    background-color: #f5ae47;
+    border-radius: 8px;
+    font-weight: bold;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+#btn-select-table:hover{
+    box-shadow: 0px 0px 4px rgb(145, 56, 56);
+}
