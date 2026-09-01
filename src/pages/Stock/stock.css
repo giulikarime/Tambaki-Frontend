@@ -89,6 +89,69 @@ main{
     color: black;
 }
 
+.card-products{
+    width: 30%;
+    height: auto;
+    background-color: rgb(253, 249, 249);
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 1px 5px 10px rgba(48, 26, 26, 0.212);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-size: 16px;
+}
+
+.top-container-card{
+    display: flex;
+    flex-direction: row;
+    gap: 15px;
+    align-items: center;
+}
+
+.text-stock{
+    padding: 5px 10px;
+    background-color: #d5d6fd;
+    border-radius: 50px;
+    color: #3553b5;
+    font-weight: bold;
+}
+
+.text-stock .mid-empty{
+    padding: 5px 10px;
+    background-color: #f6ce95;
+    border-radius: 50px;
+    color: #865000;
+    font-weight: bold;
+}
+
+.text-stock .empty{
+    padding: 5px 10px;
+    background-color: #efcbd1;
+    border-radius: 50px;
+    color: #b21106;
+    font-weight: bold;
+}
+
+.inside-container-card{
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.align-items-card{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+}
+
+.bottom-container-card{
+    display: flex;
+    flex-direction: row;
+    gap: 15px;
+}
+
 .modal-products-header{
     display: flex;
     flex-direction: column;

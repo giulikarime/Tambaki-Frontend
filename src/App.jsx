@@ -37,24 +37,22 @@ function ProtectedRoute({ children }) {
 function App() {
 
   return (
-    <main>
-      <Routes>
-        <Route path='/' element={<Login/>}></Route>
-        <Route path='/recovery' element={<PasswordRecovery/>}></Route>
-        <Route path='/home' element={<ProtectedRoute><Home /></ProtectedRoute>}></Route>
-        <Route path='/dashboard' element={<ProtectedRoute><Financial /></ProtectedRoute>}></Route>
-        <Route path='/menu' element={<ProtectedRoute><Menu /></ProtectedRoute>}></Route>
-        <Route path='/stock' element={<ProtectedRoute><Stock /></ProtectedRoute>}></Route>
-        <Route path='/users' element={<ProtectedRoute><UserPage /></ProtectedRoute>}></Route>
-        <Route path='/perfil' element={<ProtectedRoute><Perfil /></ProtectedRoute>}></Route>
-        <Route path='/configuration' element={<ProtectedRoute><Configuration /></ProtectedRoute>}></Route>
-        <Route path='/order_ticket' element={<ProtectedRoute><OrderTicket /></ProtectedRoute>}></Route>
-        <Route path='/open_all_tickets' element={<ProtectedRoute><OpenAllTickets /></ProtectedRoute>}></Route>
-        <Route path='/book_table' element={<ProtectedRoute><BookTable /></ProtectedRoute>}></Route>
-        <Route path='/create_table' element={<ProtectedRoute><Tables /></ProtectedRoute>}></Route>
-        <Route path='/menu_ordering' element={<ProtectedRoute><MenuOrdering /></ProtectedRoute>}></Route>
-      </Routes>
-    </main>
+    <Routes>
+      <Route path='/' element={<Login />}></Route>
+      <Route path='/recovery' element={<PasswordRecovery />}></Route>
+      <Route path='/home' element={<ProtectedRoute><Home /></ProtectedRoute>}></Route>
+      <Route path='/dashboard' element={<ProtectedRoute><Financial /></ProtectedRoute>}></Route>
+      <Route path='/menu' element={<ProtectedRoute><Menu /></ProtectedRoute>}></Route>
+      <Route path='/stock' element={<ProtectedRoute><Stock /></ProtectedRoute>}></Route>
+      <Route path='/users' element={<ProtectedRoute><UserPage /></ProtectedRoute>}></Route>
+      <Route path='/perfil' element={<ProtectedRoute><Perfil /></ProtectedRoute>}></Route>
+      <Route path='/configuration' element={<ProtectedRoute><Configuration /></ProtectedRoute>}></Route>
+      <Route path='/order_ticket' element={<ProtectedRoute><OrderTicket /></ProtectedRoute>}></Route>
+      <Route path='/open_all_tickets' element={<ProtectedRoute><OpenAllTickets /></ProtectedRoute>}></Route>
+      <Route path='/book_table' element={<ProtectedRoute><BookTable /></ProtectedRoute>}></Route>
+      <Route path='/create_table' element={<ProtectedRoute><Tables /></ProtectedRoute>}></Route>
+      <Route path='/menu_ordering' element={<ProtectedRoute><MenuOrdering /></ProtectedRoute>}></Route>
+    </Routes>
   );
 }
 

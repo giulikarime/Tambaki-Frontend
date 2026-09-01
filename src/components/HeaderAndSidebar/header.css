@@ -23,10 +23,10 @@ header {
     flex-direction: row;
     align-items: center;
     gap: 35px;
-    
+
 }
 
-.icon-header{
+.icon-header {
     border-radius: 50px;
     padding: 7px;
     box-sizing: border-box;
@@ -36,7 +36,7 @@ header {
 }
 
 .icon-header:hover {
-  background-color: #67628f;
+    background-color: #67628f;
 }
 
 .notif-empty {
@@ -97,16 +97,16 @@ header {
     color: #666;
 }
 
-.user-menu{
-    list-style-type:none;
-    display:flex;
+.user-menu {
+    list-style-type: none;
+    display: flex;
     flex-direction: column;
-    flex-direction:'column';
-    gap:15px;
+    flex-direction: 'column';
+    gap: 15px;
     padding-left: 8px;
 }
 
-.btn-user-modal{
+.btn-user-modal {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -114,7 +114,7 @@ header {
     font-size: 15px;
 }
 
-.btn-user-modal:hover{
+.btn-user-modal:hover {
     text-decoration: underline;
     text-underline-offset: 3px;
 }

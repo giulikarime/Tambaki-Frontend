@@ -3,7 +3,7 @@ import Header from "../../components/HeaderAndSidebar/Header";
 import Sidebar from "../../components/HeaderAndSidebar/Sidebar";
 import './stock.css'
 import '../../App.css'
-import { ChevronLeft, Plus, Funnel } from "lucide-react";
+import { ChevronLeft, Plus, Funnel, ChefHat } from "lucide-react";
 import { getProducts } from "../../services/products";
 import { useNavigate } from "react-router-dom";
 import Modal from 'react-modal'
@@ -31,6 +31,10 @@ function Stock(){
     const [entranceProductModalIsOpen,setEntranceProductModalIsOpen] = useState(false);
     const [removeProductModalIsOpen,setRemoveProductModalIsOpen] = useState(false);
     const [filterProductModalIsOpen,setFilterProductModalIsOpen] = useState(false);
+    
+    const [missingProducts,setMissingProducts] = useState([]);
+    const [midStockProducts,setMidStockProducts] = useState([]);
+
     const modalAddProductStyle = {
         overlay:{
             backgroundColor: '#191444be',
@@ -68,6 +72,22 @@ function Stock(){
                 console.error("Produtos não encontrados no sistema.",error)
             }
         }
+
+        get_products();
+    },[])
+
+    useEffect(()=>{
+        function missing_products(){
+            products.map((product)=>{
+                if(product.current_stock === 0){
+                    setMissingProducts(product);
+                } else{
+                    setMidStockProducts(product);
+                }
+            })
+        }
+
+        missing_products();
     },[])
 
     return(
@@ -90,7 +110,13 @@ function Stock(){
                                 <button id='btn-funnel-base' className="btn-stock-base">Filtrar <Funnel size={20}></Funnel></button>
                             </div>
                         </div>
-                        <p style={{color:'#777171ff'}}>X itens monitorados - x em falta - x próximos de acabar</p>
+                        {
+                            products.length <= 1 ? (
+                                <p style={{color:'#777171ff'}}>{products.length} item monitorado - {missingProducts.length} em falta - {midStockProducts.length} próximos de acabar</p>
+                            ) : (
+                                <p style={{color:'#777171ff'}}>{products.length} itens monitorados - {missingProducts.length} - {midStockProducts.length} próximos de acabar</p>
+                            )
+                        }
                     </div>
                     <div id="filters-container">
                         {filter_btn.map((name,index)=>(
@@ -99,28 +125,36 @@ function Stock(){
                     </div>
                     <div id="products-list">
                         {products.length !== 0 ? (
-                            products.map((item,index)=>(
-                                <div key={index}>
-                                    <div>
-                                        <p>Copinho Produto</p>
-                                        <div>
-                                            <p><b>{item.name}</b> - {item.brand}</p>
-                                            {item.current_stock === 0 ? (
-                                                <p>Em Falta</p>
-                                            ) : item.current_stock <= item.min_stock ? (
-                                                <p>Próximo de Acabar</p>
-                                            ) : (
-                                                <p>Estoque Saudável</p>
-                                            )}
-                                            <p>{item.current_stock}/{item.stock_quantity}</p>
+                            products.map((item,index)=>{
+
+                                const dateFab = new Date(item.expiration_date).toLocaleDateString('pt-br');
+                                const dateVal = new Date(item.manufacture_date).toLocaleDateString('pt-br');
+
+                                return(
+                                    <div key={index} className="card-products">
+                                        <div className="top-container-card">
+                                            <ChefHat size={50}></ChefHat>
+                                            <div className="inside-container-card">
+                                                <p><b>{item.name}</b> - {item.brand}</p>
+                                                <div className="align-items-card">
+                                                    {item.current_stock === 0 ? (
+                                                        <p className="text-stock empty">Em Falta</p>
+                                                    ) : item.current_stock <= item.min_stock ? (
+                                                        <p className="text-stock mid-empty">Próximo de Acabar</p>
+                                                    ) : (
+                                                        <p className="text-stock">Estoque Saudável</p>
+                                                    )}
+                                                    <p><b>{item.current_stock}/{item.stock_quantity} {item.unit_of_measure}</b></p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="bottom-container-card">
+                                            <p>Fabricação: {dateFab}</p>
+                                            <p>Validade: {dateVal}</p>
                                         </div>
                                     </div>
-                                    <div>
-                                        <p>Fabricação: {item.manufacture_date}</p>
-                                        <p>Validade: {item.expiration_date}</p>
-                                    </div>
-                                </div>
-                            ))
+                                )
+                            })
                         ) : (
                             <p>Nenhum produto existente.</p>
                         )}
