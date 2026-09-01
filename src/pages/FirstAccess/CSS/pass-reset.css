@@ -1,0 +1,148 @@
+main{
+    width: 100vw;
+    height: 93vh;
+}
+
+#top-container-reset{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 100px;
+}
+
+.p-y{
+  color: #fcf5bb
+}
+
+#form-format-reset {
+    z-index: 2;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 60%;
+    padding-top: 10%;
+}
+
+#formulario-reset{
+    display: flex;
+    flex-direction: column;
+    gap: 100px;
+    z-index: 3;
+    align-items: center;
+}
+
+#formulario-reset h1 {
+    color: #221E52;
+    font-size: 50px;
+    font-weight: 800;
+    line-height: 1.2;
+    text-align: center;
+}
+
+#form-format-reset form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 280px;
+}
+
+.form-input {
+    position: relative;
+    width: 100%;
+}
+
+#form-format-reset #password,
+#form-format-reset #confirmPassword {
+    background: transparent;
+    border: 2px solid #FAF4E8;
+    border-radius: 20px;
+    padding: 10px 44px 10px 18px;
+    color: #FAF4E8;
+    font-size: 0.95rem;
+    outline: none;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+#formulario-reset input::placeholder {
+    color: #FAF4E8;
+    opacity: 0.9;
+}
+
+.toggle-icon {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #FAF4E8;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+#formulario-reset #confirm-password {
+    background-color: #f5ae47;
+    border: none;
+    border-radius: 20px;
+    padding: 10px 0;
+    color: #221E52;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: filter 0.2s;
+}
+
+#formulario-reset #confirm-password:hover {
+    filter: brightness(0.95);
+}
+
+#formulario-reset #confirm-password:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+
+#waves {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 1;
+}
+
+
+.wave-track {
+  position: absolute;
+  bottom: calc(50% - 150px);
+  left: 0;
+  width: 200vw;
+  height: 350px;
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+
+.wave-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+
+.wave-back {
+  opacity: 0.85;
+}
+
+
+.wave-bottom-fill {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: calc(50% - 148px);
+  background-color: #15133C;
+} 

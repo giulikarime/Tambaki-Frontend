@@ -50,6 +50,7 @@ main{
 
 #formulario-reco #voltar{
   background-color: #4a7ff7;
+  color: white;
 }
 
 #formulario-reco input {
@@ -152,12 +153,12 @@ form p {
 }
 
 
-#senha {
+#password {
   position: relative;
   width: 100%; 
 }
 
-#senha input {
+#password input {
   width: 100%;
   padding: 10px 40px 10px 12px; 
   border: 2px solid #f7f7f7;
@@ -166,7 +167,7 @@ form p {
   font-size: 14px;
 }
 
-#senha input:focus {
+#password input:focus {
   outline: none;
   border-color: #ffff;
 }
