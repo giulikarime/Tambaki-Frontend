@@ -13,6 +13,7 @@ import OpenAllTickets from './pages/Ticket/OpenAllTickets/OpenAllTickets';
 import BookTable from './pages/Ticket/BookTable/BookTable';
 import Tables from './pages/Tables/Tables';
 import MenuOrdering from './pages/MenuOrdering/MenuOrdering';
+import PasswordRecovery from './pages/FirstAccess/PasswordRecovery';
 
 function hasValidAccessToken() {
   const token = localStorage.getItem('accessToken');
@@ -39,6 +40,7 @@ function App() {
     <main>
       <Routes>
         <Route path='/' element={<Login/>}></Route>
+        <Route path='/recovery' element={<PasswordRecovery/>}></Route>
         <Route path='/home' element={<ProtectedRoute><Home /></ProtectedRoute>}></Route>
         <Route path='/dashboard' element={<ProtectedRoute><Financial /></ProtectedRoute>}></Route>
         <Route path='/menu' element={<ProtectedRoute><Menu /></ProtectedRoute>}></Route>

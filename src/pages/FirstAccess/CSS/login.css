@@ -21,6 +21,13 @@ main{
     align-items: center;
 }
 
+#formulario .forgot-my-password{
+  background-color: transparent;
+  color: #fcf5bb;
+  text-decoration: underline;
+  font-weight: lighter;
+}
+
 
 #formulario h1 {
     color: #221E52;

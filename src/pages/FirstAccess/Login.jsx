@@ -41,6 +41,10 @@ function Login() {
         }
     };
 
+    function redirect(url){
+        navigate(url);
+    }
+
     return (
         <main>
             <section id="form-format">
@@ -84,7 +88,7 @@ function Login() {
                         </button>
 
 
-                        <a href="Tambaki---Gerenciamento-de-Restaurantes/react-frontend/src/pages/FirstAcess/PasswordRecovery.jsx">Esqueci minha senha</a>
+                        <button className="forgot-my-password" onClick={()=>redirect('/recovery')} >Esqueci minha senha</button>
                     </form>
                 </div>
 
