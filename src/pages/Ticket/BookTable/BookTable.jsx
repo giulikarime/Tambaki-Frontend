@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import Header from "../../../components/HeaderAndSidebar/Header";
 import Sidebar from "../../../components/HeaderAndSidebar/Sidebar";
 import './book_table.css'
-import { ChevronLeft } from "lucide-react";
+import { AlignCenter, ChevronLeft, TextAlignCenter } from "lucide-react";
 import { getTables } from "../../../services/tables";
 import Modal from 'react-modal'
 
@@ -31,7 +31,7 @@ function BookTable(){
         },
         content:{
             position: 'absolute',
-            top: '10%',
+            top: '12%',
             left:'50%',
             transform: 'translate(-50%,-50%)',
             bottom: 'auto',
@@ -40,11 +40,11 @@ function BookTable(){
             borderRadius: '16px',
             border: 'none',
             boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
-            backgroundColor: '#dfd1d1ff',
+            backgroundColor: '#c8ebffff',
             display:'flex',
             flexDirection:'column',
             gap:'20px',
-            color: '#b21106'
+            color: '#080e64ff',
         }
     }
 
