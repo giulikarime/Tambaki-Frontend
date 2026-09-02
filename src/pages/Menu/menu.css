@@ -1,0 +1,90 @@
+main{
+    width: 100vw;
+    height: 93vh;
+    background-color: #fff8e9;
+}
+
+.principal-container-cardapio{
+    top: 100px;
+    left: 20%;
+    transform: translateX(-20%);
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+}
+
+#menuHeader{
+    width: 70%;
+    display: flex;
+    flex-direction: column;
+    gap: 100px;
+}
+
+#menuHeader h1{
+    color: #1b1343;
+
+}
+
+#container-cards{
+    display: flex;
+    flex-direction: row;
+    width: 70%;
+    justify-content: space-between;
+    gap: 30px;
+    max-width: 1500px;
+    max-height: 350px;
+}
+
+
+.menuFood-card{
+    background-color: #ffff;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 300px;
+    height: 350px;
+    border-radius: 10px;
+    box-shadow: 3px 3px 7px 2px rgba(58, 33, 65, 0.2);
+}
+
+.imgMenu{
+    width: 270px;
+    height: 175px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    display: flex;
+    
+}
+
+.menuCard-bottom{
+    display: flex;
+    flex-direction: column;
+    height: 100px;
+    right: 5px;
+    padding: 10px;
+}
+
+.menuTitle{
+    display: flex;
+    position: relative;
+    top: -60px;
+    font-size: 21px;
+    left: 10px;
+}
+
+.menuDescription{
+    display: flex;
+    position: relative;
+    top: -50px;
+    font-size: 18px;
+    left: 10px;
+
+}
+
+.menuPrice{
+    display: flex;
+    position: relative;
+    top: -40px;
+    font-size: 18px;
+    left: 10px;
+}
