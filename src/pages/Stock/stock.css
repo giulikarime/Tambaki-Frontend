@@ -71,6 +71,12 @@ main{
     align-items: center;
 }
 
+#products-list{
+    display: flex;
+    flex-direction: wrap;
+    gap: 20px;
+}
+
 .btn-filters{
     padding: 8px;
     border-radius: 50px;
@@ -111,26 +117,24 @@ main{
 
 .text-stock{
     padding: 5px 10px;
+    background-color: transparent;
+    border-radius: 50px;
+    font-weight: bold;
+}
+
+.text-stock.full{
     background-color: #d5d6fd;
-    border-radius: 50px;
     color: #3553b5;
-    font-weight: bold;
 }
 
-.text-stock .mid-empty{
-    padding: 5px 10px;
+.text-stock.mid-empty{
     background-color: #f6ce95;
-    border-radius: 50px;
     color: #865000;
-    font-weight: bold;
 }
 
-.text-stock .empty{
-    padding: 5px 10px;
+.text-stock.empty{
     background-color: #efcbd1;
-    border-radius: 50px;
     color: #b21106;
-    font-weight: bold;
 }
 
 .inside-container-card{
@@ -282,4 +286,35 @@ main{
     outline: none;
     resize: vertical;
     transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.container-filters{
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    align-items:flex-start;
+}
+
+.top-container-filters{
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.top-container-filters h1{
+    font-size: 20px;
+}
+
+.top-container-filters button{
+    font-size: 30px;
+}
+
+.btn_filters_modal{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    font-size: 18px;
+    gap: 5px;
 }

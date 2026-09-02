@@ -3,10 +3,11 @@ import Header from "../../components/HeaderAndSidebar/Header";
 import Sidebar from "../../components/HeaderAndSidebar/Sidebar";
 import './stock.css'
 import '../../App.css'
-import { ChevronLeft, Plus, Funnel, ChefHat } from "lucide-react";
+import { ChevronLeft, Plus, Funnel, ChefHat, ChevronRight, ChevronDown } from "lucide-react";
 import { getProducts } from "../../services/products";
 import { useNavigate } from "react-router-dom";
 import Modal from 'react-modal'
+import { transform } from "framer-motion";
 
 function Stock(){
 
@@ -30,7 +31,10 @@ function Stock(){
     const [addProductModalIsOpen,setAddProductModalIsOpen] = useState(false);
     const [entranceProductModalIsOpen,setEntranceProductModalIsOpen] = useState(false);
     const [removeProductModalIsOpen,setRemoveProductModalIsOpen] = useState(false);
+    
+    const filtersModal = ["Categoria", "Local de Armazenamento", "Alergênicos", "Marca", "Status"];
     const [filterProductModalIsOpen,setFilterProductModalIsOpen] = useState(false);
+    const [filterProductIsClicked,setFilterProductIsClicked] = useState(null);
     
     const [missingProducts,setMissingProducts] = useState([]);
     const [midStockProducts,setMidStockProducts] = useState([]);
@@ -61,6 +65,28 @@ function Stock(){
             flexDirection:'column',
             gap:'20px'
         }
+    }
+
+        const modalFilterProductsStyle = {
+        overlay:{
+            backgroundColor: '#191444be',
+            position: 'fixed',
+            zIndex: 100,
+            inset: 0
+        },
+        content: {
+            position: 'absolute',
+            top: '0',
+            left:'80%',
+            bottom: '0',
+            width: '300px',
+            maxHeight: '100vh',
+            padding: '20px',
+            border: 'none',
+            boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+            backgroundColor: '#fff',
+            }
+
     }
 
     useEffect(()=>{
@@ -107,7 +133,7 @@ function Stock(){
                                 <button onClick={()=>setAddProductModalIsOpen(!addProductModalIsOpen)} id='btn-plus-stock'><Plus></Plus></button>
                                 <button onClick={()=>setEntranceProductModalIsOpen(!entranceProductModalIsOpen)}  className="btn-stock-base">Dar Entrada</button>
                                 <button onClick={()=>setRemoveProductModalIsOpen(!removeProductModalIsOpen)} className="btn-stock-base">Dar Baixa</button>
-                                <button id='btn-funnel-base' className="btn-stock-base">Filtrar <Funnel size={20}></Funnel></button>
+                                <button onClick={()=>setFilterProductModalIsOpen(!filterProductModalIsOpen)} id='btn-funnel-base' className="btn-stock-base">Filtrar <Funnel size={20}></Funnel></button>
                             </div>
                         </div>
                         {
@@ -142,9 +168,9 @@ function Stock(){
                                                     ) : item.current_stock <= item.min_stock ? (
                                                         <p className="text-stock mid-empty">Próximo de Acabar</p>
                                                     ) : (
-                                                        <p className="text-stock">Estoque Saudável</p>
+                                                        <p className="text-stock full">Estoque Saudável</p>
                                                     )}
-                                                    <p><b>{item.current_stock}/{item.stock_quantity} {item.unit_of_measure}</b></p>
+                                                    <p><b>{item.current_stock}/{item.max_stock} {item.unit_of_measure}</b></p>
                                                 </div>
                                             </div>
                                         </div>
@@ -279,7 +305,7 @@ function Stock(){
 
                 <Modal
                     isOpen={entranceProductModalIsOpen}
-                    onRequestClose={()=>setAddProductModalIsOpen(!entranceProductModalIsOpen)}
+                    onRequestClose={()=>setEntranceProductModalIsOpen(!entranceProductModalIsOpen)}
                     contentLabel="Dar Entrada"
                     shouldCloseOnOverlayClick={true}
                     style={modalAddProductStyle}
@@ -324,7 +350,10 @@ function Stock(){
                         </div>
                         <div className="fields">
                             <label htmlFor="">Quantidade de Compra</label>
-                            <input className="input-modal-add-product" placeholder="Exemplo.: 12 caixas" type="number" name="" id="" />
+                            <div className="fields-double">
+                                <input className="input-modal-add-product" placeholder="Exemplo.: 12" type="number" name="" id="" />
+                                <input className="input-modal-add-product" placeholder="Exemplo.: caixas" type="text" name="" id="" />
+                            </div>
                         </div>
                         <div className="fields">
                             <label htmlFor="">Preço de Custo</label>
@@ -396,10 +425,24 @@ function Stock(){
                     onRequestClose={()=>setFilterProductModalIsOpen(!filterProductModalIsOpen)}
                     contentLabel="Modal de Filtros"
                     shouldCloseOnOverlayClick={true}
-                    style={modalAddProductStyle}
+                    style={modalFilterProductsStyle}
                 >
-                    <div>
-                        <button>Categoria</button>
+                    <div className="container-filters">
+                        <div className="top-container-filters">
+                            <h1>Filtrar Por</h1>
+                            <button onClick={()=>setFilterProductModalIsOpen(!filterProductModalIsOpen)}>&times;</button>
+                        </div>
+                        {filtersModal.map((filters_item,index)=>{
+                            const icon = filterProductIsClicked === index ? <ChevronDown /> : <ChevronRight />;
+
+                            return(
+                                <>
+                                    <button onClick={()=>setFilterProductIsClicked(index)} className="btn_filters_modal" key={index}>{filters_item} {icon}</button>
+
+                                    {filterProductIsClicked === index && ('exibir itens')}
+                                </>
+                            )
+                        })}
                     </div>
                 </Modal>
             </main>
