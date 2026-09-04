@@ -14,3 +14,9 @@ export async function getProducts() {
 
     return data;
 }
+
+export async function getProductEnums() {
+    const response = await fetch('http://localhost:3000/products/enums');
+    if (!response.ok) throw new Error('Erro ao buscar enums de produto');
+    return response.json();
+}
