@@ -7,7 +7,7 @@
   flex-direction: column;
   min-height: 100vh;
   width: 100vw;
-  background-color: #FAF5ED;
+  background-color: #f8ebd6;
   font-family: 'Montserrat', sans-serif;
   overflow-x: hidden;
   position: relative;
@@ -20,6 +20,8 @@
   overflow: hidden;
 }
 
+
+/*Fundo da área de scroll*/
 .config-scroll-area {
   flex: 1;
   overflow-y: auto;
@@ -27,7 +29,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  background-color: #FAF5ED;
+  background-color: #fff8e9;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -67,6 +69,7 @@
   letter-spacing: -0.02em;
 }
 
+/*CARD*/
 .config-main-card {
   width: min(100%, 720px);
   background-color: #ffffff;
