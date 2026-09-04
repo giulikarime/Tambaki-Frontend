@@ -20,3 +20,19 @@ export async function getProductEnums() {
     if (!response.ok) throw new Error('Erro ao buscar enums de produto');
     return response.json();
 }
+
+export async function createProducts(payload){
+    const response = await fetch(`${API_URL}/products`,{
+        method: 'POST',
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(payload),
+    });
+
+    const data = await response.json();
+
+    if(!response.ok){
+        throw new Error(data.message || "Erro ao criar produto");
+    }
+
+    return data;
+}
