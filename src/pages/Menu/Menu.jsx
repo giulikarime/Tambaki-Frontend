@@ -32,6 +32,69 @@ function Menu() {
             name: "Camarão na Moranga",
             description: "Camarão cremoso servido na abóbora.",
             price: 40.0,
+        },
+        {
+          id: 4,
+            img: "https://i.pinimg.com/736x/5b/ba/18/5bba1864e65d71a4c12746592eb04150.jpg",
+            name: "Camarão na Moranga",
+            description: "Camarão cremoso servido na abóbora.",
+            price: 40.0
+        },
+           {
+            id: 5,
+            img: "https://i.pinimg.com/1200x/a7/4c/fb/a74cfb0b2ddcdece75fd3a26ab2bc6c7.jpg",
+            name: "Peixe Empanado",
+            description: "Acompanha arroz, feijão e salada.",
+            price: 40.0,
+        },
+        {
+            id: 6,
+            img: "https://i.pinimg.com/736x/76/68/53/766853a7890437dfc7683a499a0f1b46.jpg",
+            name: "Moqueca de Peixe",
+            description: "Peixe, leite de coco, dendê e coentro.",
+            price: 40.0,
+        },
+        {
+            id: 7,
+            img: "https://i.pinimg.com/736x/5b/ba/18/5bba1864e65d71a4c12746592eb04150.jpg",
+            name: "Camarão na Moranga",
+            description: "Camarão cremoso servido na abóbora.",
+            price: 40.0,
+        },
+        {
+          id: 8,
+            img: "https://i.pinimg.com/736x/5b/ba/18/5bba1864e65d71a4c12746592eb04150.jpg",
+            name: "Camarão na Moranga",
+            description: "Camarão cremoso servido na abóbora.",
+            price: 40.0
+        },
+           {
+            id: 9,
+            img: "https://i.pinimg.com/1200x/a7/4c/fb/a74cfb0b2ddcdece75fd3a26ab2bc6c7.jpg",
+            name: "Peixe Empanado",
+            description: "Acompanha arroz, feijão e salada.",
+            price: 40.0,
+        },
+        {
+            id: 10,
+            img: "https://i.pinimg.com/736x/76/68/53/766853a7890437dfc7683a499a0f1b46.jpg",
+            name: "Moqueca de Peixe",
+            description: "Peixe, leite de coco, dendê e coentro.",
+            price: 40.0,
+        },
+        {
+            id: 11,
+            img: "https://i.pinimg.com/736x/5b/ba/18/5bba1864e65d71a4c12746592eb04150.jpg",
+            name: "Camarão na Moranga",
+            description: "Camarão cremoso servido na abóbora.",
+            price: 40.0,
+        },
+        {
+          id: 12,
+            img: "https://i.pinimg.com/736x/5b/ba/18/5bba1864e65d71a4c12746592eb04150.jpg",
+            name: "Camarão na Moranga",
+            description: "Camarão cremoso servido na abóbora.",
+            price: 40.0
         }
     ]);
 
@@ -54,26 +117,28 @@ function Menu() {
                     </div>
                     <div id="menu-header-bottom"></div>
 
-                    <div id="container-cards">
-                        {dishes.map((dish) => (
-                            <MenuCard
-                                key={dish.id}
-                                img={dish.img}
-                                name={dish.name}
-                                description={dish.description}
-                                price={dish.price}
-                            />
-                        ))}
-                    </div>
+                        <div id="container-cards">
+                            {dishes.map((dish) => (
+                                <MenuCard
+                                    key={dish.id}
+                                    img={dish.img}
+                                    name={dish.name}
+                                    description={dish.description}
+                                    price={dish.price}
+                                />
+                            ))}
+                        </div>
                 </section>
-            </main>
+            
 
             <ModalMenu
                 aberto={addMenuModalIsOpen}
                 onFechar={() => setAddMenuModalIsOpen(false)}
                 onSalvar={addDish}
             />
+            </main>
         </>
+        
     );
 }
 

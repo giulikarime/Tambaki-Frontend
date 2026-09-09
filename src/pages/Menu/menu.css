@@ -4,35 +4,32 @@ main {
     background-color: #fff8e9;
     display: flex;
     flex-direction: column;
+    
 }
 
 
 .principal-container-cardapio {
-    display: flex;
+    width: 70%;
     position: absolute;
+    top: 150px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
     flex-direction: column;
-    padding: 48px 56px;
-    box-sizing: border-box;
-    width: 100%;
-    left: 200px;
+    gap: 40px;
 }
 
 
 #menu-header {
     display: flex;
     flex-direction: row;
-    align-items: center;
     justify-content: space-between;
-    padding-top: 30px;
-    padding-bottom: 30px;
-    width: 100%;
 }
 
 #menu-header h1 {
     color: #1b1343;
     font-size: 32px;
     font-weight: 700;
-    margin: 0;
 }
 
 .header-acoes {
@@ -46,7 +43,7 @@ main {
     height: 40px;
     border-radius: 8px;
     border: none;
-    background: #8ab7ff;
+    background: #cae2ff;
     color: #1b1343;
     font-size: 20px;
     cursor: pointer;
@@ -55,7 +52,6 @@ main {
     align-items: center;
     justify-content: center;
     position: relative;
-    left: -700px;
 }
 
 
@@ -63,23 +59,28 @@ main {
     color: #1b1343;
     font-size: 13px;
     font-weight: 700;
-    margin-top: 8px;
-    margin-bottom: 20px;
 }
-
 
 #container-cards {
     display: flex;
-    flex-direction: row;
     flex-wrap: wrap;
-    gap: 40px;
+    gap: 30px;
+    justify-content: space-between;
+    overflow-y: auto;
+    max-height: 70vh;
+}
+
+
+#container-cards::-webkit-scrollbar{
+    display: none;
 }
 
 .menuFood-card {
     background-color: #fff;
     display: flex;
     flex-direction: column;
-    width: 210px;
+    align-items: center;
+    width: 250px;
     border-radius: 12px;
     overflow: hidden; 
     box-shadow: 0 7px 8px rgba(57, 33, 66, 0.15);
