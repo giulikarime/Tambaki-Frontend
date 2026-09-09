@@ -24,7 +24,15 @@ export async function login(payload: LoginPayload): Promise<LoginResponse> {
     throw new Error(data.message || 'Erro ao fazer login');
   }
 
+  localStorage.setItem('accessToken', data.accessToken);
+  localStorage.setItem('account', JSON.stringify(data.account));
+
   return data as LoginResponse;
+}
+
+export function getLoggedUser() {
+  const account = localStorage.getItem('account');
+  return account ? JSON.parse(account) : null;
 }
 
 export async function logout(): Promise<{ message: string }> {

@@ -1,15 +1,18 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Header from "../../components/HeaderAndSidebar/Header";
 import Sidebar from "../../components/HeaderAndSidebar/Sidebar";
 import './perfil.css'
 import { ChevronLeft, Dot, LockIcon, User2Icon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { getLoggedUser } from "../../services/auth";
 
 function Perfil(){
 
     const [expanded, setExpand] = useState(false);
     const [hasInteracted, setHasInteracted] = useState(false);
     const navigate = useNavigate();
+
+    const user = getLoggedUser();
 
     return(
         <>
@@ -28,17 +31,17 @@ function Perfil(){
                                 <User2Icon  color={'rgb(15, 21, 58)'} size={70}></User2Icon>
                             </div>
                             <div id="about-me">
-                                <h2>Nome</h2>
+                                <h2>{user.name}</h2>
                                 <div id="group-about-me">
-                                    <p>Cargo</p>
+                                    <p>{user.role}</p>
                                     <Dot color={'rgb(77, 75, 75)'}></Dot>
-                                    <p>Unidade X</p>
+                                    <p>{user.storeUnitId}</p>
                                 </div>
                             </div>
                         </div>
                         <div id="gerenciamento">
                             <LockIcon color={'rgb(77, 75, 75)'} size={45}></LockIcon>
-                            <p>Seu perfil é gerenciado pela unidade X. Alterações de cargo e permissões são autorizadas pelo responsável administrativo.</p>
+                            <p>Seu perfil é gerenciado pela unidade {user.storeUnitId}. Alterações de cargo e permissões são autorizadas pelo responsável administrativo.</p>
                         </div>
                     </div>
                 </div>
