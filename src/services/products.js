@@ -36,3 +36,34 @@ export async function createProducts(payload){
 
     return data;
 }
+
+export async function editProducts(id,payload){
+    const response = await fetch(`${API_URL}/products/${id}`,{
+        method: 'PATCH',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(payload),
+    })
+
+    const data = await response.json();
+
+    if(!response.ok){
+        throw new Error(data.message || "Erro ao editar produto.");
+    }
+
+    return data;
+}
+
+export async function deleteProducts(id) {
+    const response = await fetch(`${API_URL}/products/${id}`,{
+        method: 'DELETE',
+        headers: {'Content-Type': 'application/json'}
+    })
+
+    const data = await response.json();
+
+    if(!response.ok){
+        throw new Error(data.message || "Erro ao deletar produto.");
+    }
+
+    return data;
+}

@@ -4,7 +4,7 @@ import Home from './pages/Home/Home';
 import Financial from './pages/Financial/Financial';
 import Menu from './pages/Menu/Menu';
 import Stock from './pages/Stock/Stock';
-import UserPage from './pages/UsersPage/UserPage';
+import UsersPage from './pages/UsersPage/UsersPage';
 import Perfil from './pages/Perfil/Perfil';
 import Configuration from './pages/Configuration/Configuration';
 import OrderTicket from './pages/Ticket/OrderTicket/OrderTicket';
@@ -44,7 +44,7 @@ function App() {
       <Route path='/dashboard' element={<ProtectedRoute><Financial /></ProtectedRoute>}></Route>
       <Route path='/menu' element={<ProtectedRoute><Menu /></ProtectedRoute>}></Route>
       <Route path='/stock' element={<ProtectedRoute><Stock /></ProtectedRoute>}></Route>
-      <Route path='/users' element={<ProtectedRoute><UserPage /></ProtectedRoute>}></Route>
+      <Route path='/users' element={<ProtectedRoute><UsersPage /></ProtectedRoute>}></Route>
       <Route path='/perfil' element={<ProtectedRoute><Perfil /></ProtectedRoute>}></Route>
       <Route path='/configuration' element={<ProtectedRoute><Configuration /></ProtectedRoute>}></Route>
       <Route path='/order_ticket' element={<ProtectedRoute><OrderTicket /></ProtectedRoute>}></Route>

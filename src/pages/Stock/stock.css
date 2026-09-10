@@ -118,6 +118,7 @@ main{
     display: flex;
     flex-direction: column;
     gap: 10px;
+    margin-bottom: 10px;
     font-size: 16px;
     box-sizing: border-box;
 
@@ -260,7 +261,8 @@ main{
 }
 
 .btn-modal-add-products{
-    padding: 12px 16px;
+    width: 100%;
+    padding: 16px 16px;
     font-size: 15px;
     font-family: inherit;
     color: #2b2a2a;
@@ -284,6 +286,20 @@ main{
     border-radius: 8px;
     outline: none;
     transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.btn-modal-file p{
+    color: #f2f2f5;
+    font-size: 16px;
+}
+
+.btn-modal-file.delete{
+    background-color: #f5ae47;
+    color: #2b2a2a;
+}
+
+.btn-modal-file.delete:hover{
+    box-shadow: 0px 0px 4px rgb(145, 56, 56);
 }
 
 .fields-full-width{
@@ -364,4 +380,11 @@ main{
     display: flex;
     flex-direction: column;
     gap: 20px;
+}
+
+.group-buttons-modal{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
 }

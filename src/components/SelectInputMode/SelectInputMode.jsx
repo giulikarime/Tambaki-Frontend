@@ -1,38 +1,48 @@
 import { useState } from "react";
 
-function SelectInputMode({options, value, onChange, className}){
+function SelectInputMode({ options, value, onChange, className }) {
+    const [isCustomMode, setIsCustomMode] = useState(false);
+    const [customText, setCustomText] = useState("");
 
-    //Mudança do select para input
-    const [isCustomSelectMode, setIsCustomSelectMode] = useState(false); //Verificar se a costumização está ativada
-    const [customSelectValue, setCustomSelectValue] = useState(""); //Valor da costumização
-
-    function handleSelectChange(e){
+    function handleSelectChange(e) {
         const selected = e.target.value;
-        if(selected === '__OUTRO__'){
-            setIsCustomSelectMode(true);
-            setCustomSelectValue("");
+        if (selected === '__OUTRO__') {
+            setIsCustomMode(true);
+            setCustomText("");
+            onChange({ type: 'CUSTOM', id: null, text: "" });
         } else {
-            setCustomSelectValue(selected);
+            onChange({ type: 'EXISTING', id: parseInt(selected), text: null });
         }
     }
 
-    if(isCustomSelectMode){
-        return(
-            <input 
+    function handleCustomChange(e) {
+        const text = e.target.value;
+        setCustomText(text);
+        onChange({ type: 'CUSTOM', id: null, text });
+    }
+
+    if (isCustomMode) {
+        return (
+            <input
                 className={className}
                 type="text"
                 autoFocus
-                value={customSelectValue}
+                value={customText}
                 placeholder="Digite um novo valor"
-                onChange={(e=>setCustomSelectValue(e.target.value))}
+                onChange={handleCustomChange}
             />
         );
     }
-    
-    return(
-        <select onChange={handleSelectChange} value={value ?? ""} className={className} name='' id=''>
-            {options.map((item,index)=>(
-                <option key={index} value={item}>{item.replaceAll('_',' ')}</option>
+
+    return (
+        <select
+            className={className}
+            value={value?.type === 'EXISTING' ? (value.id ?? "") : ""}
+            onChange={handleSelectChange}
+        >
+            <option value="" disabled>Selecione uma opção</option>
+            {options.map((opt) => (
+                <option key={opt.id} value={opt.id}>{opt.name.replaceAll('_', ' ')}</option>
             ))}
             <option value="__OUTRO__">Outro</option>
         </select>

@@ -5,11 +5,13 @@ import './book_table.css'
 import { AlignCenter, ChevronLeft, TextAlignCenter } from "lucide-react";
 import { getTables } from "../../../services/tables";
 import Modal from 'react-modal'
+import { useNavigate } from "react-router-dom";
 
 function BookTable(){
 
     const [expanded, setExpand] = useState(false);
     const [hasInteracted, setHasInteracted] = useState(false);
+    const navigate = useNavigate();
 
     const [orderTables,setOrderTables] = useState([]);
     const [selectedTable,setSelectedTable] = useState(null);

@@ -3,15 +3,19 @@ import Header from "../../components/HeaderAndSidebar/Header";
 import Sidebar from "../../components/HeaderAndSidebar/Sidebar";
 import './stock.css'
 import '../../App.css'
-import { ChevronLeft, Plus, Funnel, ChefHat, ChevronRight, ChevronDown, SquarePen } from "lucide-react";
-import { getProducts, getProductEnums, createProducts } from "../../services/products";
+import { ChevronLeft, Plus, Funnel, ChefHat, ChevronRight, ChevronDown, SquarePen, Trash } from "lucide-react";
+import { getProducts, getProductEnums, createProducts, editProducts, deleteProducts } from "../../services/products";
 import { getSuppliers } from "../../services/suppliers";
+import { useContext } from "react";
+import { AuthContext } from "../../services/AuthContext";
 import { useNavigate } from "react-router-dom";
 import Modal from 'react-modal'
 import SelectInputMode from "../../components/SelectInputMode/SelectInputMode";
 import React, { Fragment } from 'react';
 
 function Stock() {
+
+    const [isCustomSelectMode, setIsCustomSelectMode] = useState(false);
 
     // Const padrão das páginas
     const [expanded, setExpand] = useState(false);
@@ -47,8 +51,8 @@ function Stock() {
     const filtersModal = ["Categoria", "Local de Armazenamento", "Alergênicos", "Status"];
 
     const filtersData = {
-        "Categoria": ["Carnes e Pescados", "Hortifrúti", "Laticínios", "Embutidos", "Secos"],
-        "Local de Armazenamento": ["Geladeira", "Freezer", "Câmara Fria", "Despensa/Estoque Seco", "Bar/Adega"],
+        "Categoria": ["Carnes_e_Pescados", "Hortifrúti", "Laticínios", "Embutidos", "Secos"],
+        "Local de Armazenamento": ["Geladeira", "Freezer", "Camara_Fria", "Despensa_Estoque_Seco", "Bar_Adega"],
         "Alergênicos": ["Glúten", "Lacticineos", "Amendoim", "Frutos do Mar", "Oleoaginas"],
         "Status": ["Ativo", "Inativo", "Descontinuado"]
     };
@@ -70,11 +74,12 @@ function Stock() {
         storageLocations: [],
         statuses: [],
         unitOfMeasure: [],
+        batchs: [],
     });
 
     //Definindo strings que mostram o estado dos produtos
     const missingProducts = products.filter(product => product.stock_quantity === 0);
-    const midStockProducts = products.filter(product => product.stock_quantity <= product.min_stock);
+    const midStockProducts = products.filter(product => product.stock_quantity <= product.min_stock && product.stock_quantity !== 0);
     const missing_products_text = missingProducts.length > 0 ? `- ${String(missingProducts.length).padStart(2, "0")} em falta` : '';
     const product_running_low = midStockProducts.length > 0 ?
         (midStockProducts.length === 1 ?
@@ -90,21 +95,24 @@ function Stock() {
         const diffDias = (vencimento - hoje) / (1000 * 60 * 60 * 24);
         
         // Altere a quantidade de dias (ex: 10) conforme sua necessidade
-        return diffDias <= 10 && diffDias >= 0; 
+        return diffDias <= 10; 
     });
 
     // 2. Calcula a quantidade
     const qtdVencendo = produtosProximosVencimento.length;
 
     // 3. Monta o texto diretamente (acessível no seu JSX)
-    const text_vencidos = `- ${String(qtdVencendo).padStart(2, "0")} ${
-        qtdVencendo === 1 ? "próximo do vencimento" : "próximos do vencimento"
-    }.`;
+    const text_vencidos = qtdVencendo.length > 0 ? (
+        `- ${String(qtdVencendo).padStart(2, "0")} perto do vencimento.`
+    ) : (
+        ''
+    )
 
     //Valores dos inputs/selects nos formularios
     const [storageLocationValue, setStorageLocationValue] = useState("");
     const [allergenValue, setAllergenValue] = useState("");
     const [categoryValue, setCategoryValue] = useState("");
+    const [batchValue, setBatchValue] = useState("");
 
     //Método de filtrar produtos por botões
     const filteredProducts = products.filter((item) => {
@@ -127,7 +135,7 @@ function Stock() {
                 const hoje = new Date();
                 const vencimento = new Date(item.expiration_date);
                 const diffDias = (vencimento - hoje) / (1000 * 60 * 60 * 24);
-                matchesBtn = diffDias <= 10 && diffDias >= 0;
+                matchesBtn = diffDias <= 10;
                 break;
             }
             default:
@@ -145,7 +153,7 @@ function Stock() {
         }
 
         // Filtro de Local de Armazenamento
-        if (selectedModalFilters["Local de Armazenamento"] && item.storage_location !== selectedModalFilters["Local de Armazenamento"]) {
+        if (selectedModalFilters["Local de Armazenamento"] && item.storageLocation !== selectedModalFilters["Local de Armazenamento"]) {
             return false;
         }
 
@@ -268,27 +276,29 @@ function Stock() {
 
     const [formError,setFormError] = useState('')
 
+    const { user } = useContext(AuthContext);
+
     async function handleCreateProduct(e) {
         e.preventDefault();
         setFormError("");
         const formData = new FormData(e.target);
         const payload = {
             name: String(formData.get('name_add')),
-            cost_price: parseFloat(formData.get('cost-price')),
-            category: categoryValue,
+            cost_price: parseFloat(formData.get('cost_price')),
+            category: categoryValue || productEnums.categories[0],
             brand: String(formData.get('brand')),
-            allergens: allergenValue,
+            allergens: allergenValue ? [allergenValue] : [],
             stock_quantity: parseInt(formData.get('stock_quantity')),
-            unit_of_measure: parseInt(formData.get('unit_of_measure')),
+            unit_of_measure: String(formData.get('unit_of_measure')),
             min_stock: parseInt(formData.get('min_stock')),
             max_stock: parseInt(formData.get('max_stock')),
             manufacture_date: new Date(formData.get('manufacture_date')).toISOString(),
             expiration_date: new Date(formData.get('expiration_date')).toISOString(),
-            storageLocation: storageLocationValue,
-            status: String(formData.get('status')),
+            storageLocation: storageLocationValue || productEnums.storageLocations[0],
+            status: String(formData.get('status')) || productEnums.statuses[0],
             batch: String(formData.get('batch')),
             supplierId: parseInt(formData.get('supplierId')),
-            unitId: parseInt(formData.get('unitId')),
+            unitId: user.storeUnitId,
         }
 
         try{
@@ -298,7 +308,59 @@ function Stock() {
             e.target.reset();
         } catch(error){
             console.log("Erro ao criar produto: ", error);
-            setFormError('Não foi possível criar a mesa. Verifique os dados e tente novamente.')
+            setFormError('Não foi possível criar o produto. Verifique os dados e tente novamente.')
+        }
+    }
+
+    async function handleEditProduct(e){
+        e.preventDefault();
+        setFormError("");
+        const formData = new FormData(e.target);
+
+        const payload = {
+            name: String(formData.get('name_edit') || selectedProduct.name),
+            cost_price: parseFloat(formData.get('cost_price_edit')) || selectedProduct.cost_price,
+            category: categoryValue || selectedProduct.category,
+            brand: String(formData.get('brand_edit') || selectedProduct.brand),
+            allergens: allergenValue ? [allergenValue] : selectedProduct.allergens,
+            stock_quantity: parseInt(formData.get('stock_quantity_edit')) || selectedProduct.stock_quantity,
+            unit_of_measure: String(formData.get('unit_of_measure_edit') || selectedProduct.unit_of_measure),
+            min_stock: parseInt(formData.get('min_stock_edit')) || selectedProduct.min_stock,
+            max_stock: parseInt(formData.get('max_stock_edit')) || selectedProduct.max_stock,
+            manufacture_date: formData.get('manufacture_date_edit')
+                ? new Date(formData.get('manufacture_date_edit')).toISOString()
+                : selectedProduct.manufacture_date,
+            expiration_date: formData.get('expiration_date_edit')
+                ? new Date(formData.get('expiration_date_edit')).toISOString()
+                : selectedProduct.expiration_date,
+            storageLocation: storageLocationValue || selectedProduct.storageLocation,
+            status: String(formData.get('status_edit') || selectedProduct.status),
+            batch: String(formData.get('batch_edit') || selectedProduct.batch),
+            supplierId: parseInt(formData.get('supplierId_edit')) || selectedProduct.supplierId,
+            unitId: user.storeUnitId,
+        }
+
+        try{
+            await editProducts(selectedProduct.id, payload);
+            await get_products();
+            setEditProductModalIsOpen(false);
+            setEditProductStatus(false);
+        } catch (error){
+            console.error("Erro ao editar produto. ", error);
+            setFormError(`Não foi possível editar ${selectedProduct.name}. Verifique os dados e tente novamente.`);
+        }
+    }
+
+    async function handleDeleteProduct() {
+        try{
+            await deleteProducts(selectedProduct.id);
+            await get_products();
+            setEditProductModalIsOpen(false);
+            setEditProductStatus(false);
+            setSelectedProduct(null);
+        }catch (error){
+            console.error("Erro o deletar produto. ",error );
+            setFormError('Erro ao deletar Produto.');
         }
     }
 
@@ -377,123 +439,123 @@ function Stock() {
                     </div>
                 </div>
                 <Modal
-    isOpen={addProductModalIsOpen}
-    onRequestClose={() => { setAddProductModalIsOpen(false); }}
-    contentLabel="Adicionar Produtos"
-    shouldCloseOnOverlayClick={true}
-    style={modalAddProductStyle}
->
-    <div className="modal-products-header">
-        <div className="top-container-modal-products">
-            <h2>Adicionar Produto</h2>
-            <button onClick={() => { setAddProductModalIsOpen(false); }}>&times;</button>
-        </div>
-        <p className="text-under-top-container">Preencha o formulário para adicionar um novo produto ao estoque.</p>
-    </div>
+                    isOpen={addProductModalIsOpen}
+                    onRequestClose={() => { setAddProductModalIsOpen(false); }}
+                    contentLabel="Adicionar Produtos"
+                    shouldCloseOnOverlayClick={true}
+                    style={modalAddProductStyle}
+                >
+                    <div className="modal-products-header">
+                        <div className="top-container-modal-products">
+                            <h2>Adicionar Produto</h2>
+                            <button onClick={() => { setAddProductModalIsOpen(false); }}>&times;</button>
+                        </div>
+                        <p className="text-under-top-container">Preencha o formulário para adicionar um novo produto ao estoque.</p>
+                    </div>
 
-    <form className="modal-products-form" onSubmit={handleCreateProduct}>
-        <div className="fields">
-            <label htmlFor="name_add">Nome do Insumo</label>
-            <input className="input-modal-add-product" type="text" placeholder="Insira um nome..." name="name_add" required />
-        </div>
-        <div className="fields">
-            <label htmlFor="batch">Lote</label>
-            <input className="input-modal-add-product" type="text" placeholder="Insira o valor do lote..." name="batch" required />
-        </div>
-        <div className="fields">
-            <label htmlFor="storageLocation">Local de Armazenamento</label>
-            <SelectInputMode
-                className='input-modal-add-product'
-                options={productEnums.storageLocations}
-                value={storageLocationValue}
-                onChange={setStorageLocationValue}
-                name='storageLocation'
-            />
-        </div>
-        <div className="fields">
-            <label htmlFor="manufacture_date">Data da Fabricação</label>
-            <input className="input-modal-add-product" type="date" name="manufacture_date" required />
-        </div>
-        <div className="fields">
-            <label htmlFor="expiration_date">Data de Validade</label>
-            <input className="input-modal-add-product" type="date" name="expiration_date" required />
-        </div>
-        <div className="fields">
-            <label htmlFor="stock_quantity">Unidade de Uso</label>
-            <div className="fields-double">
-                <input className="input-modal-add-product" placeholder="Exemplo.: 5" type="number" name="stock_quantity" required />
-                <select className="select-modal-add-product" name="unit_of_measure">
-                    {productEnums.unitOfMeasure.map((unit, index) => (
-                        <option key={index} value={unit}>{unit}</option>
-                    ))}
-                </select>
-            </div>
-        </div>
-        <div className="fields">
-            <label htmlFor="brand">Marca</label>
-            <input className="input-modal-add-product" placeholder="Insira uma marca..." type="text" name="brand" required />
-        </div>
-        <div className="fields">
-            <label htmlFor="cost_price">Preço de Custo</label>
-            <input className="input-modal-add-product" placeholder="Insira o preço de custo..." type="number" step="0.01" name="cost_price" required />
-        </div>
-        <div className="fields">
-            <label htmlFor="supplierId">Fornecedor</label>
-            <select className="select-modal-add-product" name="supplierId">
-                {suppliers.map((item, i) => (
-                    <option key={i} value={item.id}>{item.company_name}</option>
-                ))}
-            </select>
-        </div>
-        <div className="fields">
-            <label htmlFor="allergens">Alergênicos</label>
-            <SelectInputMode
-                className='select-modal-add-product'
-                options={productEnums.allergens}
-                value={allergenValue}
-                onChange={setAllergenValue}
-                name='allergens'
-            />
-        </div>
-        <div className="fields">
-            <label htmlFor="category">Categoria</label>
-            <SelectInputMode
-                className='input-modal-add-product'
-                options={productEnums.categories}
-                value={categoryValue}
-                onChange={setCategoryValue}
-                name='category'
-            />
-        </div>
-        <div className="fields">
-            <label htmlFor="min_stock">Quantidade Mínima</label>
-            <div className="fields-double">
-                <input className="input-modal-add-product" placeholder="Exemplo.: 12" type="number" name="min_stock" required />
-            </div>
-        </div>
-        <div className="fields">
-            <label htmlFor="max_stock">Quantidade Máxima</label>
-            <input className="input-modal-add-product" placeholder="Exemplo.: 30" type="number" name="max_stock" required />
-        </div>
-        <div className="fields">
-            <label htmlFor="status">Status</label>
-            <select className="select-modal-add-product" name="status">
-                {productEnums.statuses.map((item, index) => (
-                    <option key={index} value={item}>{item.replaceAll('_', ' ')}</option>
-                ))}
-            </select>
-        </div>
-        <div className="fields">
-            <label>Nota Fiscal</label>
-            <button type="button" onClick={handleButtonClick} className="btn-modal-file">
-                <input onChange={handleFileClick} ref={fileRef} hidden type="file" name="invoice" />
-                <p>Adicionar arquivo</p>
-            </button>
-        </div>
-        {formError && <p style={{ color: '#c0392b' }}>{formError}</p>}
-        <button type="submit" className="btn-modal-add-products">Salvar</button>
-    </form>
-</Modal>
+                    <form className="modal-products-form" onSubmit={handleCreateProduct}>
+                        <div className="fields">
+                            <label htmlFor="name_add">Nome do Insumo</label>
+                            <input className="input-modal-add-product" type="text" placeholder="Insira um nome..." name="name_add" required />
+                        </div>
+                        <div className="fields">
+                            <label htmlFor="batch">Lote</label>
+                            <input className="input-modal-add-product" type="text" placeholder="Insira o valor do lote..." name="batch" required />
+                        </div>
+                        <div className="fields">
+                            <label htmlFor="storageLocation">Local de Armazenamento</label>
+                            <SelectInputMode
+                                className='input-modal-add-product'
+                                options={productEnums.storageLocations}
+                                value={storageLocationValue}
+                                onChange={setStorageLocationValue}
+                                name='storageLocation'
+                            />
+                        </div>
+                        <div className="fields">
+                            <label htmlFor="manufacture_date">Data da Fabricação</label>
+                            <input className="input-modal-add-product" type="date" name="manufacture_date" required />
+                        </div>
+                        <div className="fields">
+                            <label htmlFor="expiration_date">Data de Validade</label>
+                            <input className="input-modal-add-product" type="date" name="expiration_date" required />
+                        </div>
+                        <div className="fields">
+                            <label htmlFor="max_stock">Unidade de Uso</label>
+                            <div className="fields-double">
+                                <input className="input-modal-add-product" placeholder="Exemplo.: 5" type="number" name="max_stock" required />
+                                <select className="select-modal-add-product" name="unit_of_measure">
+                                    {productEnums.unitOfMeasure.map((unit, index) => (
+                                        <option key={index} value={unit}>{unit}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+                        <div className="fields">
+                            <label htmlFor="brand">Marca</label>
+                            <input className="input-modal-add-product" placeholder="Insira uma marca..." type="text" name="brand" required />
+                        </div>
+                        <div className="fields">
+                            <label htmlFor="cost_price">Preço de Custo</label>
+                            <input className="input-modal-add-product" placeholder="Insira o preço de custo..." type="number" step="0.01" name="cost_price" required />
+                        </div>
+                        <div className="fields">
+                            <label htmlFor="supplierId">Fornecedor</label>
+                            <select className="select-modal-add-product" name="supplierId">
+                                {suppliers.map((item, i) => (
+                                    <option key={i} value={item.id}>{item.company_name}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="fields">
+                            <label htmlFor="allergens">Alergênicos</label>
+                            <SelectInputMode
+                                className='select-modal-add-product'
+                                options={productEnums.allergens}
+                                value={allergenValue}
+                                onChange={setAllergenValue}
+                                name='allergens'
+                            />
+                        </div>
+                        <div className="fields">
+                            <label htmlFor="category">Categoria</label>
+                            <SelectInputMode
+                                className='input-modal-add-product'
+                                options={productEnums.categories}
+                                value={categoryValue}
+                                onChange={setCategoryValue}
+                                name='category'
+                            />
+                        </div>
+                        <div className="fields">
+                            <label htmlFor="min_stock">Quantidade Mínima</label>
+                            <div className="fields-double">
+                                <input className="input-modal-add-product" placeholder="Exemplo.: 12" type="number" name="min_stock" required />
+                            </div>
+                        </div>
+                        <div className="fields">
+                            <label htmlFor="stock_quantity">Quantidade Atual</label>
+                            <input className="input-modal-add-product" placeholder="Exemplo.: 30" type="number" name="stock_quantity" required />
+                        </div>
+                        <div className="fields">
+                            <label htmlFor="status">Status</label>
+                            <select className="select-modal-add-product" name='status' id=''>
+                                {productEnums.statuses.map((item,index)=>(
+                                    <option key={index} value={item}>{item.replaceAll('_',' ')}</option>
+                                ))}
+                            </select>   
+                        </div>
+                        <div className="fields">
+                            <label>Nota Fiscal</label>
+                            <button type="button" onClick={handleButtonClick} className="btn-modal-file">
+                                <input onChange={handleFileClick} ref={fileRef} hidden type="file" name="invoice" />
+                                <p>Adicionar arquivo</p>
+                            </button>
+                        </div>
+                        {formError && <p style={{ color: '#c0392b' }}>{formError}</p>}
+                        <button type="submit" className="btn-modal-add-products">Salvar</button>
+                    </form>
+                </Modal>
 
                 <Modal
                     isOpen={entranceProductModalIsOpen}
@@ -509,26 +571,26 @@ function Stock() {
                         </div>
                         <p className="text-under-top-container">Preencha o formulário para adicionar um novo lote ao estoque.</p>
                     </div>
-                    <div className="modal-products-form-entrance">
+                    <form className="modal-products-form-entrance">
                         <div className="fields">
-                            <label htmlFor="">Produto</label>
-                            <select className="select-modal-add-product" name="" id="">
+                            <label htmlFor="name_add">Produto</label>
+                            <select className="select-modal-add-product" name="name_add" id="">
                                 {products.map((item,index)=>(
                                     <option key={index} value={item.id}>{item.name}</option>
                                 ))}
                             </select>
                         </div>
                         <div className="fields">
-                            <label htmlFor="">Lote</label>
-                            <input className="input-modal-add-product" type="text" placeholder="Insira o valor do lote..." name="" id="" />
+                            <label htmlFor="batch">Lote</label>
+                            <input className="input-modal-add-product" type="text" placeholder="Insira o valor do lote..." name="batch" id="" />
                         </div>
                         <div className="fields">
-                            <label htmlFor="">Data da Fabricação</label>
-                            <input className="input-modal-add-product" type="date" name="" id="" />
+                            <label htmlFor="manufacture_date">Data da Fabricação</label>
+                            <input className="input-modal-add-product" type="date" name="manufacture_date" id="" />
                         </div>
                         <div className="fields">
-                            <label htmlFor="">Data de Validade</label>
-                            <input className="input-modal-add-product" type="date" name="" id="" />
+                            <label htmlFor="expiration_date">Data de Validade</label>
+                            <input className="input-modal-add-product" type="date" name="expiration_date" id="" />
                         </div>
                         <div className="fields">
                             <label htmlFor="">Unidade de Compra</label>
@@ -556,8 +618,8 @@ function Stock() {
                                 <p>Adicionar arquivo</p>
                             </button>
                         </div>
-                    </div>
-                    <button className="btn-modal-add-products">Salvar</button>
+                        <button type='submit' className="btn-modal-add-products">Salvar</button>
+                    </form>
                 </Modal>
 
                 <Modal
@@ -576,8 +638,21 @@ function Stock() {
                     </div>
                     <div className="modal-products-form-remove">
                         <div className="fields">
+                            <label htmlFor="">Produto</label>
+                            <select className="input-modal-add-product" name="" id="">
+                                {products.map((item,i)=>(
+                                    <option key={i} value={item.name}>{item.name}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="fields">
                             <label htmlFor="">Lote</label>
-                            <input className="input-modal-add-product" type="text" placeholder="Insira o valor do lote..." name="" id="" />
+                            <SelectInputMode
+                                className='select-modal-add-product'
+                                options={productEnums.batchs}
+                                value={batchValue}
+                                onChange={setBatchValue}
+                            ></SelectInputMode>
                         </div>
                         <div className="fields">
                             <label htmlFor="">Quantidade Retirada por Compra</label>
@@ -671,10 +746,11 @@ function Stock() {
                     style={modalAddProductStyle}
                 >
                     {(()=>{
-                        const text_enable_edit = editProductStatus ? 'Desativar Edição' : 'Habilitar Edição';
-                        const save_edits_button = editProductStatus ? <button onClick={()=>setIsCustomSelectMode(!isCustomSelectMode)} className="btn-modal-add-products">Salvar Alterações</button> : '';
+                        const text_enable_edit = editProductStatus ? 'Desabilitar Edição' : 'Habilitar Edição';
+                        const save_edits_button = editProductStatus ? <button type='submit' onClick={()=>setIsCustomSelectMode(!isCustomSelectMode)} className="btn-modal-add-products">Salvar Alterações</button> : '';
                         const see_add_file_btn = editProductStatus ? 'Adicionar Nota Fiscal' : 'Ver Nota Fiscal';
                         const subtitle_top_container = editProductStatus ?  `Edite e altere informações de ${selectedProduct?.name}` : `Dados de ${selectedProduct?.name}`;
+                        const btn_delete = editProductStatus ? <button  className="btn-modal-file delete" onClick={handleDeleteProduct}>< Trash></Trash></button> : '';
 
                         return(
                             <div className="modal-edit-products">
@@ -688,14 +764,14 @@ function Stock() {
                                     </div>
                                     <p className="text-under-top-container">{subtitle_top_container}</p>
                                 </div>
-                                <div className="modal-products-form">
+                                <form onSubmit={handleEditProduct} className="modal-products-form">
                                     <div className="fields">
-                                        <label htmlFor="">Nome do Insumo</label>
-                                        <input readOnly={!editProductStatus} className="input-modal-add-product" type="text" placeholder={selectedProduct?.name} name="" id="" />
+                                        <label htmlFor="name_edit">Nome do Insumo</label>
+                                        <input readOnly={!editProductStatus} className="input-modal-add-product" type="text" defaultValue={selectedProduct?.name} name="name_edit" id="" />
                                     </div>
                                     <div className="fields">
-                                        <label htmlFor="">Lote</label>
-                                        <input readOnly={!editProductStatus} className="input-modal-add-product" type="text" placeholder={selectedProduct?.batch} name="" id="" />
+                                        <label htmlFor="batch_edit">Lote</label>
+                                        <input readOnly={!editProductStatus} className="input-modal-add-product" type="text" defaultValue={selectedProduct?.batch} name="batch_edit" id="" />
                                     </div>
                                     <div className="fields">
                                         <label htmlFor="">Local de Armazenamento</label>
@@ -705,35 +781,36 @@ function Stock() {
                                                 options={productEnums.storageLocations}
                                                 value={storageLocationValue}
                                                 onChange={setStorageLocationValue}
+                                                name='storageLocation'
                                             ></SelectInputMode>
                                         ) : (
-                                            <input readOnly={!editProductStatus} className="input-modal-add-product" placeholder={selectedProduct?.storageLocation} type="text" name="" id="" />
+                                            <input readOnly={!editProductStatus} className="input-modal-add-product" defaultValue={selectedProduct?.storageLocation.replaceAll('_',' ')} type="text" name="storageLocation" id="" />
                                         )}
                                     </div>
                                     <div className="fields">
-                                        <label htmlFor="">Data da Fabricação</label>
+                                        <label htmlFor="manufacture_date_edit">Data da Fabricação</label>
                                         <input readOnly={!editProductStatus} className="input-modal-add-product" type="date"
                                             defaultValue={
                                                 selectedProduct?.manufacture_date
                                                     ? new Date(selectedProduct.manufacture_date).toISOString().split('T')[0]
                                                     : ''
                                             }
-                                            name="" id="" />
+                                            name="manufacture_date_edit" id="" />
                                     </div>
                                     <div className="fields">
-                                        <label htmlFor="">Data de Validade</label>
+                                        <label htmlFor="expiration_date_edit">Data de Validade</label>
                                         <input readOnly={!editProductStatus} className="input-modal-add-product"
                                         defaultValue={
                                                 selectedProduct?.manufacture_date
                                                     ? new Date(selectedProduct.expiration_date).toISOString().split('T')[0]
                                                     : ''
                                             }
-                                        type="date" name="" id="" />
+                                        type="date" name="expiration_date_edit" id="" />
                                     </div>
                                     <div className="fields">
-                                        <label htmlFor="">Unidade de Uso</label>
+                                        <label htmlFor="max_stock_edit">Unidade de Uso</label>
                                         <div className="fields-double">
-                                            <input readOnly={!editProductStatus} className="input-modal-add-product" placeholder={selectedProduct?.max_stock} type="number" name="" id="" />
+                                            <input readOnly={!editProductStatus} className="input-modal-add-product" defaultValue={selectedProduct?.max_stock} type="number" name="max_stock_edit" id="" />
                                             {editProductStatus ? (
                                                 <select className="select-modal-add-product" name='' id=''>
                                                     {productEnums.unitOfMeasure.map((unit,index)=>(
@@ -741,32 +818,32 @@ function Stock() {
                                                     ))}
                                                 </select>
                                             ) : (
-                                                <input readOnly={!editProductStatus}  className="input-modal-add-product" placeholder={selectedProduct?.unit_of_measure} type="text" name="" id="" />
+                                                <input readOnly={!editProductStatus}  className="input-modal-add-product" defaultValue={selectedProduct?.unit_of_measure} type="text" name="unit_of_measure_edit" id="" />
                                             )}
                                         </div>
                                     </div>
                                     <div className="fields">
-                                        <label htmlFor="">Marca</label>
-                                        <input readOnly={!editProductStatus} className="input-modal-add-product" placeholder={selectedProduct?.brand} type="text" name="" id="" />
+                                        <label htmlFor="brand_edit">Marca</label>
+                                        <input readOnly={!editProductStatus} className="input-modal-add-product" defaultValue={selectedProduct?.brand} type="text" name="brand_edit" id="" />
                                     </div>
                                     <div className="fields">
-                                        <label htmlFor="">Preço de Custo</label>
-                                        <input readOnly={!editProductStatus} className="input-modal-add-product" placeholder={selectedProduct?.cost_price} type="number" name="" id="" />
+                                        <label htmlFor="cost_price_edit">Preço de Custo</label>
+                                        <input readOnly={!editProductStatus} className="input-modal-add-product" defaultValue={selectedProduct?.cost_price} type="number" name="cost_price_edit" id="" />
                                     </div>
                                     <div className="fields">
-                                        <label htmlFor="">Fornecedor</label>
+                                        <label htmlFor="supplierId_edit">Fornecedor</label>
                                         {editProductStatus ? (
-                                            <select className="select-modal-add-product" name="" id="">
+                                            <select className="select-modal-add-product" name="supplierId_edit" id="">
                                                 {suppliers.map((item,i)=>(
                                                     <option key={i} value={item.id}>{item.company_name}</option>
                                                 ))}
                                             </select>
                                         ) : (
-                                            <input readOnly={!editProductStatus} className="input-modal-add-product" placeholder={selectedProduct?.supplierId} type="text" name="" id="" />
+                                            <input readOnly={!editProductStatus} className="input-modal-add-product" defaultValue={selectedProduct?.supplierId} type="text" name="supplierId_edit" id="" />
                                         )}
                                     </div>
                                     <div className="fields">
-                                        <label htmlFor="">Alergênicos</label>
+                                        <label htmlFor="allergens_edit">Alergênicos</label>
                                         {editProductStatus ? (
                                             <SelectInputMode
                                                 className='select-modal-add-product'
@@ -775,11 +852,11 @@ function Stock() {
                                                 onChange={setAllergenValue}
                                             ></SelectInputMode>
                                         ) : (
-                                            <input readOnly={!editProductStatus}  className="input-modal-add-product" placeholder={selectedProduct?.allergens} type="text" name="" id="" />
+                                            <input readOnly={!editProductStatus}  className="input-modal-add-product" defaultValue={selectedProduct?.allergens} type="text" name="allergens_edit" id="" />
                                         )}
                                     </div>
                                     <div className="fields">
-                                        <label htmlFor="">Categoria</label>
+                                        <label htmlFor="category_edit">Categoria</label>
                                         {editProductStatus ? (
                                             <SelectInputMode
                                                 className='input-modal-add-product'
@@ -788,27 +865,27 @@ function Stock() {
                                                 onChange={setCategoryValue}
                                             ></SelectInputMode>
                                         ) : (
-                                            <input readOnly={!editProductStatus} className="input-modal-add-product" placeholder={selectedProduct?.category} type="text" name="" id="" />
+                                            <input readOnly={!editProductStatus} className="input-modal-add-product" defaultValue={selectedProduct?.category.replaceAll('_',' ')} type="text" name="category_edit" id="" />
                                         )}
                                     </div>
                                     <div className="fields">
-                                        <label htmlFor="">Quantidade Mínima</label>
-                                        <input readOnly={!editProductStatus} className="input-modal-add-product" placeholder={selectedProduct?.min_stock} type="text" name="" id="" />
+                                        <label htmlFor="min_stock_edit">Quantidade Mínima</label>
+                                        <input readOnly={!editProductStatus} className="input-modal-add-product" defaultValue={selectedProduct?.min_stock} type="text" name="min_stock_edit" id="" />
                                     </div>
                                     <div className="fields">
-                                        <label htmlFor="">Quantidade Atual</label>
-                                        <input readOnly={!editProductStatus} className="input-modal-add-product" placeholder={selectedProduct?.stock_quantity} type="text" name="" id="" />
+                                        <label htmlFor="stock_quantity_edit">Quantidade Atual</label>
+                                        <input readOnly={!editProductStatus} className="input-modal-add-product" defaultValue={selectedProduct?.stock_quantity} type="text" name="stock_quantity_edit" id="" />
                                     </div>
                                     <div className="fields">
-                                        <label htmlFor="">Status</label>
+                                        <label htmlFor="status_edit">Status</label>
                                         {editProductStatus ? (
-                                            <select className="select-modal-add-product" name='' id=''>
+                                            <select className="select-modal-add-product" name='status_edit' id=''>
                                                 {productEnums.statuses.map((item,index)=>(
                                                     <option key={index} value={item}>{item.replaceAll('_',' ')}</option>
                                                 ))}
                                             </select>
                                         ) : (
-                                            <input readOnly={!editProductStatus} className="input-modal-add-product" placeholder={selectedProduct?.status} type="text" name="" id="" />
+                                            <input readOnly={!editProductStatus} className="input-modal-add-product" defaultValue={selectedProduct?.status} type="text" name="status_edit" id="" />
                                         )}
                                     </div>
                                     <div className="fields">
@@ -818,8 +895,11 @@ function Stock() {
                                             <p>{see_add_file_btn}</p>
                                         </button>
                                     </div>
-                                </div>
-                                {save_edits_button}
+                                    <div className="group-buttons-modal">
+                                        {btn_delete}
+                                        {save_edits_button}
+                                    </div>
+                                </form>
                             </div>
                         )
                     })()}

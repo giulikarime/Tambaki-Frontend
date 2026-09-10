@@ -1,0 +1,31 @@
+main{
+    width: 100vw;
+    height: 93vh;
+    background-color: #fff8e9;
+    
+}
+
+.principal-menu-users{
+    width: 70%;
+    position: absolute;
+    top: 150px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+}
+
+.top-container-users{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.container-users{
+    background-color: #fffdf8;
+    border-radius: 30px;
+    padding: 30px;
+    width: 100%;
+}
