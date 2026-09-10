@@ -29,3 +29,34 @@ main{
     padding: 30px;
     width: 100%;
 }
+
+.container-users table{
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.tr-th-group{
+    border-bottom: 1px solid #cfcfcf;
+}
+
+td, th{
+    padding: 15px;
+    text-align: left;
+}
+
+th{
+    color: #4b455f
+}
+
+.see-more-users{
+    background-color: #df8400;
+    width: 100%;
+    border-radius: 50px;
+    padding: 6px 5px;
+    color: white;
+    font-weight: 700;
+}
+
+.see-more-users:hover{
+    cursor: pointer;
+}
