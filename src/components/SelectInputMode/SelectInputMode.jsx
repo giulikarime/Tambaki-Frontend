@@ -42,7 +42,7 @@ function SelectInputMode({ options, value, onChange, className }) {
         >
             <option value="" disabled>Selecione uma opção</option>
             {options.map((opt) => (
-                <option key={opt.id} value={opt.id}>{opt.name.replaceAll('_', ' ')}</option>
+                <option key={opt.id} value={opt.id}>{opt.name?.replaceAll('_', ' ')}</option>
             ))}
             <option value="__OUTRO__">Outro</option>
         </select>
