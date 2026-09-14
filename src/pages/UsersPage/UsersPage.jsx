@@ -49,6 +49,7 @@ function UsersPage(){
     //modais
     const [createUserModalIsOpen,setCreateUserModalIsOpen] = useState(false);
     const [editUserModalIsOpen,setEditUserModalIsOpen] = useState(false);
+    const [enableEditMode,setEnableEditMode] = useState(false);
     const [selectedUser,setSelectedUser] = useState(null);
 
     const modalStyle = {
@@ -195,7 +196,7 @@ function UsersPage(){
                                             <td>{employees.access_level}</td>
                                             <td><button onClick={()=>{
                                                 setEditUserModalIsOpen(!editUserModalIsOpen)
-                                                setSelectedUser(item)
+                                                setSelectedUser(employees)
                                                 }} className="see-more-users">Ver mais</button></td>
                                         </tr>
                                     </>
@@ -252,48 +253,70 @@ function UsersPage(){
 
                 <Modal
                     isOpen={editUserModalIsOpen}
-                    onRequestClose={()=>setEditUserModalIsOpen(!editUserModalIsOpen)}
+                    onRequestClose={()=>{
+                        setEditUserModalIsOpen(!editUserModalIsOpen)
+                        setEnableEditMode(false);
+                    }}
                     contentLabel="Editar Usuário"
                     shouldCloseOnOverlayClick={true}
                     style={modalStyle}
                 >
-                    <div className="top-container">
-                        <div className="group-one-top-container">
-                            <h2>Editar ${selectedUser?.name}</h2>
-                            <button style={{display:'flex',flexDirection:'row',alignItems:'center',gap:'10px',fontSize:'18px'}}>Habilitar Edição<SquarePen></SquarePen></button>
-                            <button onClick={()=>setEditUserModalIsOpen(!editUserModalIsOpen)}>&times;</button>
-                        </div>
-                        <p style={{'font-size': 15,'color': '#777171ff'}}>Edite e veja os dados de ...</p>
-                    </div>
-                    <form action="" onSubmit={handleCreateUser}>
+                    {(()=>{
+                        const principal_edit_text = enableEditMode ? `Edite ${selectedUser?.name}` : `${selectedUser?.name}`;
+                        const enable_edit_text = enableEditMode ? `Desabilitar Edição` : `Habilitar Edição`;
+                        const subtitle_edit_text = enableEditMode ? `Edite os dados de ${selectedUser?.name}` : "" ;
 
-                        <div className="container-form">
-                            {inputValues.map((item,index)=>(
-                                item.model === 'input' ? (
-                                    <div key={index} className="fields">
-                                        <label>{item.label}</label>
-                                        <input className="input-select-model" name={item.name} type={item.type} placeholder={item.placeholder} />
-                                    </div>
-                                ) : (
-                                    <div key={index} className="fields">
-                                        <label>{item.label}</label>
-                                        <select className="input-select-model" name={item.name}>
-                                            <option>Outros</option>
-                                        </select>
-                                    </div>
-                                )
-                            ))}
-
-                            <div className="fields">
-                                <label htmlFor="">Contrato de Trabalho</label>
-                                <button type="button" onClick={handleButtonFile} className="btn-modal-file-users">
-                                    <input hidden onChange={handleInputFile} ref={fileRef} type="file" name="" id="" />
-                                    <p>Adicionar arquivo</p>
-                                </button>
+                        return(
+                            <>
+                            <div className="top-container">
+                                <div className="group-one-top-container">
+                                    <h2>{principal_edit_text}</h2>
+                                    <button
+                                        onClick={()=>setEnableEditMode(!enableEditMode)}
+                                        style={{display:'flex',flexDirection:'row',alignItems:'center',gap:'10px',fontSize:'18px'}}>{enable_edit_text}<SquarePen></SquarePen></button>
+                                    <button onClick={()=>{
+                                        setEditUserModalIsOpen(!editUserModalIsOpen)
+                                        setEnableEditMode(false)
+                                    }}>&times;</button>
+                                </div>
+                                <p style={{'font-size': 15,'color': '#777171ff'}}>{subtitle_edit_text}</p>
                             </div>
-                        </div>
-                        <button className="btn-modal-submit" type="submit">Salvar</button>
-                    </form>
+                            <form action="" onSubmit={handleCreateUser}>
+
+                                <div className="container-form">
+                                    {inputValues.map((item,index)=>(
+                                        item.model === 'input' ? (
+                                            <div key={index} className="fields">
+                                                <label>{item.label}</label>
+                                                <input readOnly={!enableEditMode} className="input-select-model" name={item.name} type={item.type} placeholder={item.placeholder} />
+                                            </div>
+                                        ) : (
+                                            <div key={index} className="fields">
+                                                <label>{item.label}</label>
+                                                <select readOnly={!enableEditMode} className="input-select-model" name={item.name}>
+                                                    <option>Outros</option>
+                                                </select>
+                                            </div>
+                                        )
+                                    ))}
+
+                                    <div className="fields">
+                                        <label htmlFor="">Contrato de Trabalho</label>
+                                        <button type="button" onClick={handleButtonFile} className="btn-modal-file-users">
+                                            <input hidden onChange={handleInputFile} ref={fileRef} type="file" name="" id="" />
+                                            <p>{enableEditMode ? ("Adicionar arquivo") : ("Ver arquivo")}</p>
+                                        </button>
+                                    </div>
+                                </div>
+                                {enableEditMode ? (
+                                    <button className="btn-modal-submit" type="submit">Salvar</button>
+                                ) : (
+                                    ''
+                                )}
+                            </form>
+                            </>
+                        )
+                    })()}
                 </Modal>
 
             </main>
