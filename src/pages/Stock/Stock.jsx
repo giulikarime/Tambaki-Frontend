@@ -3,7 +3,7 @@ import Header from "../../components/HeaderAndSidebar/Header";
 import Sidebar from "../../components/HeaderAndSidebar/Sidebar";
 import './stock.css'
 import '../../App.css'
-import { ChevronLeft, Plus, Funnel, ChefHat, ChevronRight, ChevronDown, SquarePen, Trash } from "lucide-react";
+import { ChevronLeft, Plus, Funnel, ChefHat, ChevronRight, ChevronDown, SquarePen, Trash, } from "lucide-react";
 import { getProducts, getProductEnums, createProducts, editProducts, deleteProducts } from "../../services/products";
 import { getSuppliers } from "../../services/suppliers";
 import { useContext } from "react";

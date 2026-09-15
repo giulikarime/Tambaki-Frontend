@@ -1,0 +1,36 @@
+.ul-list{
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    gap: 15px;
+    list-style-type: none;
+    position: relative;
+}
+
+.li-style-model{
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+    background-color: rgb(255, 212, 131);
+    padding: 5px 10px;
+    border-radius: 50px;
+    align-items: center;
+    margin-right: 10px;
+}
+
+.li-style-model button{
+    font-size: 20px;
+}
+
+.add-category-ul-list{
+    position: absolute;
+    display: flex;
+    align-items: center;
+    bottom: 0;
+    right: 0;
+    margin: 10px;
+    background-color: #333333;
+    color: white;
+    border-radius: 50px;
+    padding: 5px;
+}

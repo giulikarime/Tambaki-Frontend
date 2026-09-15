@@ -141,3 +141,22 @@ form{
 .btn-modal-submit:hover{
     box-shadow: 0px 0px 4px rgb(145, 56, 56);
 }
+
+.container-filters-options-users{
+    display: flex;
+    flex-direction: column;
+    margin-left: 10%;
+    align-items: flex-start;
+    gap: 15px;
+    list-style-type: none;
+}
+
+.container-filters-options-users button{
+    font-size: 18px;
+}
+
+.container-filters-options-users button:hover{
+    text-decoration: underline;
+    text-underline-offset: 2px;
+
+}
