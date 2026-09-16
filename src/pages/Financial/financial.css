@@ -1,0 +1,74 @@
+.cards-dashboard{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.card-value{
+    width: 310px;
+    padding: 10px;
+    padding: 30px 20px;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    box-shadow: 0 5px 10px rgba(77, 40, 40, 0.377);
+    transition: all 0.3s ease;
+    align-items: flex-start;
+}
+
+.card-value:hover{
+    transform: translateY(-5px);
+}
+
+.card-value.yellow{
+    background-color: #ffdf98;
+}
+.yellow button{
+    background-color: #f4b153;
+}
+
+.orange{
+    background-color: #f4b153;
+}
+.orange button{
+    background-color: #ffdf98;
+}
+
+.blue{
+    background-color: #3553b5;
+    color: white;
+}
+.blue button{
+    background-color: #191444;
+    color: white;
+}
+
+.dark-blue{
+    background-color: #191444;
+    color: white;
+}
+
+.card-value h2{
+    font-size: 18px;
+    padding-bottom: 20px;
+}
+
+.card-value-container{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 20px;
+}
+
+.btn-add-card-value{
+    display: flex;
+    align-items: center;
+    padding: 5px;
+    border-radius: 10px;
+}
+
+.subtitle-card{
+    font-size: 30px;
+    font-weight: 700;
+}

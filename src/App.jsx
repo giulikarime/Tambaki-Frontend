@@ -16,24 +16,6 @@ import MenuOrdering from './pages/MenuOrdering/MenuOrdering';
 import PasswordRecovery from './pages/FirstAccess/PasswordRecovery';
 import Suppliers from './pages/Suppliers/Suppliers';
 
-function hasValidAccessToken() {
-  const token = localStorage.getItem('accessToken');
-
-  if (!token) {
-    return false;
-  }
-
-  try {
-    const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
-    return !payload.exp || payload.exp * 1000 > Date.now();
-  } catch {
-    return false;
-  }
-}
-
-function ProtectedRoute({ children }) {
-  return hasValidAccessToken() ? children : <Navigate to="/" replace />;
-}
 
 function App() {
 
@@ -41,18 +23,19 @@ function App() {
     <Routes>
       <Route path='/' element={<Login />}></Route>
       <Route path='/recovery' element={<PasswordRecovery />}></Route>
-      <Route path='/home' element={<ProtectedRoute><Home /></ProtectedRoute>}></Route>
-      <Route path='/dashboard' element={<ProtectedRoute><Financial /></ProtectedRoute>}></Route>
-      <Route path='/menu' element={<ProtectedRoute><Menu /></ProtectedRoute>}></Route>
-      <Route path='/stock' element={<ProtectedRoute><Stock /></ProtectedRoute>}></Route>
-      <Route path='/users' element={<ProtectedRoute><UsersPage /></ProtectedRoute>}></Route>
-      <Route path='/perfil' element={<ProtectedRoute><Perfil /></ProtectedRoute>}></Route>
-      <Route path='/configuration' element={<ProtectedRoute><Configuration /></ProtectedRoute>}></Route>
-      <Route path='/order_ticket' element={<ProtectedRoute><OrderTicket /></ProtectedRoute>}></Route>
-      <Route path='/open_all_tickets' element={<ProtectedRoute><OpenAllTickets /></ProtectedRoute>}></Route>
-      <Route path='/book_table' element={<ProtectedRoute><BookTable /></ProtectedRoute>}></Route>
-      <Route path='/create_table' element={<ProtectedRoute><Tables /></ProtectedRoute>}></Route>
-      <Route path='/suppliers' element={<ProtectedRoute><Suppliers/></ProtectedRoute>}></Route>
+      <Route path='/home' element={<Home />}></Route>
+      <Route path='/dashboard' element={<Financial />}></Route>
+      <Route path='/menu' element={<Menu />}></Route>
+      <Route path='/stock' element={<Stock />}></Route>
+      <Route path='/users' element={<UsersPage />}></Route>
+      <Route path='/perfil' element={<Perfil />}></Route>
+      <Route path='/configuration' element={<Configuration />}></Route>
+      <Route path='/order_ticket' element={<OrderTicket />}></Route>
+      <Route path='/open_all_tickets' element={<OpenAllTickets />}></Route>
+      <Route path='/book_table' element={<BookTable />}></Route>
+      <Route path='/create_table' element={<Tables />}></Route>
+      <Route path='/suppliers' element={<Suppliers/>}></Route>
+      <Route path='/menu_ordering' element={<MenuOrdering/>}></Route>
     </Routes>
   );
 }
