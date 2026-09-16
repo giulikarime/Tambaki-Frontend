@@ -37,7 +37,7 @@ function UsersPage(){
         {label: 'CPF', model: 'input', type: 'text', name: 'cpf_add_user', placeholder: 'Exemplo.: 11122233344...', placeholderEdit: `cpf`},
         {label: 'Email', model: 'input', type: 'email', name: 'email_add_user', placeholder: 'Digite um email...', placeholderEdit: `email`},
         {label: 'Telefone', model: 'input', type: 'text', name: 'phone_add_user', placeholder: 'Exemplo.: 11998876655...', placeholderEdit: `phone`},
-        {label: 'Senha', model: 'input', type: 'password', name: 'pass_add_user', readOnly: true, placeholder: 'Digite uma senha...', placeholderEdit: `password`},
+        {label: 'Senha', model: 'input', type: 'password', name: 'pass_add_user', readOnly: true, placeholder: 'Digite uma senha...', placeholderEdit: `password`, isPassword: true},
         {label: 'Cargo', model: 'select', name: 'role_add_user', placeholderEdit: `role`},
         {label: 'Nível de Acesso', model: 'select', name: 'access_level_add_user', placeholderEdit: `access_level`},
         {label: 'Modelo de Contrato', model: 'select', name: 'employ_add_user', placeholderEdit: `employ_type`},
@@ -346,7 +346,8 @@ function UsersPage(){
                                         item.model === 'input' ? (
                                             <div key={index} className="fields">
                                                 <label>{item.label}</label>
-                                                <input readOnly={!enableEditMode} className="input-select-model" name={item.name} type={item.type} placeholder={selectedUser?.[item.placeholderEdit]} />
+                                                <input readOnly={!enableEditMode} className="input-select-model" name={item.name} type={item.type} 
+                                                    placeholder={ item.isPassword? '••••••••' : selectedUser?.[item.placeholderEdit]} />
                                             </div>
                                         ) : (
                                             <div key={index} className="fields">
@@ -369,7 +370,7 @@ function UsersPage(){
                                 {enableEditMode ? (
                                     <div style={{display:'flex',flexDirection:'row',gap: 10}}>
                                         <button className="btn-modal-submit" type="submit">Salvar</button>
-                                        <button className="btn-modal-submit"><Trash></Trash></button>
+                                        <button className="btn-modal-submit trash"><Trash></Trash></button>
                                     </div>
                                 ) : (
                                     ''

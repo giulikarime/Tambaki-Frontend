@@ -127,7 +127,8 @@ form{
 
 .btn-modal-submit{
     width: 32%;
-    padding: 16px 16px;
+    height: auto;
+    padding: 10px 16px;
     font-size: 15px;
     font-family: inherit;
     color: #2b2a2a;
@@ -140,6 +141,10 @@ form{
 
 .btn-modal-submit:hover{
     box-shadow: 0px 0px 4px rgb(145, 56, 56);
+}
+
+.trash {
+    width: 7%;
 }
 
 .container-filters-options-users{

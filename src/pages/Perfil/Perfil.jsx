@@ -41,7 +41,7 @@ function Perfil(){
                         </div>
                         <div id="gerenciamento">
                             <LockIcon color={'rgb(77, 75, 75)'} size={45}></LockIcon>
-                            <p>Seu perfil é gerenciado pela unidade {user.storeUnitId}. Alterações de cargo e permissões são autorizadas pelo responsável administrativo.</p>
+                            <p>Seu perfil é gerenciado pela unidade {user.storeUnit?.company_name}. Alterações de cargo e permissões são autorizadas pelo responsável administrativo.</p>
                         </div>
                     </div>
                 </div>

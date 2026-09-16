@@ -186,7 +186,7 @@ function Home() {
                             <p>Selecione a mesa e os itens do cardápio para abrir uma comanda.</p>
                         </button>
                         <button onClick={()=>redirect('/open_all_tickets')} style={{ backgroundColor: '#f3b45c', color: 'black'}} className="principal-btn">
-                            <CalendarFold color="black" size={30} style={{backgroundColor:'#dda761', borderRadius:'16px', padding:'8px'}}></CalendarFold>
+                            <CalendarFold color="black" size={50} style={{backgroundColor:'#dda761', borderRadius:'16px', padding:'8px'}}></CalendarFold>
                             <h2>Comandas e Reservas Abertas</h2>
                             {orderList.length === 0 && bookTableList.length === 0 ? (
                                 <p>Nenhuma comanda ou reserva aberta.</p>
@@ -195,7 +195,7 @@ function Home() {
                             )}
                         </button>
                         <button onClick={()=>redirect('/book_table')} style={{ backgroundColor: '#7eb5f8', color: 'black' }} className="principal-btn">
-                            <ClipboardCheck color="black" size={30} style={{backgroundColor:'#a4c8fd', borderRadius:'16px', padding:'8px'}}></ClipboardCheck>
+                            <ClipboardCheck color="black" size={50} style={{backgroundColor:'#a4c8fd', borderRadius:'16px', padding:'8px'}}></ClipboardCheck>
                             <h2>Reservar Mesa</h2>
                             <p>Reservar uma mesa para um cliente.</p>
                         </button>
