@@ -2,7 +2,7 @@ import { useState } from "react";
 import Header from "../../components/HeaderAndSidebar/Header";
 import Sidebar from "../../components/HeaderAndSidebar/Sidebar";
 import './financial.css'
-import { ChevronDown, ChevronLeft, ChevronRight, Funnel, Plus } from "lucide-react";
+import { BanknoteArrowDown, Carrot, ChevronDown, ChevronLeft, ChevronRight, Funnel, PackagePlus, Plus, Snowflake, Van } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import CMV from "../../components/CMV/CMV";
 import Costs from "../../components/Costs/Costs";
@@ -23,10 +23,10 @@ function Financial(){
     const year = presentDate.getFullYear();
 
     const cardsData = [
-        {label: 'Custo de Mercadoria Vendida', value: 'R$ 38,2 k', subtitle: '4% vs. mês anterior', button: true, id: 'yellow', selected: 'CMV'},
-        {label: 'Custos Fixos e Variáveis', value: 'R$ 21,6 k', subtitle: '2% vs. mês anterior', button: true, id: 'orange', selected: 'Custos'},
-        {label: 'Lucro e Ponto de Equilíbrio', value: 'R$ 17,9 k', subtitle: 'Equilíbrio em 18 dias', button: true, id: 'blue', selected: 'Lucro'},
-        {label: 'Maiores Gastos dos Clientes', value: 'Rodízio', subtitle: '42% do faturamento', button: false, id: 'dark-blue', selected: 'Clientes'}
+        {label: 'Custo de Mercadoria Vendida', value: 'R$ 38,2 k', subtitle: '4% vs. mês anterior', button: true, id: 'yellow', selected: 'CMV', action: ()=>setAddCMVModalIsOpen(!addCMVModalIsOpen)},
+        {label: 'Custos Fixos e Variáveis', value: 'R$ 21,6 k', subtitle: '2% vs. mês anterior', button: true, id: 'orange', selected: 'Custos', action: ()=>setAddCostModalIsOpen(!addCostModalIsOpen)},
+        {label: 'Lucro e Ponto de Equilíbrio', value: 'R$ 17,9 k', subtitle: 'Equilíbrio em 18 dias', button: true, id: 'blue', selected: 'Lucro', action: ()=>setAddProfitPointModalIsOpen(!addProfitPointModalIsOpen)},
+        {label: 'Maiores Gastos dos Clientes', value: 'Rodízio', subtitle: '42% do faturamento', button: false, id: 'dark-blue', selected: 'Clientes', action: ()=>setAddClientCostModalIsOpen(!addClientCostModalIsOpen)}
     ];
 
     const [selectCard,setSelectedCard] = useState('CMV');
@@ -58,6 +58,34 @@ function Financial(){
 
     }
 
+    const modalStyle = {
+        overlay: {
+            backgroundColor: '#191444be',
+            position: 'fixed',
+            zIndex: 100,
+            inset: 0
+        },
+        content: {
+            position: 'absolute',
+            overflowY: 'auto',
+            maxHeight: '90vh',
+            minWidth: '20vw',
+            scrollbarWidth: 'none',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%,-50%)',
+            bottom: 'auto',
+            padding: '20px',
+            borderRadius: '16px',
+            border: 'none',
+            boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+            backgroundColor: '#fff',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '20px'
+        }
+    }
+
     const [selectedModalFilters, setSelectedModalFilters] = useState({
         "Categoria": null,
         "Prazo": null,
@@ -77,6 +105,19 @@ function Financial(){
         }));
     };
 
+    const [addCMVModalIsOpen,setAddCMVModalIsOpen] = useState(false);
+    const [addClientCostModalIsOpen,setAddClientCostModalIsOpen] = useState(false);
+    const [addCostModalIsOpen,setAddCostModalIsOpen] = useState(false);
+    const [addProfitPointModalIsOpen,setAddProfitPointModalIsOpen] = useState(false);
+
+    const cmvItems = [
+        { icon: Carrot, label: 'Produtos' },
+        { icon: Van, label: 'Fretes e Logística' },
+        { icon: BanknoteArrowDown, label: 'Impostos sob insumos' },
+        { icon: Snowflake, label: 'Insumo de Conservação' },
+        { icon: PackagePlus, label: 'Embalagens' },
+    ];
+
     return(
         <>
             <Header expanded={expanded} setExpand={setExpand} setHasInteracted={setHasInteracted} ></Header>
@@ -92,6 +133,7 @@ function Financial(){
                             <p style={{ color: '#777171ff' }}>Unidade XYZ - {month.charAt(0).toUpperCase() + month.slice(1)} {year}</p>
                         </div>
                         <div>
+                            <button>Definir Metas</button>
                             <button
                                 onClick={()=>setFilterModalIsOpen(!filterModalIsOpen)}
                                 id='btn-funnel-base' 
@@ -101,18 +143,26 @@ function Financial(){
                     </div>
                     <div className="cards-dashboard">
                         {cardsData.map((card,index)=>(
-                            <button
-                                type="button"
+                            <div
+                                role="button"
+                                tabIndex={0}
                                 onClick={()=>setSelectedCard(card.selected)}
                                 key={index} 
                                 className={`card-value ${card.id}`}>
                                 <h2>{card.label}</h2>
                                 <div className="card-value-container">
                                     <p className="subtitle-card">{card.value}</p>
-                                    {card.button ? <button className="btn-add-card-value"><Plus></Plus></button> : ''}
+                                    {card.button ? <button
+                                                    type="button"
+                                                     className="btn-add-card-value"
+                                                     onClick={(e)=>{
+                                                        e.stopPropagation();
+                                                        card.action();
+                                                    }}
+                                                     ><Plus></Plus></button> : ''}
                                 </div>
                                 <p>{card.subtitle}</p>
-                            </button>
+                            </div>
                         ))}
                     </div>
                     <div>
@@ -178,6 +228,40 @@ function Financial(){
                             })}
                         >Limpar Filtros do Modal</button>
                     </div>
+                    </Modal>
+
+                    <Modal
+                        isOpen={addCMVModalIsOpen}
+                        contentLabel="Registro CMV"
+                        shouldCloseOnOverlayClick={true}
+                        onRequestClose={()=>setAddCMVModalIsOpen(!addCMVModalIsOpen)}
+                        style={modalStyle}
+                    >
+                        <div className="top-container">
+                            <div className="group-one-top-container">
+                                <h2>Baixa de Gastos CMV</h2>
+                                <button onClick={()=>{
+                                    setAddCMVModalIsOpen(!addCMVModalIsOpen)
+                                    }}>&times;</button>
+                            </div>
+                            <p style={{'font-size': 16,'color': 'rgb(51, 51, 51)'}}>Registre seus gastos e calculamos seu CMV.</p>
+                        </div>
+                        <div className="mid-container">
+                            <h3 style={{fontSize: 20}}>Selecione uma opção.</h3>
+                            <ul className="container-btn-cmv">
+                               {cmvItems.map((item, index) => {
+                                    const Icon = item.icon;
+                                    return (
+                                        <li key={index}>
+                                            <button type="button">
+                                                <Icon size={35}></Icon>
+                                                {item.label}
+                                            </button>
+                                        </li>
+                                    );
+                                })}
+                            </ul>
+                        </div>
                     </Modal>
             </main>
         </>
