@@ -40,8 +40,8 @@ main {
 
 .botao-adicionar {
     width: 50px;
-    height: 40px;
-    border-radius: 8px;
+    height: 43px;
+    border-radius: 10px;
     border: none;
     background: #cae2ff;
     color: #1b1343;
@@ -52,7 +52,27 @@ main {
     align-items: center;
     justify-content: center;
     position: relative;
+    margin-left: 930px;
 }
+
+.btn-menu-filter{
+background-color: #7eb5f8;
+color: #000000;
+font-size: 18px;
+font-weight: 700;
+border-radius: 8px;
+width: 170px;
+height: 40px;
+display: flex;
+flex-direction: row;
+justify-content: center;
+gap: 30px;
+align-items: center;
+position: relative;
+cursor: pointer;
+text-align: center;
+}
+
 
 
 #menu-header-bottom {
@@ -79,7 +99,7 @@ main {
     background-color: #fff;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: left;
     width: 250px;
     border-radius: 12px;
     overflow: hidden; 
@@ -128,4 +148,18 @@ main {
     font-weight: 700;
     color: #000000;
     margin-top: 6px;
+}
+
+
+.top-container-menu{
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    width: 100%;
+}
+
+.top-container-modal{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
 }
