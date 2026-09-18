@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Header from "../../components/HeaderAndSidebar/Header";
 import Sidebar from "../../components/HeaderAndSidebar/Sidebar";
 import './financial.css'
@@ -28,6 +28,11 @@ function Financial(){
         {label: 'Lucro e Ponto de Equilíbrio', value: 'R$ 17,9 k', subtitle: 'Equilíbrio em 18 dias', button: true, id: 'blue', selected: 'Lucro', action: ()=>setAddProfitPointModalIsOpen(!addProfitPointModalIsOpen)},
         {label: 'Maiores Gastos dos Clientes', value: 'Rodízio', subtitle: '42% do faturamento', button: false, id: 'dark-blue', selected: 'Clientes', action: ()=>setAddClientCostModalIsOpen(!addClientCostModalIsOpen)}
     ];
+
+    const [addCMVModalIsOpen, setAddCMVModalIsOpen] = useState(false);
+    const [addCostModalIsOpen, setAddCostModalIsOpen] = useState(false);
+    const [addProfitPointModalIsOpen, setAddProfitPointModalIsOpen] = useState(false);
+    const [addClientCostModalIsOpen, setAddClientCostModalIsOpen] = useState(false);
 
     const [selectCard,setSelectedCard] = useState('CMV');
 
@@ -105,11 +110,6 @@ function Financial(){
         }));
     };
 
-    const [addCMVModalIsOpen,setAddCMVModalIsOpen] = useState(false);
-    const [addClientCostModalIsOpen,setAddClientCostModalIsOpen] = useState(false);
-    const [addCostModalIsOpen,setAddCostModalIsOpen] = useState(false);
-    const [addProfitPointModalIsOpen,setAddProfitPointModalIsOpen] = useState(false);
-
     const cmvItems = [
         { icon: Carrot, label: 'Produtos' },
         { icon: Van, label: 'Fretes e Logística' },
@@ -117,6 +117,11 @@ function Financial(){
         { icon: Snowflake, label: 'Insumo de Conservação' },
         { icon: PackagePlus, label: 'Embalagens' },
     ];
+
+    const [activeModalCategory, setActiveModalCategory] = useState(false);
+  
+    const [optionCMVSelected, setOptionCMVSelected] = useState(null);
+
 
     return(
         <>
@@ -244,7 +249,7 @@ function Financial(){
                                     setAddCMVModalIsOpen(!addCMVModalIsOpen)
                                     }}>&times;</button>
                             </div>
-                            <p style={{'font-size': 16,'color': 'rgb(51, 51, 51)'}}>Registre seus gastos e calculamos seu CMV.</p>
+                            <p style={{'fontSize': 16,'color': 'rgb(51, 51, 51)'}}>Registre seus gastos e calculamos seu CMV.</p>
                         </div>
                         <div className="mid-container">
                             <h3 style={{fontSize: 20}}>Selecione uma opção.</h3>
@@ -253,7 +258,14 @@ function Financial(){
                                     const Icon = item.icon;
                                     return (
                                         <li key={index}>
-                                            <button type="button">
+                                            <button
+                                             type="button"
+                                             onClick={()=>{
+                                                setOptionCMVSelected(item.label)
+                                                setActiveModalCategory(!activeModalCategory)
+                                                setAddCMVModalIsOpen(false)
+                                            }}
+                                             >
                                                 <Icon size={35}></Icon>
                                                 {item.label}
                                             </button>
@@ -263,9 +275,36 @@ function Financial(){
                             </ul>
                         </div>
                     </Modal>
+
+                    <Modal
+                        isOpen={activeModalCategory}
+                        contentLabel="Registro Valor Financeiro"
+                        shouldCloseOnOverlayClick={true}
+                        onRequestClose={()=>{
+                            setActiveModalCategory(!activeModalCategory)
+                            setAddCMVModalIsOpen(true)
+                        }}
+                        style={modalStyle}
+                    >
+                        <div className="top-container">
+                            <div className="group-one-top-container">
+                                <h2>{optionCMVSelected}</h2>
+                                <button onClick={()=>{
+                                    setActiveModalCategory(!activeModalCategory)
+                                    setAddCMVModalIsOpen(true)
+                                    }}>&times;</button>
+                            </div>
+                            <p style={{'fontSize': 16,'color': 'rgb(51, 51, 51)'}}>Registre seus gastos com {optionCMVSelected?.toLowerCase()}.</p>
+                        </div>
+                        <div className="mid-container">
+                            {optionCMVSelected === listOfOptionThatIsSelectMode.includes(optionCMVSelected) ? ('select') : ('input')}
+                        </div>
+                    </Modal>
             </main>
         </>
     );
 }
+
+const listOfOptionThatIsSelectMode = [cmvItems[0].label,cmvItems[1].label,cmvItems[2].label];
 
 export default Financial
