@@ -296,15 +296,11 @@ function Financial(){
                             </div>
                             <p style={{'fontSize': 16,'color': 'rgb(51, 51, 51)'}}>Registre seus gastos com {optionCMVSelected?.toLowerCase()}.</p>
                         </div>
-                        <div className="mid-container">
-                            {optionCMVSelected === listOfOptionThatIsSelectMode.includes(optionCMVSelected) ? ('select') : ('input')}
-                        </div>
                     </Modal>
             </main>
         </>
     );
 }
 
-const listOfOptionThatIsSelectMode = [cmvItems[0].label,cmvItems[1].label,cmvItems[2].label];
 
 export default Financial

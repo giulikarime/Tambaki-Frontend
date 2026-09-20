@@ -67,3 +67,19 @@ export async function deleteProducts(id) {
 
     return data;
 }
+
+export async function writeOffProducts(id, new_stock_quantity){
+    const response = await fetch(`${API_URL}/products/${id}/write-off`, {
+        method: 'PATCH', // método correto
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ quantity: new_stock_quantity }) // objeto com chave
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(data.message || 'Erro ao dar baixa em produto.');
+    }
+
+    return data;
+}

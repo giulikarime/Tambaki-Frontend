@@ -121,7 +121,20 @@ main{
     margin-bottom: 10px;
     font-size: 16px;
     box-sizing: border-box;
+    justify-content: flex-start;
+    white-space: nowrap;
+}
 
+.card-products.empty{
+    border-left: 5px solid #b21106;
+}
+
+.card-products.mid-empty{
+    border-left: 5px solid #865000;
+}
+
+.card-products.full{
+    border-left: 5px solid #3d50b2;
 }
 
 .top-container-card{
@@ -211,7 +224,7 @@ main{
 
 .modal-products-form-remove{
     display: grid;
-    grid-template-rows: repeat(3, 1fr);
+    grid-template-rows: repeat(4, 1fr);
     grid-auto-flow: column;
     gap: 20px;
 }
@@ -262,6 +275,7 @@ main{
 
 .btn-modal-add-products{
     width: 100%;
+    max-height: 50px;
     padding: 16px 16px;
     font-size: 15px;
     font-family: inherit;
@@ -387,4 +401,45 @@ main{
     flex-direction: row;
     align-items: center;
     gap: 10px;
+}
+
+.add-allergen-select{
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    transform: translate(160px,-5px);
+    list-style-type: none;
+    background-color: #f7f2f2;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    filter: drop-shadow(-7px 7px 3px rgba(85, 35, 35, 0.2));
+    padding: 15px 0 15px 0;
+    z-index: 5;
+    overflow-y: auto;
+    height: 200px;
+}
+
+
+.add-allergen-select li{
+    padding: 3px 15px 3px 15px
+}
+
+.add-allergen-select li:hover{
+    background-color: rgb(122, 154, 223);
+}
+
+li button{
+    font-size: 15px;
+}
+
+.input-select-model.ul-list{
+    display: flex;
+    flex-wrap: wrap;
+    max-height: 50px;
+    overflow-y: auto;
+    align-items: center;
+    padding: 10px;
+    width: 350px;
+    width: 400px;
 }

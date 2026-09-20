@@ -116,6 +116,7 @@ button:hover {
 .table-card.blue{
     border: 4px solid #87b3f2;
     color: black;
+    background-color: transparent;
 }
 
 .table-card.blue #p-table-status{

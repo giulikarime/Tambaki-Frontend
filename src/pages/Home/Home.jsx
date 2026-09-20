@@ -8,6 +8,7 @@ import { getOrders } from "../../services/orders";
 import { getReservations } from "../../services/reserves";
 import { useNavigate } from "react-router-dom";
 import Modal from 'react-modal'
+import { getLoggedUser } from "../../services/auth";
 
 function Home() {
     const [tablesList,setTablesList] = useState([]);
@@ -29,6 +30,8 @@ function Home() {
     const isDragging = useRef(false);
     const startX = useRef(0);
     const scrollLeftStart = useRef(0);
+
+    const user = getLoggedUser();
 
     const modalCreateTableStyle = {
         overlay:{
@@ -118,7 +121,7 @@ function Home() {
             table_number: Number(formData.get('table_number')),
             capacity: Number(formData.get('table_max')),
             status: "Livre",
-            unitId: 1
+            unitId: user.storeUnitId,
         };
 
         try{
@@ -301,11 +304,11 @@ function Home() {
                             <div className="container-fields">
                                 <div className='fields'>
                                     <label htmlFor='table_number'>Número da Mesa</label>
-                                    <input readOnly className="input-modal-table" type="number" name="table_number" value={selectedTable?.table_number ?? ""} />
+                                    <input readOnly className="input-modal-table" type="number" name="table_number" defaultValue={selectedTable?.table_number ?? ""} />
                                 </div>
                                 <div className='fields'>
                                     <label htmlFor='table_max'>Capacidade da Mesa</label>
-                                    <input readOnly className="input-modal-table" type="number" name="table_max" value={selectedTable?.capacity ?? ""} />
+                                    <input readOnly className="input-modal-table" type="number" name="table_max" defaultValue={selectedTable?.capacity ?? ""} />
                                 </div>
                             </div>
                             )}

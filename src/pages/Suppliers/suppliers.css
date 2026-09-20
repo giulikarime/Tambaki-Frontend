@@ -2,10 +2,10 @@
     display: flex;
     flex-wrap: wrap;
     flex-direction: row;
-    gap: 15px;
     list-style-type: none;
     position: relative;
     min-height: 50px;
+    gap: 5px;
 }
 
 .ul-list p{
@@ -21,7 +21,6 @@
     padding: 5px 10px;
     border-radius: 50px;
     align-items: center;
-    margin-right: 15px;
 }
 
 .li-style-model button{
@@ -53,6 +52,7 @@
     flex-direction: column;
     filter: drop-shadow(-7px 7px 3px rgba(85, 35, 35, 0.2));
     padding: 15px 0 15px 0;
+    z-index: 5;
 }
 
 .add-categorie-select::after{
