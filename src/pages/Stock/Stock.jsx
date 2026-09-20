@@ -11,6 +11,7 @@ import Modal from 'react-modal'
 import React from 'react';
 import { getLoggedUser } from "../../services/auth";
 import { uploadFile } from "../../services/upload";
+import SucessModals from '../../components/SucessModals/SucessModals'
 
 function Stock() {
     // ===================== Navegação e layout padrão =====================
@@ -18,6 +19,9 @@ function Stock() {
     const navigate = useNavigate();
     const user = getLoggedUser();
     const [documentUrl, setDocumentUrl] = useState('');
+
+    const [sucessPhrase,setSucessPhrase] = useState('');
+    const [sucessModalIsOpen,setSucessModalIsOpen] = useState(false);
 
     // ===================== Dados principais (produtos e relacionados) =====================
     const [products, setProducts] = useState([]);
@@ -383,6 +387,8 @@ function Stock() {
             await get_products();
             setAddProductModalIsOpen(false);
             setSelectAllergensForProducts([]);
+            setSucessPhrase('Produto criado com sucesso!');
+            setSucessModalIsOpen(true);
             e.target.reset();
         } catch (error) {
             console.log("Erro ao criar produto: ", error);
@@ -440,6 +446,8 @@ function Stock() {
             await get_products();
             setEditProductModalIsOpen(false);
             setEditProductStatus(false);
+            setSucessPhrase(`${selectedProduct.name} editado com sucesso!`);
+            setSucessModalIsOpen(true);
         } catch (error) {
             console.error("Erro ao editar produto. ", error);
             setFormError(`Não foi possível editar ${selectedProduct.name}. Verifique os dados e tente novamente.`);
@@ -453,6 +461,8 @@ function Stock() {
             setEditProductModalIsOpen(false);
             setEditProductStatus(false);
             setSelectedProduct(null);
+            setSucessPhrase(`${selectedProduct.name} deletado com sucesso!`);
+            setSucessModalIsOpen(true);
         } catch (error) {
             console.error("Erro o deletar produto. ", error);
             setFormError('Erro ao deletar Produto.');
@@ -502,6 +512,8 @@ function Stock() {
             await createProducts(payload);
             await get_products();
             setEntranceProductModalIsOpen(false);[]
+            setSucessPhrase(`Entrada de ${entranceSelectedProduct.name} feita com sucesso!`);
+            setSucessModalIsOpen(true);
             e.target.reset();
         } catch (error) {
             console.log("Erro ao criar produto: ", error);
@@ -529,6 +541,8 @@ function Stock() {
             await get_products();
             setRemoveProductModalIsOpen(false);
             setWriteOffSelectedProduct(null);
+            setSucessPhrase(`Baixa de ${writeOffSelectedProduct.name} feita com sucesso!`);
+            setSucessModalIsOpen(true);
             e.target.reset();
         } catch(error) {
             console.log("Erro ao editar produto: ", error);
@@ -1123,6 +1137,12 @@ function Stock() {
                         )
                     })()}
                 </Modal>
+
+                <SucessModals
+                    phrase={sucessPhrase}
+                    isOpen={sucessModalIsOpen}
+                    setIsOpen={setSucessModalIsOpen}
+                />
 
             </main>
         </>
