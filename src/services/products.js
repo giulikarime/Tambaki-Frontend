@@ -8,6 +8,8 @@ export async function getProducts() {
 
     const data = await response.json();
 
+    console.log(data.message);
+
     if (!response.ok) {
         throw new Error(data.message || "Erro ao buscar produtos");
     }
@@ -21,32 +23,33 @@ export async function getProductEnums() {
     return response.json();
 }
 
-export async function createProducts(payload){
-    const response = await fetch(`${API_URL}/products`,{
+export async function createProducts(payload) {
+    const response = await fetch(`${API_URL}/products`, {
         method: 'POST',
-        headers: {"Content-Type": "application/json"},
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
     });
 
     const data = await response.json();
 
-    if(!response.ok){
+    if (!response.ok) {
         throw new Error(data.message || "Erro ao criar produto");
     }
 
     return data;
 }
 
-export async function editProducts(id,payload){
-    const response = await fetch(`${API_URL}/products/${id}`,{
+export async function editProducts(id, payload) {
+    const response = await fetch(`${API_URL}/products/${id}`, {
         method: 'PATCH',
-        headers: {'Content-Type':'application/json'},
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
     })
 
     const data = await response.json();
+    console.log(data);
 
-    if(!response.ok){
+    if (!response.ok) {
         throw new Error(data.message || "Erro ao editar produto.");
     }
 
@@ -54,21 +57,21 @@ export async function editProducts(id,payload){
 }
 
 export async function deleteProducts(id) {
-    const response = await fetch(`${API_URL}/products/${id}`,{
+    const response = await fetch(`${API_URL}/products/${id}`, {
         method: 'DELETE',
-        headers: {'Content-Type': 'application/json'}
+        headers: { 'Content-Type': 'application/json' }
     })
 
     const data = await response.json();
 
-    if(!response.ok){
+    if (!response.ok) {
         throw new Error(data.message || "Erro ao deletar produto.");
     }
 
     return data;
 }
 
-export async function writeOffProducts(id, new_stock_quantity){
+export async function writeOffProducts(id, new_stock_quantity) {
     const response = await fetch(`${API_URL}/products/${id}/write-off`, {
         method: 'PATCH', // método correto
         headers: { 'Content-Type': 'application/json' },

@@ -11,7 +11,7 @@ import Modal from 'react-modal'
 import React from 'react';
 import { getLoggedUser } from "../../services/auth";
 import { uploadFile } from "../../services/upload";
-import SucessModals from '../../components/SucessModals/SucessModals'
+import AlertModals from "../../components/SucessModals/AlertModals";
 
 function Stock() {
     // ===================== Navegação e layout padrão =====================
@@ -20,8 +20,8 @@ function Stock() {
     const user = getLoggedUser();
     const [documentUrl, setDocumentUrl] = useState('');
 
-    const [sucessPhrase,setSucessPhrase] = useState('');
-    const [sucessModalIsOpen,setSucessModalIsOpen] = useState(false);
+    const [modalPhrase,setModalPhrase] = useState('');
+    const [alertModalIsOpen,setAlertModalIsOpen] = useState(false);
 
     // ===================== Dados principais (produtos e relacionados) =====================
     const [products, setProducts] = useState([]);
@@ -289,7 +289,7 @@ function Stock() {
         {label: 'Data de Validade', mode: 'input', type: 'date', name: 'add_product_exp_date', schema: 'expiration_date'},
         {label: 'Unidade de Uso', mode: 'combo', type: 'number', name: 'add_product_max_stock', selectName: 'add_product_unit_type', enum: true, product_enum: productEnums.unitOfMeasure, placeholder: 'Exemplo.: 100', schema: 'max_stock', schema1: 'unit_of_measure'},
         {label: 'Marca', mode: 'input', type: 'text', name: 'add_product_brand', placeholder: 'Digite o nome da marca...', schema: 'brand'},
-        {label: 'Preço de Custo', mode: 'input', type: 'number', name: 'add_product_price', placeholder: 'Exemplo.: 35.50', schema: 'cost_price'},
+        {label: 'Preço de Custo', mode: 'input', type: 'number', name: 'add_product_price', placeholder: 'Exemplo.: 35.50', schema: 'cost_price', step: '0.01'},
         {label: 'Fornecedor', mode: 'select', name: 'add_product_supplier', schema: 'supplierId'},
         {label: 'Categoria', mode: 'select', name: 'add_product_category', enum: true, product_enum: productEnums.categories, schema: 'category'},
         {label: 'Alergênicos', mode: 'select', name: 'add_product_allergens', enum: true, product_enum: productEnums.allergens, multiply: true, schema: 'allergens'},
@@ -387,12 +387,12 @@ function Stock() {
             await get_products();
             setAddProductModalIsOpen(false);
             setSelectAllergensForProducts([]);
-            setSucessPhrase('Produto criado com sucesso!');
-            setSucessModalIsOpen(true);
+            setModalPhrase('Produto criado com sucesso!');
+            setAlertModalIsOpen(true);
             e.target.reset();
         } catch (error) {
-            console.log("Erro ao criar produto: ", error);
-            setFormError('Não foi possível criar o produto. Verifique os dados e tente novamente.');
+            setFormError(error.message);
+            setAlertModalIsOpen(true);
         }
     }
 
@@ -446,11 +446,11 @@ function Stock() {
             await get_products();
             setEditProductModalIsOpen(false);
             setEditProductStatus(false);
-            setSucessPhrase(`${selectedProduct.name} editado com sucesso!`);
-            setSucessModalIsOpen(true);
+            setModalPhrase(`${selectedProduct.name} editado com sucesso!`);
+            setAlertModalIsOpen(true);
         } catch (error) {
-            console.error("Erro ao editar produto. ", error);
-            setFormError(`Não foi possível editar ${selectedProduct.name}. Verifique os dados e tente novamente.`);
+            setFormError(error.message);
+            setAlertModalIsOpen(true);
         }
     }
 
@@ -461,11 +461,11 @@ function Stock() {
             setEditProductModalIsOpen(false);
             setEditProductStatus(false);
             setSelectedProduct(null);
-            setSucessPhrase(`${selectedProduct.name} deletado com sucesso!`);
-            setSucessModalIsOpen(true);
+            setModalPhrase(`${selectedProduct.name} deletado com sucesso!`);
+            setAlertModalIsOpen(true);
         } catch (error) {
-            console.error("Erro o deletar produto. ", error);
-            setFormError('Erro ao deletar Produto.');
+            setFormError(error.message);
+            setAlertModalIsOpen(true);
         }
     }
 
@@ -512,12 +512,12 @@ function Stock() {
             await createProducts(payload);
             await get_products();
             setEntranceProductModalIsOpen(false);[]
-            setSucessPhrase(`Entrada de ${entranceSelectedProduct.name} feita com sucesso!`);
-            setSucessModalIsOpen(true);
+            setModalPhrase(`Entrada de ${entranceSelectedProduct.name} feita com sucesso!`);
+            setAlertModalIsOpen(true);
             e.target.reset();
         } catch (error) {
-            console.log("Erro ao criar produto: ", error);
-            setFormError('Não foi possível criar o produto. Verifique os dados e tente novamente.');
+            setFormError(error.message);
+            setAlertModalIsOpen(true);
         }
     }
 
@@ -526,29 +526,28 @@ function Stock() {
         setFormError('');
 
         if(!writeOffSelectedProduct) {
-            console.log("Nenhum produto selecionado");
+            setFormError('Nenhum produto selecionado.')
             return;
         }
 
         const formData = new FormData(e.target);
         const new_stock_quantity = parseNumberOrFallback(formData, 'write_off_unit', writeOffSelectedProduct.stock_quantity);
 
-        console.log("Produto selecionado:", writeOffSelectedProduct);
-        console.log("Quantidade informada:", new_stock_quantity);
-
         try {
             await writeOffProducts(writeOffSelectedProduct.id, new_stock_quantity);
             await get_products();
             setRemoveProductModalIsOpen(false);
             setWriteOffSelectedProduct(null);
-            setSucessPhrase(`Baixa de ${writeOffSelectedProduct.name} feita com sucesso!`);
-            setSucessModalIsOpen(true);
+            setModalPhrase(`Baixa de ${writeOffSelectedProduct.name} feita com sucesso!`);
+            setAlertModalIsOpen(true);
             e.target.reset();
         } catch(error) {
-            console.log("Erro ao editar produto: ", error);
-            setFormError('Não foi possível editar o produto. Verifique os dados e tente novamente.');
+            setFormError(error.message);
+            setAlertModalIsOpen(true);
         }
         }
+
+    const watched_products = products.length > 0 ? products.length === 1 ? `item monitorado` : `itens monitorado` : '0 itens monitorados';
 
 
     return (
@@ -573,9 +572,9 @@ function Stock() {
                         </div>
                         <div>
                             {products.length === 1 ? (
-                                <p style={{ color: '#777171ff' }}>{String(products.length).padStart(2,'0')} item monitorado {missing_products_text} {product_running_low} {text_vencidos}</p>
+                                <p style={{ color: '#777171ff' }}>{watched_products} {missing_products_text} {product_running_low} {text_vencidos}</p>
                             ) : (
-                                <p style={{ color: '#777171ff' }}>{String(products.length).padStart(2,'0')} itens monitorados {missing_products_text} {product_running_low} {text_vencidos}</p>
+                                <p style={{ color: '#777171ff' }}>{watched_products} {missing_products_text} {product_running_low} {text_vencidos}</p>
                             )}
                         </div>
                     </div>
@@ -631,7 +630,7 @@ function Stock() {
                     shouldCloseOnOverlayClick={true}
                     style={modalAddProductStyle}
                 >
-                    <div className="modal-products-header">
+                    <div className="modal-products-header" onClick={()=> addAllergensToListModal ? setAddAllergensToListModal(false) : ''}>
                         <div className="top-container-modal-products">
                             <h2>Adicionar Produto</h2>
                             <button onClick={() => { setAddProductModalIsOpen(false); }}>&times;</button>
@@ -639,7 +638,7 @@ function Stock() {
                         <p className="text-under-top-container">Preencha o formulário para adicionar um novo produto ao estoque.</p>
                     </div>
 
-                    <form className="modal-products-form" onSubmit={handleCreateProduct}>
+                    <form className="modal-products-form" onSubmit={handleCreateProduct} onClick={()=> addAllergensToListModal ? setAddAllergensToListModal(false) : ''}>
                        {inputValues.map((mode,index)=>{
                             const btn_file_add = <mode.group type='button' className="btn-modal-file" onClick={handleButtonClick}>
                                 <label htmlFor="">Adicionar Arquivo</label>
@@ -715,7 +714,7 @@ function Stock() {
                                         ) : mode.mode === 'input' ? (
                                             <>
                                                 <label htmlFor="">{mode.label}</label>
-                                                <input className="input-modal-add-product" name={mode.name} type={mode.type} placeholder={mode.placeholder} />
+                                                <input className="input-modal-add-product" name={mode.name} type={mode.type} placeholder={mode.placeholder} step={mode.step}/>
                                             </>
                                         ) : mode.mode === 'combo' ? (
                                             <>
@@ -739,7 +738,6 @@ function Stock() {
                                 
                             )
                         })}
-                        {formError && <p>{formError}</p>}
                         
                     </form>
                 </Modal>
@@ -802,12 +800,12 @@ function Stock() {
                                         </div>
 
                                 ) : mode.mode === 'button' ? (
-                                    <div className="fields" key={index}>
-                                        <label htmlFor="">{mode.label}</label>
-                                        <button type={mode.type} className="btn-modal-add-products">
-                                            {mode.text}
-                                        </button>
-                                    </div>
+                                        <div className="fields" key={index}>
+                                            <label htmlFor="">{mode.label}</label>
+                                            <button type={mode.type} className="btn-modal-add-products">
+                                                {mode.text}
+                                            </button>
+                                        </div>
                                 ) : (
                                     <div key={index} className="fields">
                                         <label>{mode.label}</label>
@@ -816,7 +814,6 @@ function Stock() {
                                 )
                             )
                         })}
-                        {formError}
                     </form>
                 </Modal>
 
@@ -881,6 +878,7 @@ function Stock() {
                                     <input className="input-modal-add-product" placeholder={mode.placeholder} name={mode.name} type={mode.type} />
                                 </div>
                             )
+                            
                     )}
                     </form>
                 </Modal>
@@ -964,7 +962,7 @@ function Stock() {
                         
 
                         return(
-                            <div className="modal-edit-products">
+                            <div className="modal-edit-products" onClick={()=> addAllergensToListModal ? setAddAllergensToListModal(false) : ''}>
                                 <div className="modal-products-header">
                                     <div className="top-container-modal-products">
                                         <div className="group-title-edit">
@@ -1119,29 +1117,28 @@ function Stock() {
                                                         </>
                                                     ) : (
                                                         editProductStatus ? (
-                                                            <div style={{display: 'flex', flexDirection: 'row', gap: 5}}>
-                                                                <button className="btn-modal-add-products" type={mode.type}>
-                                                                    {mode.text}
-                                                                </button>
-                                                                {btn_delete}
-                                                            </div>
+                                                                <div style={{display: 'flex', flexDirection: 'row', gap: 5}}>
+                                                                    <button className="btn-modal-add-products" type={mode.type}>
+                                                                        {mode.text}
+                                                                    </button>
+                                                                    {btn_delete}
+                                                                </div>
                                                         ) : ''
                                                     )
                                                 )}
                                             </div>
                                         )
                                     })}
-                                    {formError && <p>{formError}</p>}
                                 </form>
                             </div>
                         )
                     })()}
                 </Modal>
 
-                <SucessModals
-                    phrase={sucessPhrase}
-                    isOpen={sucessModalIsOpen}
-                    setIsOpen={setSucessModalIsOpen}
+                <AlertModals
+                    phrase={modalPhrase ? modalPhrase : formError}
+                    isOpen={alertModalIsOpen}
+                    setIsOpen={setAlertModalIsOpen}
                 />
 
             </main>
