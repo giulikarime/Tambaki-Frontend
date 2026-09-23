@@ -55,6 +55,8 @@ main{
     font-size: 15px;
     font-weight: bolder;
     letter-spacing: 0.5px;
+    flex-direction: center;
+    gap: 10px
 }
 
 #btn-funnel-base{
@@ -62,6 +64,7 @@ main{
     flex-direction: row;
     align-items: center;
     gap: 20px;
+    background-color: rgb(212, 226, 247);
 }
 
 #filters-container{
@@ -247,6 +250,21 @@ main{
     color: #121213;
 }
 
+.file_name_style{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 2px 10px;
+    border-radius: 50px;
+    border: 1px solid #3553b5;
+}
+
+.file_name_style p{
+    color: #3553b5
+}
+
 .input-modal-add-product{
     width: 100%;
     padding: 12px 16px;
@@ -276,7 +294,7 @@ main{
 .btn-modal-add-products{
     width: 100%;
     max-height: 50px;
-    padding: 16px 16px;
+    padding: 12px 16px;
     font-size: 15px;
     font-family: inherit;
     color: #2b2a2a;
@@ -295,11 +313,16 @@ main{
     padding: 12px 16px;
     font-size: 16px;
     font-family: inherit;
-    color: #f2f2f5;
     background-color: #3d50b2;
     border-radius: 8px;
     outline: none;
     transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.btn-modal-file label {
+    color: #e6f2fd;
+    cursor: pointer;
+    font-weight: 100;
 }
 
 .btn-modal-file p{

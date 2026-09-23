@@ -1,6 +1,5 @@
 .sucess-modal-content {
     opacity: 0;
-    transform: translate(-50%, -30%);
     transition: opacity 300ms ease, transform 300ms ease;
 }
 

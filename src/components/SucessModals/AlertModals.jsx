@@ -12,7 +12,8 @@ function AlertModals({phrase,isOpen,setIsOpen}){
             backgroundColor: 'transparent',
             position: 'fixed',
             zIndex: 100,
-            inset: 0
+            inset: 0,
+            pointerEvents: 'none',
         },
         content: {
             position: 'absolute',
@@ -23,9 +24,10 @@ function AlertModals({phrase,isOpen,setIsOpen}){
             borderRadius: '50px',
             border: 'none',
             boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
-            backgroundColor: `${typeOfPhrase? `rgb(226, 255, 226)` : `rgba(255, 191, 191, 1)`}`,
+            backgroundColor: `${typeOfPhrase? `rgba(255, 191, 191, 1)` : `rgb(226, 255, 226)`}`,
             whiteSpace: 'nowrap',
-            color: `${typeOfPhrase ? `rgba(5, 32, 5, 1)` : `rgba(48, 2, 2, 1)`}`
+            color: `${typeOfPhrase ? `rgba(48, 2, 2, 1)` : `rgba(5, 32, 5, 1)`}`,
+            fontSize: 18,
         }
 
 };

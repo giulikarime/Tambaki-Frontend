@@ -3,7 +3,7 @@ import Header from "../../components/HeaderAndSidebar/Header";
 import Sidebar from "../../components/HeaderAndSidebar/Sidebar";
 import './stock.css'
 import '../../App.css'
-import { ChevronLeft, Plus, Funnel, ChevronRight, ChevronDown, SquarePen, Trash, } from "lucide-react";
+import { ChevronLeft, Plus, Funnel, ChevronRight, ChevronDown, SquarePen, Trash, X } from "lucide-react";
 import { getProducts, getProductEnums, createProducts, editProducts, deleteProducts, writeOffProducts } from "../../services/products";
 import { getSuppliers } from "../../services/suppliers";
 import { useNavigate } from "react-router-dom";
@@ -51,7 +51,7 @@ function Stock() {
     const filtersData = {
         "Categoria": ["Carnes_e_Pescados", "Hortifrúti", "Laticínios", "Embutidos", "Secos"],
         "Local de Armazenamento": ["Geladeira", "Freezer", "Camara_Fria", "Despensa_Estoque_Seco", "Bar_Adega"],
-        "Alergênicos": ["Glúten", "Lacticineos", "Amendoim", "Frutos do Mar", "Oleoaginas"],
+        "Alergênicos": ["Glúten", "Laticínios", "Amendoim", "Frutos do Mar", "Oleoaginas"],
         "Status": ["Ativo", "Inativo", "Descontinuado"]
     };
 
@@ -108,6 +108,24 @@ function Stock() {
         } catch (error) {
             console.error("Erro ao enviar arquivo: ", error);
             setFormError('Não foi possível enviar o arquivo.');
+        }
+    }
+
+    async function handleRemoveFile() {
+        try {
+            if (documentUrl) {
+                await deleteFile(documentUrl);
+            }
+        } catch (error) {
+            console.error("Erro ao remover o arquivo do servidor: ", error);
+        } finally {
+            setFileName('Nenhum arquivo selecionado.');
+            setDocumentUrl(null);
+            setFormError(null);
+
+            if (fileRef.current) {
+                fileRef.current.value = '';
+            }
         }
     }
 
@@ -297,7 +315,7 @@ function Stock() {
         {label: 'Quantidade Mínima', mode: 'input', type: 'number', name: 'add_product_min_stock', placeholder: 'Exemplo.: 10', schema: 'min_stock'},
         {label: 'Status', mode: 'select', name: 'add_product_status', enum: true, product_enum: productEnums.statuses, schema: 'status'},
         {label: 'Nota fiscal', mode: 'input', type: 'file', group: 'button', name: 'add_product_url', schema: 'document_url'},
-        {label: ' ', text: 'Salvar', mode: 'button', type: 'submit'}
+        {label: '.', text: 'Salvar', mode: 'button', type: 'submit'}
     ];
 
     const checkInProductFormsInputValue = [
@@ -547,7 +565,7 @@ function Stock() {
         }
         }
 
-    const watched_products = products.length > 0 ? products.length === 1 ? `item monitorado` : `itens monitorado` : '0 itens monitorados';
+    const watched_products = products.length > 0 ? products.length === 1 ? ` ${products.length} item monitorado` : ` ${products.length} itens monitorado` : '0 itens monitorados';
 
 
     return (
@@ -564,7 +582,7 @@ function Stock() {
                             </div>
 
                             <div className="groups-top-container">
-                                <button onClick={() => setAddProductModalIsOpen(!addProductModalIsOpen)} id='btn-plus-stock'><Plus></Plus></button>
+                                <button onClick={() => setAddProductModalIsOpen(!addProductModalIsOpen)} className="btn-stock-base"><p>Adicionar Produto</p> <Plus size={20}></Plus></button>
                                 <button onClick={() => setEntranceProductModalIsOpen(!entranceProductModalIsOpen)} className="btn-stock-base">Dar Entrada</button>
                                 <button onClick={() => setRemoveProductModalIsOpen(!removeProductModalIsOpen)} className="btn-stock-base">Dar Baixa</button>
                                 <button onClick={() => setFilterProductModalIsOpen(!filterProductModalIsOpen)} id='btn-funnel-base' className="btn-stock-base">Filtrar <Funnel size={20}></Funnel></button>
@@ -651,7 +669,12 @@ function Stock() {
                                         <div className="fields">
                                             <label htmlFor="">{mode.label}</label>
                                             {btn_file_add}
-                                            <p style={{fontSize: 14, color: 'black', whiteSpace: 'nowrap'}}>{fileName}</p>
+                                            <div className='file_name_style'>
+                                                <p style={{fontSize: 14, whiteSpace: 'nowrap'}}>{fileName}</p>
+                                                {fileName === "Nenhum arquivo selecionado." ? "" : <button onClick={handleRemoveFile}>
+                                                        <X color={'#3553b5'} size={15}></X>
+                                                    </button>}
+                                            </div>
                                         </div>
                                     ) : (
                                         mode.mode === 'select' ? (
@@ -729,9 +752,12 @@ function Stock() {
                                                 </div>
                                             </>
                                         ) : (
-                                            <button className="btn-modal-add-products" type={mode.type}>
-                                                {mode.text}
-                                            </button>
+                                            <div className='fields'>
+                                                <label style={{color: 'white'}} htmlFor="">{mode.label}</label>
+                                                <button className="btn-modal-add-products" type={mode.type}>
+                                                    {mode.text}
+                                                </button>
+                                            </div>
                                         )
                                     )}
                                 </div>
@@ -883,7 +909,7 @@ function Stock() {
                     </form>
                 </Modal>
 
-                <Modal
+                {/* <Modal
                     isOpen={filterProductModalIsOpen}
                     onRequestClose={() => setFilterProductModalIsOpen(!filterProductModalIsOpen)}
                     contentLabel="Modal de Filtros"
@@ -919,7 +945,7 @@ function Stock() {
                                                         onClick={() => handleSelectModalFilter(filters_item, option)}
                                                         className={isSelected ? "filter-option-active" : ""}
                                                     >
-                                                        {option} {isSelected && "✓"}
+                                                        {option.replaceAll('_'," ")} {isSelected && "✓"}
                                                     </button>
                                                 );
                                             })}
@@ -930,7 +956,7 @@ function Stock() {
                         })}
 
                         {/* Botão para limpar os filtros do modal de uma vez */}
-                        <button 
+                        {/* <button 
                             className="btn-clear-filters"
                             onClick={() => setSelectedModalFilters({
                                 "Categoria": null,
@@ -942,7 +968,7 @@ function Stock() {
                             Limpar Filtros do Modal
                         </button>
                     </div>
-                </Modal>
+                </Modal> */}
 
                 <Modal
                     isOpen={editProductModalIsOpen}
