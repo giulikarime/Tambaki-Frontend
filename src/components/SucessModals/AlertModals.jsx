@@ -1,11 +1,10 @@
 import './alert_modals.css';
 import Modal from 'react-modal'
 import { useEffect, useRef, useState } from "react";
-import modalPhrase from '../../pages/Stock/Stock';
 
-function AlertModals({phrase,isOpen,setIsOpen}){
+function AlertModals({phrase,isOpen,setIsOpen,type = 'sucess'}){
 
-    const typeOfPhrase = phrase === modalPhrase ? true : false;
+    const isError = type === 'error';
 
     const modalStyle = {
         overlay: {
@@ -24,9 +23,9 @@ function AlertModals({phrase,isOpen,setIsOpen}){
             borderRadius: '50px',
             border: 'none',
             boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
-            backgroundColor: `${typeOfPhrase? `rgba(255, 191, 191, 1)` : `rgb(226, 255, 226)`}`,
+            backgroundColor: isError? `rgba(255, 191, 191, 1)` : `rgb(226, 255, 226)`,
             whiteSpace: 'nowrap',
-            color: `${typeOfPhrase ? `rgba(48, 2, 2, 1)` : `rgba(5, 32, 5, 1)`}`,
+            color: isError ? `rgba(48, 2, 2, 1)` : `rgba(5, 32, 5, 1)`,
             fontSize: 18,
         }
 
