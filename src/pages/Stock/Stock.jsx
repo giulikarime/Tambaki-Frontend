@@ -322,13 +322,13 @@ function Stock() {
 
     const checkInProductFormsInputValue = [
         {label: 'Produto', type: 'product', mode: 'select', name: 'check_product_name'},
-        {label: 'Lote Anterior', type: 'batch', mode: 'select', name: 'check_in_batch_select'},
+        {...inputValues[6], label: 'Lote Anterior', type: 'batch', mode: 'select', name: 'check_in_batch_select'},
         {...inputValues[1], label: 'Novo Lote', name: 'check_product_batch'},
         {...inputValues[3], name: 'check_product_man_date'},
         {...inputValues[4], name: 'check_product_exp_date'},
         {...inputValues[6], name: 'check_product_unit'},
-        {...inputValues[7], name: 'check_product_price'},
-        {...inputValues[8], name: 'check_product_supplier'},
+        {...inputValues[8], name: 'check_product_price'},
+        {...inputValues[9], name: 'check_product_supplier'},
         {...inputValues[15], name: 'check_product_url'},
         {...inputValues[16]}
     ];
@@ -411,6 +411,7 @@ function Stock() {
             setAddProductModalIsOpen(false);
             setSelectAllergensForProducts([]);
             setModalPhrase('Produto criado com sucesso!');
+            setAlertType('sucess');
             setAlertModalIsOpen(true);
             handleRemoveFile();
             e.target.reset();
@@ -474,6 +475,7 @@ function Stock() {
             setEditProductModalIsOpen(false);
             setEditProductStatus(false);
             setModalPhrase(`${selectedProduct.name} editado com sucesso!`);
+            setAlertType('sucess');
             setAlertModalIsOpen(true);
         } catch (error) {
             setFormError(error.message);
@@ -489,6 +491,7 @@ function Stock() {
             setEditProductModalIsOpen(false);
             setEditProductStatus(false);
             setSelectedProduct(null);
+            setAlertType('sucess');
             setModalPhrase(`${selectedProduct.name} deletado com sucesso!`);
             setAlertModalIsOpen(true);
         } catch (error) {
@@ -511,9 +514,14 @@ function Stock() {
         e.preventDefault();
         setFormError("");
 
+
         if (!entranceSelectedProduct) {
             setFormError('Selecione um produto antes de dar entrada.');
             return;
+        }
+
+        if (writeOffSelectedProduct?.id) {
+            await deleteProducts(writeOffSelectedProduct.id);
         }
 
         const formData = new FormData(e.target);
@@ -523,6 +531,8 @@ function Stock() {
             category: entranceSelectedProduct.category,
             brand: entranceSelectedProduct.brand,
             allergens: entranceSelectedProduct.allergens,
+            measure_unit_of_product: entranceSelectedProduct.measure_unit_of_product,
+            unit_of_product: entranceSelectedProduct.unit_of_product,
             unit_of_measure: entranceSelectedProduct.unit_of_measure,
             min_stock: entranceSelectedProduct.min_stock,
             storageLocation: entranceSelectedProduct.storageLocation,
@@ -542,7 +552,9 @@ function Stock() {
             await get_products();
             setEntranceProductModalIsOpen(false);[]
             setModalPhrase(`Entrada de ${entranceSelectedProduct.name} feita com sucesso!`);
+            setAlertType('sucess');
             setAlertModalIsOpen(true);
+            setWriteOffSelectedProduct(null);
             e.target.reset();
         } catch (error) {
             setFormError(error.message);
@@ -567,9 +579,10 @@ function Stock() {
             await writeOffProducts(writeOffSelectedProduct.id, new_stock_quantity);
             await get_products();
             setRemoveProductModalIsOpen(false);
-            setWriteOffSelectedProduct(null);
+            setAlertType('sucess');
             setModalPhrase(`Baixa de ${writeOffSelectedProduct.name} feita com sucesso!`);
             setAlertModalIsOpen(true);
+            setWriteOffSelectedProduct(null);
             e.target.reset();
         } catch(error) {
             setFormError(error.message);
@@ -796,10 +809,7 @@ function Stock() {
                         <p className="text-under-top-container">Preencha o formulário para adicionar um novo lote ao estoque.</p>
                     </div>
                     <form className="modal-products-form-entrance" 
-                        onSubmit={()=>{
-                            handleDeleteProduct()
-                            handleCheckInProduct
-                    }}>
+                        onSubmit={handleCheckInProduct}>
                         {checkInProductFormsInputValue.map((mode,index)=>{
 
                             const btn_file_add = <mode.group type='button' className="btn-modal-file" onClick={handleButtonClick}>
@@ -823,7 +833,13 @@ function Stock() {
                                             <label htmlFor="">{mode.label}</label>
                                             <select 
                                                 className="input-modal-add-product"
-                                                onChange={(e) => setSelectedProductName(e.target.value)}
+                                                onChange={(e) => {
+                                                    const productName = e.target.value;
+                                                    setSelectedProductName(productName);
+                                                    
+                                                    const found = uniqueProducts.find(p => p.name === productName);
+                                                    setEntranceSelectedProduct(found || null);
+                                                }}
                                                 defaultValue=""
                                                 name={mode.name}
                                             >
@@ -839,8 +855,13 @@ function Stock() {
                                             <select 
                                                 className="input-modal-add-product"
                                                 onChange={(e) => {
-                                                    const found = matchingBatches.find(b => b.id === parseInt(e.target.value));
-                                                    setWriteOffSelectedProduct(found || null);
+                                                    const val = e.target.value;
+                                                    if (!val) {
+                                                        setWriteOffSelectedProduct(null);
+                                                        return;
+                                                    }
+                                                    const found = matchingBatches?.find(b => String(b.id) === val);
+                                                    setWriteOffSelectedProduct(found || null); 
                                                 }}
                                                 name={mode.name}
                                             >
@@ -860,14 +881,14 @@ function Stock() {
                                 ) : mode.mode === 'button' ? (
                                         <div className="fields" key={index}>
                                             <label htmlFor="">{mode.label}</label>
-                                            <button type={mode.type} className="btn-modal-add-products">
+                                            <button type='submit' className="btn-modal-add-products">
                                                 {mode.text}
                                             </button>
                                         </div>
                                 ) : (
                                     <div key={index} className="fields">
                                         <label>{mode.label}</label>
-                                        <input name={mode.name} className="input-modal-add-product" type={mode.type} placeholder={mode.placeholder}/>
+                                        <input step={mode.step} name={mode.name} className="input-modal-add-product" type={mode.type} placeholder={mode.placeholder}/>
                                     </div>
                                 )
                             )
@@ -1061,7 +1082,12 @@ function Stock() {
                                                     <div className="fields">
                                                         <label htmlFor="">{mode.label}</label>
                                                         {btn_file_add}
-                                                        {editProductStatus && (<p style={{fontSize: 14, color: 'black', whiteSpace: 'nowrap'}}>{fileName}</p>)}
+                                                        <div className='file_name_style'>
+                                                            <p style={{fontSize: 14, whiteSpace: 'nowrap'}}>{selectedProduct?.document_url.split('/').pop()}</p>
+                                                            {!editProductStatus ? "" : <button type="button" onClick={handleRemoveFile}>
+                                                                    <X color={'#3553b5'} size={15}></X>
+                                                                </button>}
+                                                        </div>
                                                     </div>
                                                 ) : (
                                                     mode.mode === 'select' ? (
@@ -1129,7 +1155,6 @@ function Stock() {
                                                         <>
                                                             <label>{mode.label}</label>
                                                             <select
-                                                                disabled={!editProductStatus}
                                                                 className="input-modal-add-product"
                                                                 defaultValue={selectedProduct?.id}
                                                                 onChange={(e) => {
@@ -1160,7 +1185,7 @@ function Stock() {
                                                     ) : mode.mode === 'input' ? (
                                                         <>
                                                             <label htmlFor="">{mode.label}</label>
-                                                            <input readOnly={!editProductStatus} className="input-modal-add-product" name={mode.name} type={mode.type} placeholder={selectedProduct? selectedProduct[mode.schema] : ''} />
+                                                            <input readOnly={!editProductStatus} step={mode.step} className="input-modal-add-product" name={mode.name} type={mode.type} placeholder={selectedProduct? selectedProduct[mode.schema] : ''} />
                                                         </>
                                                     ) : mode.mode === 'combo' ? (
                                                         <>
