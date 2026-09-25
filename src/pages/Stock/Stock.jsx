@@ -10,7 +10,7 @@ import { useNavigate } from "react-router-dom";
 import Modal from 'react-modal'
 import React from 'react';
 import { getLoggedUser } from "../../services/auth";
-import { uploadFile } from "../../services/upload";
+import { uploadFile} from "../../services/upload";
 import AlertModals from "../../components/SucessModals/AlertModals";
 
 function Stock() {
@@ -87,6 +87,8 @@ function Stock() {
     const [alertType, setAlertType] = useState('sucess');
     const [fileName,setFileName] = useState('Nenhum arquivo selecionado.');
 
+    const [newDocumentUrlProduct,setNewDocumentUrlProduct] = useState(fileName);
+
     // ===================== Upload de arquivo =====================
     const fileRef = useRef(null);
 
@@ -113,7 +115,7 @@ function Stock() {
     }
 
     async function handleRemoveFile() {
-        try {
+         try {
             if (documentUrl) {
                 await deleteFile(documentUrl);
             }
@@ -150,7 +152,7 @@ function Stock() {
         bottom: 'auto',
         minWidth: '20vw',
         maxWidth: '90vw',
-        width: '65%',
+        width: '70%',
         padding: '20px',
         borderRadius: '16px',
         border: 'none',
@@ -443,6 +445,13 @@ function Stock() {
         setFormError("");
         const formData = new FormData(e.target);
 
+        if(!documentUrl){
+            setFormError("A URL do documento não pode ser vazia.");
+            setAlertType('error');
+            setAlertModalIsOpen(true);
+            return;
+        }
+
         const payload = {
         name: String(formData.get('add_product_name') || selectedProduct.name),
         cost_price: parseFloat(formData.get('add_product_price')) || selectedProduct.cost_price,
@@ -593,6 +602,11 @@ function Stock() {
 
     const watched_products = products.length > 0 ? products.length === 1 ? ` ${products.length} item monitorado` : ` ${products.length} itens monitorado` : '0 itens monitorados';
 
+    useEffect(() => {
+        if (editProductModalIsOpen && selectedProduct) {
+            setNewDocumentUrlProduct(selectedProduct.document_url);
+        }
+        }, [editProductModalIsOpen, selectedProduct]);
 
     return (
         <>
@@ -634,6 +648,8 @@ function Stock() {
                                 const dateFab = new Date(item.manufacture_date).toLocaleDateString('pt-br', { timeZone: 'UTC' });
                                 const dateVal = new Date(item.expiration_date).toLocaleDateString('pt-br', { timeZone: 'UTC' });
 
+                                const cardBatches = products.filter(p => p.name === item.name);
+
                                 return (
                                     <button onClick={() => {
                                         setSelectedProduct(item)
@@ -642,7 +658,29 @@ function Stock() {
                                     }} key={index} className={`card-products ${item.stock_quantity === 0 ? 'empty' : item.stock_quantity <= item.min_stock ? 'mid-empty' : 'full'}`}>
                                         <div className='top-container-card'>
                                             <div className="inside-container-card">
-                                                <p style={{fontSize: 20}}><b>{item.name}</b> - {item.brand}</p>
+                                                <div style={{display:'flex',flexDirection:'row',justifyContent:'space-between', alignItems: 'center', width: '100%'}}>
+                                                    <p style={{fontSize: 20}}><b>{item.name}</b> - {item.brand}</p>
+                                                    <select 
+                                                        onClick={(e) => e.stopPropagation()}
+                                                        onChange={(e) => {
+                                                            e.stopPropagation();
+                                                            const val = e.target.value;
+                                                            if (!val) {
+                                                                setWriteOffSelectedProduct(null);
+                                                                return;
+                                                            }
+                                                            const found = cardBatches.find(b => String(b.id) === val);
+                                                            setWriteOffSelectedProduct(found || null); 
+                                                        }}
+                                                    >
+                                                        <option value={item.id}>{item.batch}</option>
+                                                        {cardBatches
+                                                            .filter(b => b.id !== item.id)
+                                                            .map((batch, idx) => (
+                                                                <option key={idx} value={batch.id}>{batch.batch}</option>
+                                                            ))}
+                                                    </select>
+                                                </div>
                                                 <div className="align-items-card">
                                                     {item.stock_quantity === 0 ? (
                                                         <p className="text-stock empty">Em Falta</p>
@@ -873,9 +911,15 @@ function Stock() {
                                         </div>
                                     )
                                 ) : mode.group ? (
-                                        <div key={index} className="fields">
+                                        <div style={{display:'flex',flexDirection:'column',gap: 5}} >
                                             <label htmlFor="">{mode.label}</label>
-                                            {btn_file_add}
+                                                {btn_file_add}
+                                                <div className='file_name_style'>
+                                                    <p style={{fontSize: 14, whiteSpace: 'nowrap'}}>{fileName}</p>
+                                                    {fileName === "Nenhum arquivo selecionado." ? "" : <button onClick={handleRemoveFile}>
+                                                            <X color={'#3553b5'} size={15}></X>
+                                                        </button>}
+                                            </div>
                                         </div>
 
                                 ) : mode.mode === 'button' ? (
@@ -1039,7 +1083,6 @@ function Stock() {
                         const text_enable_edit = editProductStatus ? 'Desabilitar Edição' : 'Habilitar Edição';
                         const subtitle_top_container = editProductStatus ?  `Edite e altere informações de ${selectedProduct?.batch}` : `Dados de ${selectedProduct?.batch}`;
                         const btn_delete = editProductStatus ? <button  className="btn-modal-file delete" onClick={handleDeleteProduct}>< Trash></Trash></button> : '';
-                        
 
                         return(
                             <div className="modal-edit-products" onClick={()=> addAllergensToListModal ? setAddAllergensToListModal(false) : ''}>
@@ -1074,6 +1117,7 @@ function Stock() {
                                             {editProductStatus && (
                                                 <input hidden type='file' ref={fileRef} onChange={handleFileClick} />
                                             )}
+                                            
                                         </mode.group>;
 
                                         return(
@@ -1083,10 +1127,12 @@ function Stock() {
                                                         <label htmlFor="">{mode.label}</label>
                                                         {btn_file_add}
                                                         <div className='file_name_style'>
-                                                            <p style={{fontSize: 14, whiteSpace: 'nowrap'}}>{selectedProduct?.document_url.split('/').pop()}</p>
-                                                            {!editProductStatus ? "" : <button type="button" onClick={handleRemoveFile}>
+                                                            <p style={{fontSize: 14, whiteSpace: 'nowrap'}}>{newDocumentUrlProduct? newDocumentUrlProduct.split('/').pop() : fileName}</p>
+                                                            {newDocumentUrlProduct ? (
+                                                                !editProductStatus ? "" : <button type="button" onClick={()=>setNewDocumentUrlProduct(null)}>
                                                                     <X color={'#3553b5'} size={15}></X>
-                                                                </button>}
+                                                                </button>
+                                                            ) : ''}
                                                         </div>
                                                     </div>
                                                 ) : (
