@@ -310,14 +310,13 @@ function Stock() {
         {label: 'Data de Fabricação', mode: 'input', type: 'date', name: 'add_product_man_date', schema: 'manufacture_date'},
         {label: 'Data de Validade', mode: 'input', type: 'date', name: 'add_product_exp_date', schema: 'expiration_date'},
         {label: 'Unidade Individual do Produto', mode: 'combo', type: 'number', name: 'add_product_unit_of_product', selectName: 'add_measure_unit_of_product', enum: true, product_enum: productEnums.unitOfMeasure, placeholder: 'Ex.: 500(mL)', schema: 'unit_of_product', schema1: 'measure_unit_of_product'},
-        {label: 'Unidade Total de Produtos', mode: 'combo', type: 'number', name: 'add_product_max_stock', selectName: 'add_product_unit_type', enum: true, product_enum: productEnums.unitOfMeasure, placeholder: 'Ex.: 200(L)', schema: 'max_stock', schema1: 'unit_of_measure'},
+        {label: 'Quantidade Total em Estoque', mode: 'combo', type: 'number', name: 'add_product_max_stock', selectName: 'add_product_unit_type', enum: true, product_enum: productEnums.unitOfMeasure, placeholder: 'Ex.: 200(L)', schema: 'max_stock', schema1: 'unit_of_measure'},
         {label: 'Marca', mode: 'input', type: 'text', name: 'add_product_brand', placeholder: 'Digite o nome da marca...', schema: 'brand'},
         {label: 'Preço de Custo', mode: 'input', type: 'number', name: 'add_product_price', placeholder: 'Exemplo.: 35.50', schema: 'cost_price', step: '0.01'},
         {label: 'Fornecedor', mode: 'select', name: 'add_product_supplier', schema: 'supplierId'},
         {label: 'Categoria', mode: 'select', name: 'add_product_category', enum: true, product_enum: productEnums.categories, schema: 'category'},
         {label: 'Alergênicos', mode: 'select', name: 'add_product_allergens', enum: true, product_enum: productEnums.allergens, multiply: true, schema: 'allergens'},
-        {label: 'Quantidade Atual do Total', mode: 'input', type: 'number', name: 'add_product_unit', placeholder: 'Exemplo.: 80', schema: 'stock_quantity'},
-        {label: 'Quantidade Mínima do Total', mode: 'input', type: 'number', name: 'add_product_min_stock', placeholder: 'Exemplo.: 10', schema: 'min_stock'},
+        {label: 'Quantidade Mínima do Estoque', mode: 'input', type: 'number', name: 'add_product_min_stock', placeholder: 'Exemplo.: 10', schema: 'min_stock'},
         {label: 'Status', mode: 'select', name: 'add_product_status', enum: true, product_enum: productEnums.statuses, schema: 'status'},
         {label: 'Nota fiscal', mode: 'input', type: 'file', group: 'button', name: 'add_product_url', schema: 'document_url'},
         {label: '.', text: 'Salvar', mode: 'button', type: 'submit'}
@@ -332,15 +331,15 @@ function Stock() {
         {...inputValues[6], name: 'check_product_unit'},
         {...inputValues[8], name: 'check_product_price'},
         {...inputValues[9], name: 'check_product_supplier'},
-        {...inputValues[15], name: 'check_product_url'},
-        {...inputValues[16]}
+        {...inputValues[14], name: 'check_product_url'},
+        {...inputValues[15]}
     ];
 
     const writeOffProductFormsInputValue = [
         {label: 'Produto', mode: 'select', name: 'write_off_name'},
         {label: 'Lote', mode: 'select', name: 'write_off_batch'},
         {label: 'Quantidade retirada por compra', mode: 'input', type: 'number', name: 'write_off_unit', placeholder: '60'},
-        {...inputValues[16]}
+        {...inputValues[15]}
     ];
 
     // ===================== Busca de dados no backend =====================
@@ -386,6 +385,22 @@ function Stock() {
         e.preventDefault();
         setFormError("");
         const formData = new FormData(e.target);
+
+        const manu_date = new Date(formData.get('add_product_man_date')).toISOString();
+        const exp_date = new Date(formData.get('add_product_exp_date')).toISOString();
+
+        const datesAvailable = manu_date >= exp_date;
+
+        console.log(manu_date)
+        console.log(exp_date)
+        console.log(datesAvailable)
+        if(datesAvailable){
+            setFormError('A Data de Validade não pode pertencer ao mesmo dia, ou ser anterior a Data de Fabricação!');
+            setAlertType('error');
+            setAlertModalIsOpen(true);
+            return;
+        }
+
         const payload = {
             name: String(formData.get('add_product_name')),
             cost_price: parseFloat(formData.get('add_product_price')),
@@ -394,7 +409,7 @@ function Stock() {
             allergens: selectAllergensForProducts,
             unit_of_product: parseInt(formData.get('add_product_unit_of_product')),
             measure_unit_of_product: String(formData.get('add_measure_unit_of_product')),
-            stock_quantity: parseInt(formData.get('add_product_unit')),
+            stock_quantity: parseInt(formData.get('add_product_max_stock')),
             unit_of_measure: String(formData.get('add_product_unit_type')),
             max_stock: parseInt(formData.get('add_product_max_stock')),
             min_stock: parseInt(formData.get('add_product_min_stock')),
@@ -453,6 +468,17 @@ function Stock() {
             return;
         }
 
+        const manu_date = new Date(formData.get('check_product_man_date'));
+        const exp_date = new Date(formData.get('check_product_exp_date'));
+
+        const datesAvailable = exp_date >= manu_date;
+        if(datesAvailable){
+            setFormError('A Data de Validade não pode pertencer ao mesmo dia, ou ser anterior a Data de Fabricação!');
+            setAlertType('error');
+            setAlertModalIsOpen(true);
+            return;
+        }
+
         const payload = {
         name: String(formData.get('add_product_name') || selectedProduct.name),
         cost_price: parseFloat(formData.get('add_product_price')) || selectedProduct.cost_price,
@@ -495,6 +521,7 @@ function Stock() {
     }
 
     async function handleDeleteProduct() {
+        setFormError('');
         try {
             await deleteProducts(selectedProduct.id);
             await get_products();
@@ -535,6 +562,18 @@ function Stock() {
         }
 
         const formData = new FormData(e.target);
+
+        const manu_date = new Date(formData.get('check_product_man_date'));
+        const exp_date = new Date(formData.get('check_product_exp_date'));
+
+        const datesAvailable = exp_date >= manu_date;
+        if(datesAvailable){
+            setFormError('A Data de Validade não pode pertencer ao mesmo dia, ou ser anterior a Data de Fabricação!');
+            setAlertType('error');
+            setAlertModalIsOpen(true);
+            return;
+        }
+
         const payload = {
             name: entranceSelectedProduct.name,
             cost_price: parseFloat(formData.get('check_product_price')),

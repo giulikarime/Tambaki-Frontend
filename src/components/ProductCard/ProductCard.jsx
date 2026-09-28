@@ -72,7 +72,7 @@ function ProductCard({
                         ) : (
                             <p className="text-stock full">Estoque Saudável</p>
                         )}
-                        <p><b>{selectedBatch.stock_quantity}/{selectedBatch.max_stock} {selectedBatch.unit_of_measure}</b></p>
+                        <p><b>{selectedBatch.stock_quantity} {selectedBatch.unit_of_measure} / {selectedBatch.max_stock} {selectedBatch.unit_of_measure}</b></p>
                     </div>
                 </div>
             </div>
