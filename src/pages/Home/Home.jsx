@@ -121,6 +121,16 @@ function Home() {
         e.preventDefault();
         setFormError("");
         const formData = new FormData(e.target);
+
+        const max_quant = Number(formData.get('table_max'));
+
+        if(max_quant >= 50){
+            setFormError("A capacidade de pessoas na mesa ultrapassa os limites disponíveis.");
+            setAlertType('error');
+            setAlertModalIsOpen(true);
+            return;
+        }
+
         const payload = {
             table_number: Number(formData.get('table_number')),
             capacity: Number(formData.get('table_max')),
@@ -176,6 +186,7 @@ function Home() {
         }
 
     async function confirmDeleteTable() {
+        setFormError("");
     try {
         await deleteTable(selectedTable.id);
         await refreshTables();
