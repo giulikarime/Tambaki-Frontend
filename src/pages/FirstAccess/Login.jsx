@@ -30,17 +30,20 @@ function Login() {
         try {
             const result = await login(form);
 
-            // Guarda o token para usar nas próximas requisições
             localStorage.setItem("accessToken", result.accessToken);
             localStorage.setItem("account", JSON.stringify(result.account));
 
-            navigate("/dashboard"); // ajuste para a rota certa do seu app
+            navigate("/home");
         } catch (err) {
             setError(err.message);
         } finally {
             setLoading(false);
         }
     };
+
+    function redirect(url){
+        navigate(url);
+    }
 
     return (
         <main>
@@ -85,7 +88,7 @@ function Login() {
                         </button>
 
 
-                        <a href="Tambaki---Gerenciamento-de-Restaurantes/react-frontend/src/pages/FirstAcess/PasswordRecovery.jsx">Esqueci minha senha</a>
+                        <button className="forgot-my-password" onClick={()=>redirect('/recovery')} >Esqueci minha senha</button>
                     </form>
                 </div>
 

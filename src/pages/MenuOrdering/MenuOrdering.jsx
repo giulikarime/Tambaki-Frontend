@@ -1,9 +1,9 @@
 import { useState } from "react";
 import Header from "../../components/HeaderAndSidebar/Header";
 import Sidebar from "../../components/HeaderAndSidebar/Sidebar";
-import './userpage.css'
+import './menu_ordering.css'
 
-function UserPage(){
+function MenuOrdering(){
 
     const [expanded, setExpand] = useState(false);
     const [hasInteracted, setHasInteracted] = useState(false);
@@ -18,4 +18,4 @@ function UserPage(){
     );
 }
 
-export default UserPage
+export default MenuOrdering

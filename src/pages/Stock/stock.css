@@ -1,10 +1,25 @@
-#principal-menu{
+main{
+    width: 100vw;
+    height: 93vh;
+    background-color: #fff8e9;
+    
+}
+
+#principal-menu-stock{
     width: 70%;
-    top: 15%;
+    position: absolute;
+    top: 150px;
     left: 50%;
-    transform: translate(-50%,-15%);
+    transform: translateX(-50%);
     display: flex;
     flex-direction: column;
+    gap: 40px;
+}
+
+#container{
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
 }
 
 #top-container{
@@ -40,13 +55,28 @@
     font-size: 15px;
     font-weight: bolder;
     letter-spacing: 0.5px;
+    flex-direction: center;
+    gap: 10px
 }
 
-#btn-funnel-base{
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 20px;
+.plus{
+    background-color: #ffd883;
+    color: #381203;
+}
+
+.check-in{
+    background-color: #f3b45c;
+    color: #4d310a;
+}
+
+.write-off{
+    background-color: #87b3f2;
+    color: #0c1d53;
+}
+
+.funnel{
+    background-color: #19348a;
+    color: #dfecff;
 }
 
 #filters-container{
@@ -57,11 +87,30 @@
     align-items: center;
 }
 
+#products-list{
+    max-height: 60vh;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+    overflow-y: auto;
+    padding: 5px;
+}
+
+#products-list::-webkit-scrollbar{
+    display: none;
+}
+
+#products-list button:hover{
+    transform: translateY(-5px);
+    transition: ease 0.3s ;
+}
+
 .btn-filters{
     padding: 8px;
     border-radius: 50px;
     border: 1px solid #1b1343;
     width: 200px;
+    font-size: 15px;
 }
 
 .btn-filters.clicked{
@@ -72,4 +121,361 @@
 .btn-filters.notClicked{
     background-color: transparent;
     color: black;
+}
+
+.card-products{
+    width: 100%;
+    height: auto;
+    background-color: rgb(253, 249, 249);
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 1px 5px 10px rgba(48, 26, 26, 0.212);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 10px;
+    font-size: 16px;
+    box-sizing: border-box;
+    justify-content: flex-start;
+    white-space: nowrap;
+}
+
+.card-products.empty{
+    border-left: 5px solid #b21106;
+}
+
+.card-products.mid-empty{
+    border-left: 5px solid #865000;
+}
+
+.card-products.full{
+    border-left: 5px solid #3d50b2;
+}
+
+.top-container-card{
+    display: flex;
+    flex-direction: row;
+    gap: 15px;
+    align-items: center;
+}
+
+.text-stock{
+    padding: 5px 10px;
+    background-color: transparent;
+    border-radius: 50px;
+    font-weight: bold;
+}
+
+.text-stock.full{
+    background-color: #d5d6fd;
+    color: #3553b5;
+}
+
+.text-stock.mid-empty{
+    background-color: #f6ce95;
+    color: #865000;
+}
+
+.text-stock.empty{
+    background-color: #efcbd1;
+    color: #b21106;
+}
+
+.inside-container-card{
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+    width: 100%;
+}
+
+.align-items-card{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+}
+
+.bottom-container-card{
+    display: flex;
+    flex-direction: row;
+    gap: 15px;
+}
+
+.modal-products-header{
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.top-container-modal-products{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.top-container-modal-products button{
+    font-size: 30px;
+}
+
+.text-under-top-container{
+    font-size: 15px;
+    color: #777171ff;
+}
+
+.modal-products-form{
+    display: grid;
+    grid-template-rows: repeat(5, 1fr);
+    grid-auto-flow: column;
+    gap: 20px;
+}
+
+.modal-products-form-entrance{
+    display: grid;
+    grid-template-rows: repeat(3, 1fr);
+    grid-auto-flow: column;
+    gap: 20px;
+}
+
+.modal-products-form-remove{
+    display: grid;
+    grid-template-rows: repeat(4, 1fr);
+    grid-auto-flow: column;
+    gap: 20px;
+}
+
+.fields{
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.fields-double{
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+}
+
+.fields label{
+    font-size: 16px;
+    font-weight: bold;
+    color: #121213;
+}
+
+.file_name_style{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 2px 10px;
+    border-radius: 50px;
+    border: 1px solid #3553b5;
+}
+
+.file_name_style p{
+    color: #3553b5
+}
+
+.input-modal-add-product{
+    width: 100%;
+    padding: 12px 16px;
+    box-sizing: border-box;
+    font-size: 1rem;
+    font-family: inherit;
+    color: #333333;
+    background-color: #f7f2f2;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.select-modal-add-product{
+    width: 100%;
+    padding: 12px 16px;
+    box-sizing: border-box;
+    font-size: 1rem;
+    font-family: inherit;
+    color: #333333;
+    background-color: #f7f2f2;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.btn-modal-add-products{
+    width: 100%;
+    max-height: 50px;
+    padding: 12px 16px;
+    font-size: 15px;
+    font-family: inherit;
+    color: #2b2a2a;
+    background-color: #f5ae47;
+    border-radius: 8px;
+    font-weight: bold;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.btn-modal-add-products:hover{
+    box-shadow: 0px 0px 4px rgb(145, 56, 56);
+}
+
+.btn-modal-file{
+    padding: 12px 16px;
+    font-size: 16px;
+    font-family: inherit;
+    background-color: #3d50b2;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.btn-modal-file label {
+    color: #e6f2fd;
+    cursor: pointer;
+    font-weight: 100;
+}
+
+.btn-modal-file p{
+    color: #f2f2f5;
+    font-size: 16px;
+}
+
+.btn-modal-file.delete{
+    background-color: #f5ae47;
+    color: #2b2a2a;
+}
+
+.btn-modal-file.delete:hover{
+    box-shadow: 0px 0px 4px rgb(145, 56, 56);
+}
+
+.fields-full-width{
+    width: 100%;
+}
+
+.textarea-modal-add-product{
+    width: 100%;
+    min-height: 90px;
+    padding: 12px 16px;
+    box-sizing: border-box;
+    font-size: 1rem;
+    font-family: inherit;
+    color: #333333;
+    background-color: #f7f2f2;
+    border-radius: 8px;
+    outline: none;
+    resize: vertical;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.container-filters{
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    align-items:flex-start;
+}
+
+.top-container-filters{
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.top-container-filters h1{
+    font-size: 24px;
+}
+
+.top-container-filters button{
+    font-size: 35px;
+}
+
+.btn_filters_modal{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    font-size: 18px;
+    gap: 5px;
+}
+
+.container-filters-options{
+    display: flex;
+    flex-direction: column;
+    margin-left: 10%;
+    align-items: flex-start;
+    gap: 15px;
+}
+
+.container-filters-options button{
+    font-size: 18px;
+}
+
+.container-filters-options button:hover{
+    text-decoration: underline;
+    text-underline-offset: 2px;
+
+}
+.group-title-edit{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 15px;
+}
+
+.modal-edit-products{
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.group-buttons-modal{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+}
+
+.add-allergen-select{
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    transform: translate(160px,-5px);
+    list-style-type: none;
+    background-color: #f7f2f2;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    filter: drop-shadow(-7px 7px 3px rgba(85, 35, 35, 0.2));
+    padding: 15px 0 15px 0;
+    z-index: 5;
+    overflow-y: auto;
+    height: 200px;
+}
+
+
+.add-allergen-select li{
+    padding: 3px 15px 3px 15px
+}
+
+.add-allergen-select li:hover{
+    background-color: rgb(122, 154, 223);
+}
+
+li button{
+    font-size: 15px;
+}
+
+.input-select-model.ul-list{
+    display: flex;
+    flex-wrap: wrap;
+    max-height: 50px;
+    overflow-y: auto;
+    align-items: center;
+    padding: 10px;
+    width: 350px;
+    width: 400px;
 }

@@ -1,0 +1,165 @@
+main {
+    width: 100vw;
+    height: 93vh;
+    background-color: #fff8e9;
+    display: flex;
+    flex-direction: column;
+    
+}
+
+
+.principal-container-cardapio {
+    width: 70%;
+    position: absolute;
+    top: 150px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+}
+
+
+#menu-header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+#menu-header h1 {
+    color: #1b1343;
+    font-size: 32px;
+    font-weight: 700;
+}
+
+.header-acoes {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.botao-adicionar {
+    width: 50px;
+    height: 43px;
+    border-radius: 10px;
+    border: none;
+    background: #cae2ff;
+    color: #1b1343;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    margin-left: 930px;
+}
+
+.btn-menu-filter{
+background-color: #7eb5f8;
+color: #000000;
+font-size: 18px;
+font-weight: 700;
+border-radius: 8px;
+width: 170px;
+height: 40px;
+display: flex;
+flex-direction: row;
+justify-content: center;
+gap: 30px;
+align-items: center;
+position: relative;
+cursor: pointer;
+text-align: center;
+}
+
+
+
+#menu-header-bottom {
+    color: #1b1343;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+#container-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+    justify-content: space-between;
+    overflow-y: auto;
+    max-height: 70vh;
+}
+
+
+#container-cards::-webkit-scrollbar{
+    display: none;
+}
+
+.menuFood-card {
+    background-color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: left;
+    width: 250px;
+    border-radius: 12px;
+    overflow: hidden; 
+    box-shadow: 0 7px 8px rgba(57, 33, 66, 0.15);
+}
+
+
+.imgMenu {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    display: block;
+    max-width: 310px;
+}
+
+.imgMenu img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+}
+
+
+.menuCard-bottom {
+    display: flex;
+    flex-direction: column;
+    padding: 12px 14px 16px;
+    gap: 4px;
+    max-width: 210px;
+}
+
+.menuTitle {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1b1343;
+}
+
+.menuDescription {
+    font-size: 13px;
+    color: #000000;
+    line-height: 1.35;
+}
+
+.menuPrice {
+    font-size: 14px;
+    font-weight: 700;
+    color: #000000;
+    margin-top: 6px;
+}
+
+
+.top-container-menu{
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    width: 100%;
+}
+
+.top-container-modal{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}

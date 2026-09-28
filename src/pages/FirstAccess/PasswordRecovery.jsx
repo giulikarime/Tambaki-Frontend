@@ -3,14 +3,47 @@ import { useNavigate } from "react-router-dom";
 import LogoRestaurant from "../../components/LogoRestaurant/LogoRestaurant";
 import { login } from "../../services/auth";
 import { m, LazyMotion, domAnimation } from "framer-motion";
-import "./CSS/pass-recor.css";
+import './CSS/pass-reco.css'
+import Modal from 'react-modal'
 
 
-function Login() {
+function PasswordRecovery() {
     const [form, setForm] = useState({ email: "", password: "" });
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+
+    const [sendEmailModalIsOpen,setSendEmailModalIsOpen] = useState(false);
+
+    function close_modal(){
+        setSendEmailModalIsOpen(false);
+    }
+
+    const modalSendEmailStyle = {
+        overlay:{
+            backgroundColor: 'transparent',
+            position: 'fixed',
+            zIndex: 100,
+            inset: 0
+        },
+        content:{
+            position: 'absolute',
+            top: '10%',
+            left:'50%',
+            transform: 'translate(-50%,-50%)',
+            bottom: 'auto',
+            width: '500px',
+            padding: '20px',
+            borderRadius: '16px',
+            border: 'none',
+            boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+            backgroundColor: '#dfd1d1ff',
+            display:'flex',
+            flexDirection:'column',
+            gap:'20px',
+            color: '#b21106'
+        }
+    }
 
     const handleChange = (e) => {
         setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -36,42 +69,58 @@ function Login() {
         }
     };
 
+    function redirect(url){
+        navigate(url);
+    }
+
+    function back_redirect(){
+        navigate(-1);
+    }
+
     return (
         <main>
 
-            <div id="formulario">
-                <section id="form-format">
-                <div id="logo">
-                    <LogoRestaurant />
-                </div>
-                    <h1> Recuperação de Senha</h1>
+            <div id="formulario-reco">
+                <section id="form-format-reco">
+                    <div id="top-container-reco">
+                        <h1> Recuperação de Senha</h1>
 
-                    <form onSubmit={handleSubmit}>
-                        <input
-                            type="email"
-                            name="email"
-                            id="email"
-                            placeholder="E-mail"
-                            value={form.email}
-                            onChange={handleChange}
-                            required
-                        />
+                        <form onSubmit={handleSubmit}>
 
-                        <button id="enviar"
-                            type="submit"
-                            disabled={loading}
-                        >
-                            {loading ? "Enviando..." : "Enviar instruções para email"}
-                        </button>
+                            <p className="p-yellow">Digite o e-mail cadastrado para receber as instruções de redefinição de senha.</p>
 
-                           <button id="voltar"
-                            type="submit"
-                            disabled={loading}
-                        >
-                            {loading ? "Voltando..." : "Voltar"}
-                        </button>
+                            <input
+                                type="email"
+                                name="email"
+                                id="email"
+                                placeholder="E-mail"
+                                value={form.email}
+                                onChange={handleChange}
+                                required
+                            />
 
-                    </form>
+                            <button id="enviar"
+                                type="submit"
+                                disabled={loading}
+                                onClick={()=>setSendEmailModalIsOpen(!sendEmailModalIsOpen)}
+                            >
+                                {loading ? "Enviando..." : "Enviar instruções para email"}
+                            </button>
+
+                            <button
+                                onClick={back_redirect}
+                                id="voltar"
+                                type="submit"
+                                disabled={loading}
+                            >
+                                {loading ? "Voltando..." : "Voltar"}
+                            </button>
+
+                        </form>
+                    </div>
+                    <div id="logo-reco">
+                        <LogoRestaurant />
+                    </div>
                 </section>
 
                 
@@ -165,8 +214,18 @@ function Login() {
                     </LazyMotion>
                 </div>
         </div>
+        <Modal
+            isOpen={sendEmailModalIsOpen}  
+            onRequestClose={close_modal}
+            contentLabel="Enviei o Email"
+            shouldCloseOnOverlayClick={true}
+            style={modalSendEmailStyle}
+            className='modal-send-email'
+        >
+            <p>Informações enviadas para o email xyz.</p>
+        </Modal>
         </main>
     );
 }
 
-export default Login;
+export default PasswordRecovery;

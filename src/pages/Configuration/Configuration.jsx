@@ -160,7 +160,7 @@ export default function Configuration() {
           <div className="config-top-bar">
             <button
               className="config-back-circle-btn"
-              onClick={() => navigate("/dashboard")}
+              onClick={()=>navigate(-1)}
               title="Voltar"
               aria-label="Voltar para tela anterior"
             >
