@@ -120,6 +120,8 @@ function Home() {
     async function handleCreateTable(e){
         e.preventDefault();
         setFormError("");
+        setAlertType("");
+        setSucessPhrase("");
         const formData = new FormData(e.target);
 
         const max_quant = Number(formData.get('table_max'));
@@ -157,6 +159,8 @@ function Home() {
     async function handleUpdateTable(e){
         e.preventDefault();
         setFormError("");
+        setAlertType("");
+        setSucessPhrase("");
         const formData = new FormData(e.target);
         const payload = {
             table_number: Number(formData.get('table_number')),
@@ -187,6 +191,8 @@ function Home() {
 
     async function confirmDeleteTable() {
         setFormError("");
+        setAlertType("");
+        setSucessPhrase("");
     try {
         await deleteTable(selectedTable.id);
         await refreshTables();

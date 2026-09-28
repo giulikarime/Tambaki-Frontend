@@ -384,6 +384,8 @@ function Stock() {
     async function handleCreateProduct(e) {
         e.preventDefault();
         setFormError("");
+        setAlertType("");
+        setSucessPhrase("");
         const formData = new FormData(e.target);
 
         const manu_date = new Date(formData.get('add_product_man_date')).toISOString();
@@ -391,9 +393,6 @@ function Stock() {
 
         const datesAvailable = manu_date >= exp_date;
 
-        console.log(manu_date)
-        console.log(exp_date)
-        console.log(datesAvailable)
         if(datesAvailable){
             setFormError('A Data de Validade não pode pertencer ao mesmo dia, ou ser anterior a Data de Fabricação!');
             setAlertType('error');
@@ -459,6 +458,8 @@ function Stock() {
     async function handleEditProduct(e) {
         e.preventDefault();
         setFormError("");
+        setAlertType("");
+        setSucessPhrase("");
         const formData = new FormData(e.target);
 
         if(!documentUrl){
@@ -522,6 +523,8 @@ function Stock() {
 
     async function handleDeleteProduct() {
         setFormError('');
+        setAlertType("");
+        setSucessPhrase("");
         try {
             await deleteProducts(selectedProduct.id);
             await get_products();
@@ -550,6 +553,8 @@ function Stock() {
     async function handleCheckInProduct(e) {
         e.preventDefault();
         setFormError("");
+        setAlertType("");
+        setSucessPhrase("");
 
 
         if (!entranceSelectedProduct) {
@@ -615,6 +620,8 @@ function Stock() {
     async function handleWriteOffProduct(e){
         e.preventDefault();
         setFormError('');
+        setAlertType("");
+        setSucessPhrase("");
 
         if(!writeOffSelectedProduct) {
             setFormError('Nenhum produto selecionado.')
