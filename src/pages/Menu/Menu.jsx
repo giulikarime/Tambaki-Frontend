@@ -1,31 +1,33 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Header from "../../components/HeaderAndSidebar/Header";
 import Sidebar from "../../components/HeaderAndSidebar/Sidebar";
 import MenuCard from "./MenuCard";
-import { Plus, Funnel, ChevronDown, ChevronRight, ChevronLeft } from "lucide-react";
+import { Plus, Funnel, ChevronDown, ChevronRight, ChevronLeft, Search } from "lucide-react";
 import './menu.css';
 import Modal from 'react-modal';
 import React from 'react';
 import { useNavigate } from "react-router-dom";
+import { getMenu, getMenuEnums, getTags } from "../../services/menu";
 
 function Menu() {
     const navigate = useNavigate();
 
-    const filtersModal = ["Modalidade", "Pratos", "Bebidas", "Sobremesas","Status"];
+    const [menuEnums, setMenuEnums] = useState({
+        categories: [],
+    });
+
+    const [tags,setTags] = useState(null);
+
+    const filtersModal = ["Categorias", "Etiquetas"];
     const filtersData = {
-        "Modalidade": ["Rodízio", "Self-Service", "A lá carte"],
-        "Pratos": ["Entradas", "Principais"],
-        "Bebidas": ["Geladas", "Quentes", "Alcóolicas", "Não-alcólicas"],
-        "Sobremesas": ["Quentes", "Geladas"],
-        "Status": ["Ativo", "Inativo", "Descontinuado"]
+        "Categorias": menuEnums.categories,
+        "Etiquetas": tags,
     };
     const [selectedModalFilters, setSelectedModalFilters] = useState({
-        "Modalidade": null,
-        "Pratos": null,
-        "Bebidas": null,
-        "Sobremesas": null,
-        "Status": null
+        "Categorias": null,
+        "Etiquetas": null,
     });
+
     const [filterProductModalIsOpen, setFilterProductModalIsOpen] = useState(false);
     const [filterProductIsClicked, setFilterProductIsClicked] = useState(null);
     const [expanded, setExpand] = useState(false);
@@ -97,97 +99,116 @@ function Menu() {
         {label: "Preço", mode: "input", type: "number", name: "addDishesPrice"}
     ]
 
-    
+    useEffect(() => {
+            async function get_enums() {
+                try {
+                    const enums_forms = await getMenuEnums();
+                    setMenuEnums(enums_forms);
+                } catch (error) {
+                    console.error("Erro ao carregar os dados dos formularios.", error);
+                }
+            }
+            get_enums();
+        }, []);
+
+    async function get_tags(){
+        try{
+            const tags_ = await getTags();
+            setTags(tags_);
+        }catch(error){
+            console.error("Erro ao carregar dados dos formularios.",error);
+        }
+    }
+
+    useEffect(()=>{
+        get_tags();
+    },[]);
 
     return (
         <>
             <Header expanded={expanded} setExpand={setExpand} setHasInteracted={setHasInteracted} ></Header>
             <main>
                 <Sidebar expanded={expanded} hasInteracted={hasInteracted} ></Sidebar>
-                <section className="principal-container-cardapio">
-                    <div id="menu-header">
-                        <div className="top-container-menu">
-                            <button 
-                                onClick={()=>navigate(-1)}
-                                className="btn-back-base"
-                                ><ChevronLeft></ChevronLeft></button>
-                            <h1>Cardápio</h1>
+                <div className="principal-menu-users">
+                    <div className="top-container-users">
+                        <div style={{display:'flex',flexDirection:'column',gap:15}}>
+                            <div style={{display:'flex',flexDirection:'row',gap: 15,alignItems:'center'}}>
+                                <button className="btn-back-base" onClick={()=>navigate(-1)}><ChevronLeft></ChevronLeft></button>
+                                <h1>Cardápio</h1>
+                            </div>
+                            <p style={{ color: '#777171ff' }}>Visualize e edite seu cardápio.</p>
                         </div>
-                        <button className="botao-adicionar" onClick={() => setAddMenuModalIsOpen(true)}>
-                            <Plus></Plus>
-                        </button>
+                        <div style={{display:'flex',flexDirection:'row',alignItems:'center',gap:15}}>
+                            <button onClick={()=>setAddMenuModalIsOpen(!addMenuModalIsOpen)} id='btn-plus-stock'><Plus></Plus></button>
+                            <button className="btn-stock-base">Etiquetas</button>
+                            <button
+                                onClick={()=>setFilterProductModalIsOpen(!filterProductModalIsOpen)}
+                             id='btn-funnel-base' 
+                             className="btn-stock-base">Filtrar <Funnel size={20}></Funnel></button>
+                        </div>
+                    </div>
+                </div>
+                
+                <Modal
+                    isOpen={filterProductModalIsOpen}
+                    onRequestClose={() => setFilterProductModalIsOpen(false)}
+                    contentLabel="Modal de Filtros"
+                    shouldCloseOnOverlayClick={true}
+                    style={modalFilterProductsStyle}
+                >
+                    <div className="container-filters">
+                        <div className="top-container-filters">
+                            <h1>Filtrar Por</h1>
+                            <button onClick={() => setFilterProductModalIsOpen(false)}>&times;</button>
+                        </div>
 
-                        <button className="btn-menu-filter" onClick={() => setFilterProductModalIsOpen(true)}>
-                            Filtrar Itens<Funnel size={25} />
+                        {filtersModal.map((filters_item, index) => {
+                            const icon = filterProductIsClicked === index ? <ChevronDown /> : <ChevronRight />;
+
+                            return (
+                                <React.Fragment key={filters_item}>
+                                    <button
+                                        onClick={() => setFilterProductIsClicked(filterProductIsClicked === index ? null : index)}
+                                        className="btn_filters_modal"
+                                    >
+                                        {filters_item} {icon}
+                                    </button>
+
+                                    {filterProductIsClicked === index && (
+                                        <ul className="container-filters-options">
+                                            {filtersData[filters_item].map((option) => {
+                                                const isSelected = selectedModalFilters[filters_item] === option;
+
+                                                return (
+                                                    <button
+                                                        key={option}
+                                                        onClick={() => handleSelectModalFilter(filters_item, option)}
+                                                        className={isSelected ? "filter-option-active" : ""}
+                                                    >
+                                                        {option.replaceAll("_"," ")} {isSelected && "✓"}
+                                                    </button>
+                                                );
+                                            })}
+                                        </ul>
+                                    )}
+                                </React.Fragment>
+                            );
+                        })}
+
+                        <button
+                            className="btn-clear-filters"
+                            onClick={() => setSelectedModalFilters({
+                                "Modalidade": null,
+                                "Pratos": null,
+                                "Bebidas": null,
+                                "Sobremesas": null,
+                                "Status": null
+                            })}
+                        >
+                            Limpar Filtros do Modal
                         </button>
                     </div>
-                    <div id="menu-header-bottom"></div>
-
-                </section>
-
-                <section>
-                    <Modal
-                        isOpen={filterProductModalIsOpen}
-                        onRequestClose={() => setFilterProductModalIsOpen(false)}
-                        contentLabel="Modal de Filtros"
-                        shouldCloseOnOverlayClick={true}
-                        style={modalFilterProductsStyle}
-                    >
-                        <div className="container-filters">
-                            <div className="top-container-filters">
-                                <h1>Filtrar Por</h1>
-                                <button onClick={() => setFilterProductModalIsOpen(false)}>&times;</button>
-                            </div>
-
-                            {filtersModal.map((filters_item, index) => {
-                                const icon = filterProductIsClicked === index ? <ChevronDown /> : <ChevronRight />;
-
-                                return (
-                                    <React.Fragment key={filters_item}>
-                                        <button
-                                            onClick={() => setFilterProductIsClicked(filterProductIsClicked === index ? null : index)}
-                                            className="btn_filters_modal"
-                                        >
-                                            {filters_item} {icon}
-                                        </button>
-
-                                        {filterProductIsClicked === index && (
-                                            <ul className="container-filters-options">
-                                                {filtersData[filters_item].map((option) => {
-                                                    const isSelected = selectedModalFilters[filters_item] === option;
-
-                                                    return (
-                                                        <button
-                                                            key={option}
-                                                            onClick={() => handleSelectModalFilter(filters_item, option)}
-                                                            className={isSelected ? "filter-option-active" : ""}
-                                                        >
-                                                            {option} {isSelected && "✓"}
-                                                        </button>
-                                                    );
-                                                })}
-                                            </ul>
-                                        )}
-                                    </React.Fragment>
-                                );
-                            })}
-
-                            {/* Botão para limpar os filtros do modal de uma vez */}
-                            <button
-                                className="btn-clear-filters"
-                                onClick={() => setSelectedModalFilters({
-                                    "Modalidade": null,
-                                    "Pratos": null,
-                                    "Bebidas": null,
-                                    "Sobremesas": null,
-                                    "Status": null
-                                })}
-                            >
-                                Limpar Filtros do Modal
-                            </button>
-                        </div>
-                    </Modal>
-                </section>
+                </Modal>
 
                 <Modal
                     isOpen={addMenuModalIsOpen}
@@ -203,39 +224,39 @@ function Menu() {
                                 onClick={()=>setAddMenuModalIsOpen(!addMenuModalIsOpen)}
                             >&times;</button>
                         </div>
-                    <form className="modal-conteudo">
+                        <form className="modal-conteudo">
 
-                        {/* <div className="upload-imagem">
-                            <div className="upload-preview" onClick={handleButtonClick}>
-                                {preview ? <img src={preview} alt="Preview" /> : <span>Escolher foto</span>}
+                            {/* <div className="upload-imagem">
+                                <div className="upload-preview" onClick={handleButtonClick}>
+                                    {preview ? <img src={preview} alt="Preview" /> : <span>Escolher foto</span>}
+                                </div>
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    ref={imgRef}
+                                    onChange={handleFileChange}
+                                    style={{ display: "none" }}
+                                />
+                            </div> */}
+
+                            {inputValues.map((item, index) => (
+                                <div>
+                                    <label htmlFor="">{item.label}</label>
+                                    {item.mode === "input" ? (
+                                        <input type={item.type} name={item.name}></input>
+                                    ) : (
+                                        <textarea name={item.name}></textarea>
+                                    )} 
+                                </div>
+                            ))}
+
+                            <div className="modal-botoes">
+                                <button type="button">Cancelar</button>
+                                <button type="submit">Adicionar prato</button>
                             </div>
-                            <input
-                                type="file"
-                                accept="image/*"
-                                ref={imgRef}
-                                onChange={handleFileChange}
-                                style={{ display: "none" }}
-                            />
-                        </div> */}
+                        </form>
 
-                        {inputValues.map((item, index) => (
-                            <div>
-                                <label htmlFor="">{item.label}</label>
-                                {item.mode === "input" ? (
-                                    <input type={item.type} name={item.name}></input>
-                                ) : (
-                                    <textarea name={item.name}></textarea>
-                                )} 
-                            </div>
-                        ))}
-
-                        <div className="modal-botoes">
-                            <button type="button">Cancelar</button>
-                            <button type="submit">Adicionar prato</button>
-                        </div>
-                    </form>
-
-                </div>
+                    </div>
                 </Modal>
             </main>
         </>
