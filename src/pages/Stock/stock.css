@@ -59,12 +59,24 @@ main{
     gap: 10px
 }
 
-#btn-funnel-base{
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 20px;
-    background-color: rgb(212, 226, 247);
+.plus{
+    background-color: #ffd883;
+    color: #381203;
+}
+
+.check-in{
+    background-color: #f3b45c;
+    color: #4d310a;
+}
+
+.write-off{
+    background-color: #87b3f2;
+    color: #0c1d53;
+}
+
+.funnel{
+    background-color: #19348a;
+    color: #dfecff;
 }
 
 #filters-container{

@@ -12,6 +12,7 @@ import React from 'react';
 import { getLoggedUser } from "../../services/auth";
 import { uploadFile} from "../../services/upload";
 import AlertModals from "../../components/SucessModals/AlertModals";
+import ProductCard from "../../components/ProductCard/ProductCard";
 
 function Stock() {
     // ===================== Navegação e layout padrão =====================
@@ -536,7 +537,7 @@ function Stock() {
         const formData = new FormData(e.target);
         const payload = {
             name: entranceSelectedProduct.name,
-            cost_price: entranceSelectedProduct.cost_price,
+            cost_price: parseFloat(formData.get('check_product_price')),
             category: entranceSelectedProduct.category,
             brand: entranceSelectedProduct.brand,
             allergens: entranceSelectedProduct.allergens,
@@ -622,10 +623,10 @@ function Stock() {
                             </div>
 
                             <div className="groups-top-container">
-                                <button onClick={() => setAddProductModalIsOpen(!addProductModalIsOpen)} className="btn-stock-base"><p>Adicionar Produto</p> <Plus size={20}></Plus></button>
-                                <button onClick={() => setEntranceProductModalIsOpen(!entranceProductModalIsOpen)} className="btn-stock-base">Dar Entrada</button>
-                                <button onClick={() => setRemoveProductModalIsOpen(!removeProductModalIsOpen)} className="btn-stock-base">Dar Baixa</button>
-                                <button onClick={() => setFilterProductModalIsOpen(!filterProductModalIsOpen)} id='btn-funnel-base' className="btn-stock-base">Filtrar <Funnel size={20}></Funnel></button>
+                                <button onClick={() => setAddProductModalIsOpen(!addProductModalIsOpen)} className="btn-stock-base plus"><p>Adicionar Produto</p> <Plus size={20}></Plus></button>
+                                <button onClick={() => setEntranceProductModalIsOpen(!entranceProductModalIsOpen)} className="btn-stock-base check-in">Dar Entrada</button>
+                                <button onClick={() => setRemoveProductModalIsOpen(!removeProductModalIsOpen)} className="btn-stock-base write-off">Dar Baixa</button>
+                                <button onClick={() => setFilterProductModalIsOpen(!filterProductModalIsOpen)} className="btn-stock-base funnel">Filtrar <Funnel size={20}></Funnel></button>
                             </div>
                         </div>
                         <div>
@@ -642,67 +643,22 @@ function Stock() {
                         ))}
                     </div>
                     <div id="products-list">
-                        {filteredProducts.length !== 0 ? (
-                            filteredProducts.map((item, index) => {
-
-                                const dateFab = new Date(item.manufacture_date).toLocaleDateString('pt-br', { timeZone: 'UTC' });
-                                const dateVal = new Date(item.expiration_date).toLocaleDateString('pt-br', { timeZone: 'UTC' });
-
-                                const cardBatches = products.filter(p => p.name === item.name);
-
-                                return (
-                                    <button onClick={() => {
-                                        setSelectedProduct(item)
-                                        setEditProductModalIsOpen(!editProductModalIsOpen)
-                                        setEditProductStatus(false)
-                                    }} key={index} className={`card-products ${item.stock_quantity === 0 ? 'empty' : item.stock_quantity <= item.min_stock ? 'mid-empty' : 'full'}`}>
-                                        <div className='top-container-card'>
-                                            <div className="inside-container-card">
-                                                <div style={{display:'flex',flexDirection:'row',justifyContent:'space-between', alignItems: 'center', width: '100%'}}>
-                                                    <p style={{fontSize: 20}}><b>{item.name}</b> - {item.brand}</p>
-                                                    <select 
-                                                        onClick={(e) => e.stopPropagation()}
-                                                        onChange={(e) => {
-                                                            e.stopPropagation();
-                                                            const val = e.target.value;
-                                                            if (!val) {
-                                                                setWriteOffSelectedProduct(null);
-                                                                return;
-                                                            }
-                                                            const found = cardBatches.find(b => String(b.id) === val);
-                                                            setWriteOffSelectedProduct(found || null); 
-                                                        }}
-                                                    >
-                                                        <option value={item.id}>{item.batch}</option>
-                                                        {cardBatches
-                                                            .filter(b => b.id !== item.id)
-                                                            .map((batch, idx) => (
-                                                                <option key={idx} value={batch.id}>{batch.batch}</option>
-                                                            ))}
-                                                    </select>
-                                                </div>
-                                                <div className="align-items-card">
-                                                    {item.stock_quantity === 0 ? (
-                                                        <p className="text-stock empty">Em Falta</p>
-                                                    ) : item.stock_quantity <= item.min_stock ? (
-                                                        <p className="text-stock mid-empty">Próximo de Acabar</p>
-                                                    ) : (
-                                                        <p className="text-stock full">Estoque Saudável</p>
-                                                    )}
-                                                    <p><b>{item.stock_quantity}/{item.max_stock} {item.unit_of_measure}</b></p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="bottom-container-card">
-                                            <p>Fabricação: {dateFab}</p>
-                                            <p>Validade: {dateVal}</p>
-                                        </div>
-                                    </button>
-                                )
-                            })
-                        ) : (
-                            <p>Nenhum produto existente.</p>
-                        )}
+                            {filteredProducts.length !== 0 ? (
+                                filteredProducts.map((item) => (
+                                    <ProductCard
+                                        key={item.id}
+                                        item={item}
+                                        products={products}
+                                        setSelectedProduct={setSelectedProduct}
+                                        setEditProductModalIsOpen={setEditProductModalIsOpen}
+                                        editProductModalIsOpen={editProductModalIsOpen}
+                                        setEditProductStatus={setEditProductStatus}
+                                        setWriteOffSelectedProduct={setWriteOffSelectedProduct}
+                                    />
+                                ))
+                            ) : (
+                                <p>Nenhum produto existente.</p>
+                            )}
                     </div>
                 </div>
                 <Modal
@@ -911,27 +867,27 @@ function Stock() {
                                         </div>
                                     )
                                 ) : mode.group ? (
-                                        <div style={{display:'flex',flexDirection:'column',gap: 5}} >
+                                        <div className="fields">
                                             <label htmlFor="">{mode.label}</label>
-                                                {btn_file_add}
-                                                <div className='file_name_style'>
-                                                    <p style={{fontSize: 14, whiteSpace: 'nowrap'}}>{fileName}</p>
-                                                    {fileName === "Nenhum arquivo selecionado." ? "" : <button onClick={handleRemoveFile}>
-                                                            <X color={'#3553b5'} size={15}></X>
-                                                        </button>}
+                                            {btn_file_add}
+                                            <div className='file_name_style'>
+                                                <p style={{fontSize: 14, whiteSpace: 'nowrap'}}>{fileName}</p>
+                                                {fileName === "Nenhum arquivo selecionado." ? "" : <button onClick={handleRemoveFile}>
+                                                        <X color={'#3553b5'} size={15}></X>
+                                                    </button>}
                                             </div>
                                         </div>
 
                                 ) : mode.mode === 'button' ? (
                                         <div className="fields" key={index}>
-                                            <label htmlFor="">{mode.label}</label>
+                                            <label style={{color: 'white'}} htmlFor="">{mode.label}</label>
                                             <button type='submit' className="btn-modal-add-products">
                                                 {mode.text}
                                             </button>
                                         </div>
                                 ) : (
                                     <div key={index} className="fields">
-                                        <label>{mode.label}</label>
+                                        <label >{mode.label}</label>
                                         <input step={mode.step} name={mode.name} className="input-modal-add-product" type={mode.type} placeholder={mode.placeholder}/>
                                     </div>
                                 )
@@ -991,7 +947,7 @@ function Stock() {
                                 </div>
                             ) : mode.mode === 'button' ? (
                                 <div className="fields" key={i}>
-                                    <label htmlFor="">{mode.label}</label>
+                                    <label style={{color: 'white'}} htmlFor="">{mode.label}</label>
                                     <button type={mode.type} className="btn-modal-add-products">
                                         {mode.text}
                                     </button>
