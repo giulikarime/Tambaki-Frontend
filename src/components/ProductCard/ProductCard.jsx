@@ -52,7 +52,7 @@ function ProductCard({
                 <div className="inside-container-card">
                     <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
                         <p style={{ fontSize: 20 }}>
-                            <b>{selectedBatch.name}</b> {selectedBatch.brand}
+                            <b>{selectedBatch.name}</b> - {selectedBatch.brand}
                         </p>
                         
                         <select 

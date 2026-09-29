@@ -7,7 +7,8 @@ import './menu.css';
 import Modal from 'react-modal';
 import React from 'react';
 import { useNavigate } from "react-router-dom";
-import { getMenu, getMenuEnums, getTags } from "../../services/menu";
+import { getMenu, getMenuEnums } from "../../services/menu";
+import { getTags} from '../../services/tags';
 
 function Menu() {
     const navigate = useNavigate();

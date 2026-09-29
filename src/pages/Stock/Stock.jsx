@@ -31,6 +31,7 @@ function Stock() {
     const [selectAllergensForProducts,setSelectAllergensForProducts] = useState([]);
     const [addAllergensToListModal,setAddAllergensToListModal] = useState(false)
 
+
     // Enums vindos do backend, usados para popular os <select> dos formulários
     const [productEnums, setProductEnums] = useState({
         categories: [],
@@ -40,6 +41,10 @@ function Stock() {
         unitOfMeasure: [],
         batchs: [],
     });
+
+    const [selectedStockUnit, setSelectedStockUnit] = useState(
+        productEnums?.unitOfMeasure?.[0] || ''
+    );
 
     // ===================== Filtro por botões (Estoque/Validade) =====================
     const filter_btn = ["Todos", "Estoque Saudável", "Próximo de Acabar", "Em Falta", "Perto do Vencimento"];
@@ -224,13 +229,13 @@ function Stock() {
     const midStockProducts = products.filter(product => product.stock_quantity <= product.min_stock && product.stock_quantity !== 0);
 
     const missing_products_text = missingProducts.length > 0
-        ? `- ${String(missingProducts.length).padStart(2, "0")} em falta`
+        ? `- ${String(missingProducts.length)} em falta`
         : '';
 
     const product_running_low = midStockProducts.length > 0
         ? (midStockProducts.length === 1
-            ? `- ${String(midStockProducts.length).padStart(2, "0")} próximo de acabar`
-            : `- ${String(midStockProducts.length).padStart(2, "0")} próximos de acabar`)
+            ? `- ${String(midStockProducts.length)} próximo de acabar`
+            : `- ${String(midStockProducts.length)} próximos de acabar`)
         : '';
 
     // Produtos com vencimento nos próximos 10 dias
@@ -244,12 +249,15 @@ function Stock() {
     const qtdVencendo = produtosProximosVencimento.length;
 
     const text_vencidos = qtdVencendo.length > 0
-        ? `- ${String(qtdVencendo).padStart(2, "0")} perto do vencimento.`
-        : '';
+        ? ''
+        : `- ${String(qtdVencendo)} perto do vencimento`;
 
     // ===================== Lista de produtos filtrada (botões + modal) =====================
+    const today = new Date();
+
     const filteredBatches = products.filter((item) => {
         let matchesBtn = true;
+
         switch (filterBtnIsClicked) {
             case 0: // Todos
                 matchesBtn = true;
@@ -263,10 +271,10 @@ function Stock() {
             case 3: // Em Falta
                 matchesBtn = item.stock_quantity === 0;
                 break;
-            case 4: { // Perto do Vencimento
+            case 4: { // Perto do Vencimento (entre 0 e 10 dias para vencer)
                 const vencimento = new Date(item.expiration_date);
-                const diffDias = (vencimento - hoje) / (1000 * 60 * 60 * 24);
-                matchesBtn = diffDias <= 10;
+                const diffDias = (vencimento - today) / (1000 * 60 * 60 * 24);
+                matchesBtn = diffDias >= 0 && diffDias <= 10;
                 break;
             }
             default:
@@ -299,7 +307,14 @@ function Stock() {
         return true;
     });
 
-    const filteredProducts = [...new Map(filteredBatches.map(p => [p.name, p])).values()];
+    // Agrupa mantendo o PRIMEIRO lote que atendeu aos critérios de filtro
+    const filteredProductsMap = new Map();
+    filteredBatches.forEach((batch) => {
+        if (!filteredProductsMap.has(batch.name)) {
+            filteredProductsMap.set(batch.name, batch);
+        }
+    });
+    const filteredProducts = Array.from(filteredProductsMap.values());
 
     // ===================== Dados fixos para formulários de Produtos
 
@@ -309,14 +324,14 @@ function Stock() {
         {label: 'Local de Armazenamento', mode: 'select', name: 'add_product_storage_location', enum: true, product_enum: productEnums.storageLocations, schema: 'storageLocation'},
         {label: 'Data de Fabricação', mode: 'input', type: 'date', name: 'add_product_man_date', schema: 'manufacture_date'},
         {label: 'Data de Validade', mode: 'input', type: 'date', name: 'add_product_exp_date', schema: 'expiration_date'},
-        {label: 'Unidade Individual do Produto', mode: 'combo', type: 'number', name: 'add_product_unit_of_product', selectName: 'add_measure_unit_of_product', enum: true, product_enum: productEnums.unitOfMeasure, placeholder: 'Ex.: 500(mL)', schema: 'unit_of_product', schema1: 'measure_unit_of_product'},
-        {label: 'Quantidade Total em Estoque', mode: 'combo', type: 'number', name: 'add_product_max_stock', selectName: 'add_product_unit_type', enum: true, product_enum: productEnums.unitOfMeasure, placeholder: 'Ex.: 200(L)', schema: 'max_stock', schema1: 'unit_of_measure'},
+        {label: 'Unidade Individual do Produto', mode: 'combo', type: 'number', name: 'add_product_unit_of_product', selectName: 'add_measure_unit_of_product', enum: true, product_enum: productEnums.unitOfMeasure, placeholder: 'Ex.: 500', schema: 'unit_of_product', schema1: 'measure_unit_of_product'},
+        {label: 'Quantidade Total em Estoque', mode: 'combo', type: 'number', name: 'add_product_max_stock', selectName: 'add_product_unit_type', enum: true, product_enum: productEnums.unitOfMeasure, placeholder: 'Ex.: 200', schema: 'max_stock', schema1: 'unit_of_measure'},
         {label: 'Marca', mode: 'input', type: 'text', name: 'add_product_brand', placeholder: 'Digite o nome da marca...', schema: 'brand'},
         {label: 'Preço de Custo', mode: 'input', type: 'number', name: 'add_product_price', placeholder: 'Exemplo.: 35.50', schema: 'cost_price', step: '0.01'},
         {label: 'Fornecedor', mode: 'select', name: 'add_product_supplier', schema: 'supplierId'},
         {label: 'Categoria', mode: 'select', name: 'add_product_category', enum: true, product_enum: productEnums.categories, schema: 'category'},
         {label: 'Alergênicos', mode: 'select', name: 'add_product_allergens', enum: true, product_enum: productEnums.allergens, multiply: true, schema: 'allergens'},
-        {label: 'Quantidade Mínima do Estoque', mode: 'input', type: 'number', name: 'add_product_min_stock', placeholder: 'Exemplo.: 10', schema: 'min_stock'},
+        {label: 'Quantidade Mínima do Estoque', mode: 'combo', type: 'number', name: 'add_product_min_stock', selectName: 'add_product_min_unit_type', enum: true, product_enum: productEnums.unitOfMeasure, placeholder: 'Ex.: 15', schema: 'min_stock', schema1: 'unit_of_measure', disabled: true},
         {label: 'Status', mode: 'select', name: 'add_product_status', enum: true, product_enum: productEnums.statuses, schema: 'status'},
         {label: 'Nota fiscal', mode: 'input', type: 'file', group: 'button', name: 'add_product_url', schema: 'document_url'},
         {label: '.', text: 'Salvar', mode: 'button', type: 'submit'}
@@ -572,7 +587,7 @@ function Stock() {
         const exp_date = new Date(formData.get('check_product_exp_date'));
 
         const datesAvailable = exp_date >= manu_date;
-        if(datesAvailable){
+        if(!datesAvailable){
             setFormError('A Data de Validade não pode pertencer ao mesmo dia, ou ser anterior a Data de Fabricação!');
             setAlertType('error');
             setAlertModalIsOpen(true);
@@ -808,11 +823,28 @@ function Stock() {
                                         ) : mode.mode === 'combo' ? (
                                             <>
                                                 <label htmlFor="">{mode.label}</label>
-                                                <div style={{display:'flex',flexDirection: 'row', gap: 10}}>
-                                                    <input className="input-modal-add-product" name={mode.name} type={mode.type} placeholder={mode.placeholder}></input>
-                                                    <select className="input-modal-add-product" name={mode.selectName} id="">
-                                                        {mode.product_enum.map((item,i)=>(
-                                                            <option key={i}>{item.replaceAll('_',' ')}</option>
+                                                <div style={{ display: 'flex', flexDirection: 'row', gap: 10 }}>
+                                                    <input 
+                                                        className="input-modal-add-product" 
+                                                        name={mode.name} 
+                                                        type={mode.type} 
+                                                        placeholder={mode.placeholder}
+                                                    />
+                                                    <select 
+                                                        disabled={mode.disabled} 
+                                                        className="input-modal-add-product" 
+                                                        name={mode.selectName}
+                                                        value={mode.schema1 === 'unit_of_measure' ? selectedStockUnit : undefined}
+                                                        onChange={(e) => {
+                                                            if (mode.schema1 === 'unit_of_measure') {
+                                                                setSelectedStockUnit(e.target.value);
+                                                            }
+                                                        }}
+                                                    >
+                                                        {mode.product_enum.map((item, i) => (
+                                                            <option key={i} value={item}>
+                                                                {item.replaceAll('_', ' ')}
+                                                            </option>
                                                         ))}
                                                     </select>
                                                 </div>
@@ -931,6 +963,31 @@ function Stock() {
                                                 {mode.text}
                                             </button>
                                         </div>
+                                )  : mode.mode === 'combo' ? (
+                                    <div key={index} className="fields">
+                                        <label htmlFor="">{mode.label}</label>
+                                        <div style={{ display: 'flex', flexDirection: 'row', gap: 10 }}>
+                                            <input 
+                                                className="input-modal-add-product" 
+                                                name={mode.name} 
+                                                type={mode.type} 
+                                                placeholder={mode.placeholder}
+                                            />
+                                            <select 
+                                                disabled={true} 
+                                                className="input-modal-add-product" 
+                                                name={mode.selectName}
+                                                value={entranceSelectedProduct?.unit_of_measure || ''}
+                                            >
+                                                <option value=""></option>
+                                                {mode.product_enum?.map((item, i) => (
+                                                    <option key={i} value={item}>
+                                                        {item.replaceAll('_', ' ')}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    </div>
                                 ) : (
                                     <div key={index} className="fields">
                                         <label >{mode.label}</label>
