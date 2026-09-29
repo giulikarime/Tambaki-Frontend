@@ -8,8 +8,6 @@ export async function getProducts() {
 
     const data = await response.json();
 
-    console.log(data.message);
-
     if (!response.ok) {
         throw new Error(data.message || "Erro ao buscar produtos");
     }
@@ -47,7 +45,6 @@ export async function editProducts(id, payload) {
     })
 
     const data = await response.json();
-    console.log(data);
 
     if (!response.ok) {
         throw new Error(data.message || "Erro ao editar produto.");

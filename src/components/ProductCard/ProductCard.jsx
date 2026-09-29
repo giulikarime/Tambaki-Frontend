@@ -11,6 +11,8 @@ function ProductCard({
 }){
     const [selectedBatch, setSelectedBatch] = useState(item);
 
+    const today = new Date();
+
     useEffect(() => {
         setSelectedBatch(item);
     }, [item]);
@@ -35,6 +37,9 @@ function ProductCard({
         }
     };
 
+    const dateExpClean = new Date(selectedBatch.expiration_date)
+    const isExpiredProduct = dateExpClean > today;
+
     return (
         <button 
             onClick={() => {
@@ -42,9 +47,8 @@ function ProductCard({
                 setEditProductModalIsOpen(!editProductModalIsOpen);
                 setEditProductStatus(false);
             }} 
-            className={`card-products ${selectedBatch.stock_quantity === 0 ? 'empty' : selectedBatch.stock_quantity <= selectedBatch.min_stock ? 'mid-empty' : 'full'}`}
+            className={`card-products ${!isExpiredProduct? ('empty') : (selectedBatch.stock_quantity === 0 ? 'empty' : selectedBatch.stock_quantity <= selectedBatch.min_stock ? 'mid-empty' : 'full')}`}
         >
-            <div className='top-container-card'>
                 <div className="inside-container-card">
                     <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
                         <p style={{ fontSize: 20 }}>
@@ -65,17 +69,20 @@ function ProductCard({
                     </div>
 
                     <div className="align-items-card">
-                        {selectedBatch.stock_quantity === 0 ? (
-                            <p className="text-stock empty">Em Falta</p>
-                        ) : selectedBatch.stock_quantity <= selectedBatch.min_stock ? (
-                            <p className="text-stock mid-empty">Próximo de Acabar</p>
+                        {!isExpiredProduct ? (
+                            <p className="text-stock empty">Vencido</p>
                         ) : (
-                            <p className="text-stock full">Estoque Saudável</p>
+                            selectedBatch.stock_quantity === 0 ? (
+                                <p className="text-stock empty">Em Falta</p>
+                            ) : selectedBatch.stock_quantity <= selectedBatch.min_stock ? (
+                                <p className="text-stock mid-empty">Próximo de Acabar</p>
+                            ) : (
+                                <p className="text-stock full">Estoque Saudável</p>
+                            )
                         )}
                         <p><b>{selectedBatch.stock_quantity} {selectedBatch.unit_of_measure} / {selectedBatch.max_stock} {selectedBatch.unit_of_measure}</b></p>
                     </div>
                 </div>
-            </div>
 
             <div className="bottom-container-card">
                 <p>Fabricação: {dateFab}</p>

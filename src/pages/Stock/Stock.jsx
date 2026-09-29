@@ -385,7 +385,7 @@ function Stock() {
         e.preventDefault();
         setFormError("");
         setAlertType("");
-        setSucessPhrase("");
+        setModalPhrase("");
         const formData = new FormData(e.target);
 
         const manu_date = new Date(formData.get('add_product_man_date')).toISOString();
@@ -459,7 +459,7 @@ function Stock() {
         e.preventDefault();
         setFormError("");
         setAlertType("");
-        setSucessPhrase("");
+        setModalPhrase("");
         const formData = new FormData(e.target);
 
         if(!documentUrl){
@@ -524,7 +524,7 @@ function Stock() {
     async function handleDeleteProduct() {
         setFormError('');
         setAlertType("");
-        setSucessPhrase("");
+        setModalPhrase("");
         try {
             await deleteProducts(selectedProduct.id);
             await get_products();
@@ -554,7 +554,7 @@ function Stock() {
         e.preventDefault();
         setFormError("");
         setAlertType("");
-        setSucessPhrase("");
+        setModalPhrase("");
 
 
         if (!entranceSelectedProduct) {
@@ -621,7 +621,7 @@ function Stock() {
         e.preventDefault();
         setFormError('');
         setAlertType("");
-        setSucessPhrase("");
+        setModalPhrase("");
 
         if(!writeOffSelectedProduct) {
             setFormError('Nenhum produto selecionado.')
