@@ -163,3 +163,26 @@ text-align: center;
     flex-direction: row;
     justify-content: space-between;
 }
+
+.modal-conteudo{
+    max-height: 60vh;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.container-add-image{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    border: 1px solid black;
+    border-radius: 20px;
+    width: 250px;
+    height: 200px;
+}
+
+.form-add-menu{
+    display: flex;
+    flex-direction: row;
+}

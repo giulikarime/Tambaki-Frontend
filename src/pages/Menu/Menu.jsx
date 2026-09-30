@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Header from "../../components/HeaderAndSidebar/Header";
 import Sidebar from "../../components/HeaderAndSidebar/Sidebar";
 import MenuCard from "./MenuCard";
-import { Plus, Funnel, ChevronDown, ChevronRight, ChevronLeft, Search } from "lucide-react";
+import { Plus, Funnel, ChevronDown, ChevronRight, ChevronLeft, Search, Camera } from "lucide-react";
 import './menu.css';
 import Modal from 'react-modal';
 import React from 'react';
@@ -14,14 +14,16 @@ function Menu() {
     const navigate = useNavigate();
 
     const [menuEnums, setMenuEnums] = useState({
-        categories: [],
+        category: [],
     });
 
     const [tags,setTags] = useState(null);
 
+    const [preview,setPreview] = useState([]);
+
     const filtersModal = ["Categorias", "Etiquetas"];
     const filtersData = {
-        "Categorias": menuEnums.categories,
+        "Categorias": menuEnums.category,
         "Etiquetas": tags,
     };
     const [selectedModalFilters, setSelectedModalFilters] = useState({
@@ -97,7 +99,10 @@ function Menu() {
        const inputValues = [
         {label: "Nome do Prato", mode: "input", type: "text", name: "addDishesName"},
         {label: "Descrição", mode: "textarea", name: "addDishesDesc"},
-        {label: "Preço", mode: "input", type: "number", name: "addDishesPrice"}
+        {label: "Preço", mode: "input", type: "number", name: "addDishesPrice"},
+        {label: "Alergênicos", mode: "select", name: "addDishesAllergens"},
+        {label: "Etiqueta", mode: "select", name: "addDishesTag"},
+        {label: ".", text: 'Salvar', mode: "button", type: 'submit', name: "addDishesTag"},
     ]
 
     useEffect(() => {
@@ -124,6 +129,40 @@ function Menu() {
     useEffect(()=>{
         get_tags();
     },[]);
+
+    const imgRef = useRef(null);
+
+    function handleButtonClickFile(){
+        imgRef.current.click();
+    }   
+
+    const handleImageChange = (e) => {
+        const files = Array.from(e.target.files);
+        
+        // Cria uma URL temporária para cada imagem sele
+        const newPreviews = files.map((file) => URL.createObjectURL(file));
+        
+        setPreview(newPreviews);
+    };
+
+    const handleDragOver = (e) => {
+        e.preventDefault();
+    };
+
+    const handleDrop = (e) => {
+        e.preventDefault();
+        const files = e.dataTransfer.files;
+        if (files && files[0]) {
+        const file = files[0];
+        if (file.type.startsWith('image/')) {
+            const imageUrl = URL.createObjectURL(file);
+            setPreview(imageUrl);
+        } else {
+            alert('Por favor, envie apenas arquivos de imagem.');
+        }
+        }
+    };
+
 
     return (
         <>
@@ -218,46 +257,76 @@ function Menu() {
                     contentLabel="Modal de Adicionar Prato"
                     style={modalStyle}
                 >
-                    <div className="modal-fundo">
                         <div className="top-container-modal">
                             <h2>Novo prato</h2>
                             <button
                                 onClick={()=>setAddMenuModalIsOpen(!addMenuModalIsOpen)}
+                                style={{fontSize:30}}
                             >&times;</button>
                         </div>
-                        <form className="modal-conteudo">
 
-                            {/* <div className="upload-imagem">
-                                <div className="upload-preview" onClick={handleButtonClick}>
-                                    {preview ? <img src={preview} alt="Preview" /> : <span>Escolher foto</span>}
-                                </div>
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    ref={imgRef}
-                                    onChange={handleFileChange}
-                                    style={{ display: "none" }}
-                                />
-                            </div> */}
+                        <form className="form-add-menu">
 
-                            {inputValues.map((item, index) => (
-                                <div>
-                                    <label htmlFor="">{item.label}</label>
-                                    {item.mode === "input" ? (
-                                        <input type={item.type} name={item.name}></input>
+                            <div>
+                                <div
+                                    onDrop={handleDrop}
+                                    onDragOver={handleDragOver}
+                                >
+                                    {!preview ? (
+                                        preview.map((image,index)=>(
+                                            <image src={image} key={index}></image>
+                                        ))
                                     ) : (
-                                        <textarea name={item.name}></textarea>
+                                        <div className="container-add-image">
+                                            <label htmlFor="">Arraste ou solte imagens aqui</label>
+                                            <Camera></Camera>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <button type="button" onClick={handleButtonClickFile}>
+                                    <input
+                                        className=""
+                                        type="file"
+                                        accept="image/*"
+                                        style={{ display: "none" }}
+                                        ref={imgRef}
+                                        onChange={handleImageChange}
+                                    />
+                                    <label htmlFor="">Adicione imagens</label>
+                                </button>
+                            </div>
+
+                            <div className="modal-conteudo">
+                                {inputValues.map((item, index) => (
+                                <div key={index}>
+                                    {item.mode === "input" ? (
+                                        <div>    
+                                            <label htmlFor="">{item.label}</label>
+                                            <input type={item.type} name={item.name}></input>
+                                        </div>
+                                    ) : item.mode === 'textarea' ? (
+                                        <div>
+                                            <label htmlFor="">{item.label}</label>
+                                            <textarea name={item.name}></textarea>
+                                        </div>
+                                    ) : item.mode === 'select' ? (
+                                        <div>
+                                            <label>{item.label}</label>
+                                            <select></select>
+                                        </div>
+                                    ) : (
+                                        <div>
+                                            <label style={{color: 'white'}} htmlFor="">{item.label}</label>
+                                            <button type={item.type}>{item.text}</button>
+                                        </div>
                                     )} 
                                 </div>
                             ))}
-
-                            <div className="modal-botoes">
-                                <button type="button">Cancelar</button>
-                                <button type="submit">Adicionar prato</button>
                             </div>
+
                         </form>
 
-                    </div>
                 </Modal>
             </main>
         </>
