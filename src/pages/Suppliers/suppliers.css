@@ -75,6 +75,55 @@
     background-color: rgb(122, 154, 223);
 }
 
+.container-suppliers{
+    background-color: #fffdf8;
+    width: 100%;
+    
+}
+
+
 li button{
     font-size: 15px;
 }
+
+#entreprise{
+    background-color: #1a3573;
+    border-radius: 8px;
+    color: white;
+}
+
+#category{
+    background-color: #264a9f;
+    border-radius: 8px;
+    color: white;
+}
+
+#deadline{
+    background-color: #3b74fa;
+    border-radius: 8px;
+    color: white;
+
+}
+
+#phone{
+    background-color: #7ca6fc;
+    border-radius: 8px;
+    color: #203371;
+}
+
+#email{
+    background-color: #a1c0fc;
+    border-radius: 8px;
+    color: #2e479c;
+
+}
+
+#info{
+    background-color: #eaf2fe;
+    border-radius: 8px;
+    color: #203371;
+    
+}
+
+
+

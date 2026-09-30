@@ -225,15 +225,15 @@ function Suppliers(){
                             </div>
                         </div>
                     </div>
-                    <div className="container-users">
+                    <div className="container-suppliers">
                         <table> 
-                            <thead className="thead-style tr-th-group">
-                                <th>EMPRESA</th>
-                                <th>CATEGORIA</th>
-                                <th>PRAZO</th>
-                                <th>TELEFONE</th>
-                                <th>EMAIL</th>
-                                <th>INFORMAÇÕES</th>
+                            <thead className="thead-style-sup tr-th-group">
+                                <th id="entreprise">EMPRESA</th>
+                                <th id="category">CATEGORIA</th>
+                                <th id="deadline">PRAZO</th>
+                                <th id="phone">TELEFONE</th>
+                                <th id="email">EMAIL</th>
+                                <th id="info">INFORMAÇÕES</th>
                             </thead>
                             <tbody>
                                 {allSuppliers.map((sup,index)=>(
