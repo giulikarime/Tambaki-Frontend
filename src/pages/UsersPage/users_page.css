@@ -23,12 +23,6 @@ main{
     justify-content: space-between;
 }
 
-.container-users{
-    background-color: #fffdf8;
-    border-radius: 30px;
-    padding: 30px;
-    width: 100%;
-}
 
 .container-users table{
     width: 100%;
@@ -64,7 +58,7 @@ th{
 .top-container{
     display: flex;
     flex-direction: column;
-    margin-bottom: 10px;
+    margin-bottom: 5px;
 }
 
 .group-one-top-container{
@@ -128,7 +122,7 @@ form{
 .btn-modal-submit{
     width: 32%;
     height: auto;
-    padding: 10px 16px;
+    padding: 5px 16px;
     font-size: 15px;
     font-family: inherit;
     color: #2b2a2a;
@@ -165,3 +159,65 @@ form{
     text-underline-offset: 2px;
 
 }
+
+.container-users{
+    background-color: #fffdf8;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    border-radius: 5px;
+    box-shadow: 0 5px 30px 0 rgba(0, 0, 0, 0.2);
+}
+
+.container-users table{
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#name{
+background-color: #ffa000;
+border-top-left-radius: 5px;
+border-top-right-radius: 5px;
+text-align: center;
+}
+
+#role{
+background-color: #ffb300;
+border-top-left-radius: 5px;
+border-top-right-radius: 5px;
+text-align: center;
+
+}
+
+#email-users{
+background-color: #ffd54f;
+border-top-left-radius: 5px;
+border-top-right-radius: 5px;
+text-align: center;
+
+}
+
+#phone-users{
+background-color: #ffe082;
+border-top-left-radius: 5px;
+border-top-right-radius: 5px;
+text-align: center;
+
+}
+
+#access_level{
+background-color: #ffecb3;
+border-top-left-radius: 5px;
+border-top-right-radius: 5px;
+text-align: center;
+
+}
+
+#info-users{
+background-color: #ffe0b2;
+border-top-left-radius: 5px;
+border-top-right-radius: 5px;
+text-align: center;
+
+}
+

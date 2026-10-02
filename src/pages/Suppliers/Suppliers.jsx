@@ -212,7 +212,7 @@ function Suppliers(){
                                 />
                                 <input 
                                     type="search" 
-                                    placeholder="Buscar forncedores..." 
+                                    placeholder="Buscar fornecedores..." 
                                     style={{ 
                                     backgroundColor: "#cae2ff", 
                                     fontSize: "16px", 
