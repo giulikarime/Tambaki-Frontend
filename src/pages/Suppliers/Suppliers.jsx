@@ -227,6 +227,7 @@ function Suppliers(){
                     </div>
                     <div className="container-suppliers">
                         <table> 
+
                             <thead className="thead-style-sup tr-th-group">
                                 <th id="entreprise">EMPRESA</th>
                                 <th id="category">CATEGORIA</th>

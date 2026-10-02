@@ -18,7 +18,7 @@
     flex-direction: row;
     gap: 5px;
     background-color: rgb(255, 212, 131);
-    padding: 5px 10px;
+    padding: 5px 5px;
     border-radius: 50px;
     align-items: center;
 }
@@ -28,12 +28,12 @@
 }
 
 .add-category-ul-list{
-    position: absolute;
+    position: relative;
     display: flex;
     align-items: center;
     bottom: 0;
     right: 0;
-    margin: 10px;
+    margin: 5px;
     background-color: #333333;
     color: white;
     border-radius: 50px;
@@ -41,7 +41,7 @@
 }
 
 .add-categorie-select{
-    position: absolute;
+    position: relative;
     bottom: 0;
     right: 0;
     transform: translate(190px,-5px);
@@ -57,13 +57,13 @@
 
 .add-categorie-select::after{
     content: '';
-    position: absolute;
+    position: relative;
     bottom: 15px;
     left: -15px;
     width: 0;
     height: 0;
-    border-top: 10px solid transparent;
-    border-bottom: 10px solid transparent;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
     border-right: 15px solid #f7f2f2;
 }
 
@@ -78,7 +78,15 @@
 .container-suppliers{
     background-color: #fffdf8;
     width: 100%;
-    
+    display: flex;
+    justify-content: center;
+    border-radius: 5px;
+    box-shadow: 0 5px 30px 0 rgba(0, 0, 0, 0.2);
+}
+
+.container-suppliers table{
+    width: 100%;
+    border-collapse: collapse;
 }
 
 
@@ -88,42 +96,53 @@ li button{
 
 #entreprise{
     background-color: #1a3573;
-    border-radius: 8px;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    text-align: center;
     color: white;
 }
 
 #category{
     background-color: #264a9f;
-    border-radius: 8px;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    text-align: center;
     color: white;
 }
 
 #deadline{
     background-color: #3b74fa;
-    border-radius: 8px;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    text-align: center;
     color: white;
-
 }
 
 #phone{
     background-color: #7ca6fc;
-    border-radius: 8px;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    text-align: center;
     color: #203371;
 }
 
 #email{
     background-color: #a1c0fc;
-    border-radius: 8px;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    text-align: center;
     color: #2e479c;
-
 }
 
 #info{
-    background-color: #eaf2fe;
-    border-radius: 8px;
+    background-color: #deeaff;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    text-align: center;
     color: #203371;
-    
 }
 
-
+.see-more-users{
+    background-color: #3a74fa;
+}
 
