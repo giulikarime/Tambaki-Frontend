@@ -2,24 +2,35 @@ import { useState, useEffect, useRef } from "react";
 import Header from "../../components/HeaderAndSidebar/Header";
 import Sidebar from "../../components/HeaderAndSidebar/Sidebar";
 import MenuCard from "./MenuCard";
-import { Plus, Funnel, ChevronDown, ChevronRight, ChevronLeft, Search, Camera } from "lucide-react";
+import { Plus, Funnel, ChevronDown, ChevronRight, ChevronLeft, Search, Camera, Form, SquarePen, Trash } from "lucide-react";
 import './menu.css';
 import Modal from 'react-modal';
 import React from 'react';
 import { useNavigate } from "react-router-dom";
 import { getMenu, getMenuEnums } from "../../services/menu";
-import { getTags} from '../../services/tags';
+import AlertModals from "../../components/SucessModals/AlertModals";
+import { getTags, createTags, deleteTags, editTags } from "../../services/tags";
 
 function Menu() {
     const navigate = useNavigate();
+    const [formError,setFormError] = useState('');
+    const [formSuccess,setFormSuccess] = useState('');
+    const [alertType,setAlertType] = useState('');
+    const [alertModalIsOpen,setAlertModalIsOpen] = useState(false);
+
+    const [menu,setMenu] = useState([]);
 
     const [menuEnums, setMenuEnums] = useState({
         category: [],
     });
 
-    const [tags,setTags] = useState(null);
+    const [tags,setTags] = useState([]);
+    const [tagsModalIsOpen,setTagsModalIsOpen] = useState(false);
+    const [editTagsModalIsOpen,setEditTagsModalIsOpen] = useState(false);
+    const [selectedTag,setSelectedTag] = useState(null);
 
     const [preview,setPreview] = useState([]);
+    const [indexOfPreview,setIndexOfPreview] = useState(0);
 
     const filtersModal = ["Categorias", "Etiquetas"];
     const filtersData = {
@@ -61,7 +72,7 @@ function Menu() {
             transform: 'translate(-50%,-50%)',
             bottom: 'auto',
             width: '65%',
-            padding: '20px',
+            padding: '30px',
             borderRadius: '16px',
             border: 'none',
             boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
@@ -72,7 +83,34 @@ function Menu() {
         }
     }
 
-    // Estilo do modal de filtro 
+    const modalStyleTags = {
+        overlay: {
+            backgroundColor: '#191444be',
+            position: 'fixed',
+            zIndex: 100,
+            inset: 0
+        },
+        content: {
+            position: 'absolute',
+            overflowY: 'auto',
+            maxHeight: '90vh',
+            scrollbarWidth: 'none',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%,-50%)',
+            bottom: 'auto',
+            width: '40%',
+            padding: '30px',
+            borderRadius: '16px',
+            border: 'none',
+            boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+            backgroundColor: '#fff',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '20px'
+        }
+    }
+
     const modalFilterProductsStyle = {
         overlay: {
             backgroundColor: '#191444be',
@@ -96,7 +134,7 @@ function Menu() {
         }
     };
 
-       const inputValues = [
+    const inputValues = [
         {label: "Nome do Prato", mode: "input", type: "text", name: "addDishesName"},
         {label: "Descrição", mode: "textarea", name: "addDishesDesc"},
         {label: "Preço", mode: "input", type: "number", name: "addDishesPrice"},
@@ -104,6 +142,19 @@ function Menu() {
         {label: "Etiqueta", mode: "select", name: "addDishesTag"},
         {label: ".", text: 'Salvar', mode: "button", type: 'submit', name: "addDishesTag"},
     ]
+
+    async function get_menus(){
+        try{
+            const menu_value = await getMenu();
+            setMenu(menu_value);
+        } catch (error){
+            console.error("Não foi possível carregar os pratos.", error);
+        }
+    }
+
+    useEffect(()=>{
+        get_menus();
+    },[])
 
     useEffect(() => {
             async function get_enums() {
@@ -138,11 +189,9 @@ function Menu() {
 
     const handleImageChange = (e) => {
         const files = Array.from(e.target.files);
-        
-        // Cria uma URL temporária para cada imagem sele
         const newPreviews = files.map((file) => URL.createObjectURL(file));
         
-        setPreview(newPreviews);
+        setPreview((prev) => [...prev, ...newPreviews]);
     };
 
     const handleDragOver = (e) => {
@@ -151,17 +200,147 @@ function Menu() {
 
     const handleDrop = (e) => {
         e.preventDefault();
-        const files = e.dataTransfer.files;
-        if (files && files[0]) {
-        const file = files[0];
-        if (file.type.startsWith('image/')) {
-            const imageUrl = URL.createObjectURL(file);
-            setPreview(imageUrl);
+        const files = Array.from(e.dataTransfer.files);
+        
+        const imageFiles = files.filter((file) => file.type.startsWith('image/'));
+        
+        if (imageFiles.length > 0) {
+            const newPreviews = imageFiles.map((file) => URL.createObjectURL(file));
+            setPreview((prev) => [...prev, ...newPreviews]);
         } else {
             alert('Por favor, envie apenas arquivos de imagem.');
         }
-        }
     };
+
+    function emptyPreviewBeforeSaving() {
+        preview.forEach((url) => URL.revokeObjectURL(url));
+
+        setPreview([]);
+
+        if (imgRef.current) {
+            imgRef.current.value = "";
+        }
+    }
+
+    function handleChangeImageRight(){
+        if(!preview || preview.length === 0){
+            return;
+        }
+
+        setIndexOfPreview((prevIndex)=>
+            prevIndex >= preview.length - 1 ? 0 : prevIndex+1
+        )
+    }
+
+    function handleChangeImageLeft(){
+        if(!preview || preview.length === 0){
+            return;
+        }
+
+        setIndexOfPreview((prevIndex)=>
+            prevIndex <= 0 ? prevIndex.length - 1 : prevIndex-1
+        )
+    }
+
+    async function handleCreateMenu(e){
+        e.preventDefault();
+        setFormError('');
+        setFormSuccess('');
+        setAlertType('');
+
+        const formData = new FormData(e.target);
+
+        if(!preview || preview.length <= 0){
+            setFormError('A imagem do cardápio não pode ser vazia');
+            setAlertType('error');
+            setAlertModalIsOpen(true);
+            return;
+        }
+
+        const payload = {
+            //Terminar de fazer quando o back estiver pronto.
+        }
+    }
+
+    async function handleCreateTags(e){
+        e.preventDefault();
+        setFormError('');
+        setFormSuccess('');
+        setAlertType('');
+        
+        const formData = new FormData(e.target);
+
+        if(String(formData.get('addTagName')).trim() === '' || String(formData.get('addTagColor')).trim() === ''){
+            setFormError("Preencha os campos para criar uma etiqueta.");
+            setAlertType('error');
+            setAlertModalIsOpen(true);
+            return;
+        }
+
+        const payload = {
+            name: String(formData.get('addTagName')),
+            color: String(formData.get('addTagColor')),
+        };
+
+        try{
+            await createTags(payload);
+            await get_tags();
+            setFormSuccess("Etiqueta criada com sucesso.");
+            setAlertType('success');
+            setAlertModalIsOpen(true);
+            e.target.reset();
+        } catch(error){
+            setFormError(error.message);
+            setAlertType('error');
+            setAlertModalIsOpen(true);
+        }
+    }
+
+    async function handleDeleteTags(itemToDelete){
+        setFormError('');
+        setFormSuccess('');
+        setAlertType('');
+        try{
+            await deleteTags(itemToDelete.id);
+            await get_tags();
+            setFormSuccess(`${itemToDelete.name} deletado(a) com sucesso.`);
+            setAlertType('success');
+            setAlertModalIsOpen(true);
+        } catch (error){
+            setFormError(error.message);
+            setAlertType('error');
+            setAlertModalIsOpen(true);
+        }
+    }
+
+    async function handleEditTags(e){
+        e.preventDefault();
+        setFormError('');
+        setFormSuccess('');
+        setAlertType('');
+        
+        const formData = new FormData(e.target);
+
+        const payload = {
+            name: String(formData.get('editTagName')) || selectedTag.name,
+            color: String(formData.get('editTagColor')) || selectedTag.color,
+        };
+
+        try{
+            await editTags(payload,selectedTag.id);
+            await get_tags();
+            setFormSuccess("Etiqueta criada com sucesso.");
+            setAlertType('success');
+            setAlertModalIsOpen(true);
+            setEditTagsModalIsOpen(false);
+            e.target.reset();
+        } catch(error){
+            setFormError(error.message);
+            setAlertType('error');
+            setAlertModalIsOpen(true);
+            setEditTagsModalIsOpen(false);
+        }
+    }
 
 
     return (
@@ -180,12 +359,23 @@ function Menu() {
                         </div>
                         <div style={{display:'flex',flexDirection:'row',alignItems:'center',gap:15}}>
                             <button onClick={()=>setAddMenuModalIsOpen(!addMenuModalIsOpen)} id='btn-plus-stock'><Plus></Plus></button>
-                            <button className="btn-stock-base">Etiquetas</button>
+                            <button onClick={()=>setTagsModalIsOpen(!tagsModalIsOpen)} className="btn-stock-base">Etiquetas</button>
                             <button
                                 onClick={()=>setFilterProductModalIsOpen(!filterProductModalIsOpen)}
                              id='btn-funnel-base' 
                              className="btn-stock-base">Filtrar <Funnel size={20}></Funnel></button>
                         </div>
+                    </div>
+                    <div>
+                        {menu.length <= 0 ? (
+                            'Nenhum prato cadastrado.'
+                        ) : (
+                            menu.map((item,i)=>(
+                                <div key={i}>
+                                    <p>{item.name}</p>
+                                </div>
+                            ))
+                        )}
                     </div>
                 </div>
                 
@@ -216,16 +406,21 @@ function Menu() {
 
                                     {filterProductIsClicked === index && (
                                         <ul className="container-filters-options">
-                                            {filtersData[filters_item].map((option) => {
+                                            {(filtersData[filters_item] || []).map((option) => {
+                                                const isObject = typeof option === 'object' && option !== null;
+                                                const optionValue = isObject ? (option.id || option.name) : option;
+                                                const optionLabel = isObject 
+                                                    ? option.name 
+                                                    : option.replaceAll("_", " ");
                                                 const isSelected = selectedModalFilters[filters_item] === option;
 
                                                 return (
                                                     <button
                                                         key={option}
-                                                        onClick={() => handleSelectModalFilter(filters_item, option)}
+                                                        onClick={() => handleSelectModalFilter(filters_item, optionValue)}
                                                         className={isSelected ? "filter-option-active" : ""}
                                                     >
-                                                        {option.replaceAll("_"," ")} {isSelected && "✓"}
+                                                        {optionLabel} {isSelected && "✓"}
                                                     </button>
                                                 );
                                             })}
@@ -252,7 +447,10 @@ function Menu() {
 
                 <Modal
                     isOpen={addMenuModalIsOpen}
-                    onRequestClose={()=>setAddMenuModalIsOpen(!addMenuModalIsOpen)}
+                    onRequestClose={()=>{
+                        setAddMenuModalIsOpen(!addMenuModalIsOpen)
+                        emptyPreviewBeforeSaving()
+                    }}
                     shouldCloseOnOverlayClick={true}
                     contentLabel="Modal de Adicionar Prato"
                     style={modalStyle}
@@ -260,7 +458,10 @@ function Menu() {
                         <div className="top-container-modal">
                             <h2>Novo prato</h2>
                             <button
-                                onClick={()=>setAddMenuModalIsOpen(!addMenuModalIsOpen)}
+                                onClick={()=>{
+                                    setAddMenuModalIsOpen(!addMenuModalIsOpen)
+                                    emptyPreviewBeforeSaving()
+                                }}
                                 style={{fontSize:30}}
                             >&times;</button>
                         </div>
@@ -272,10 +473,22 @@ function Menu() {
                                     onDrop={handleDrop}
                                     onDragOver={handleDragOver}
                                 >
-                                    {!preview ? (
-                                        preview.map((image,index)=>(
-                                            <image src={image} key={index}></image>
-                                        ))
+                                    {preview.length > 0 ? (
+                                        <div className="container-exibe-image">
+                                            <img src={preview[indexOfPreview]}className="card-full-image"></img>
+                                            {preview.length > 1 ? (
+                                                <div className="container-buttons-change-image">
+                                                    <button 
+                                                        type="button"
+                                                        className="btn-change-image-bg"
+                                                        onClick={handleChangeImageLeft}><ChevronLeft color="white"></ChevronLeft></button>
+                                                    <button
+                                                        type="button"
+                                                        className="btn-change-image-bg"
+                                                        onClick={handleChangeImageRight}><ChevronRight color="white"></ChevronRight></button>
+                                                </div>
+                                            ) : ('')}
+                                        </div>
                                     ) : (
                                         <div className="container-add-image">
                                             <label htmlFor="">Arraste ou solte imagens aqui</label>
@@ -326,8 +539,88 @@ function Menu() {
                             </div>
 
                         </form>
+                </Modal>
+
+                <Modal
+                    isOpen={tagsModalIsOpen}
+                    onRequestClose={()=>{
+                        setTagsModalIsOpen(false)
+                    }}
+                    shouldCloseOnOverlayClick={true}
+                    contentLabel="Modal de Gerenciar Etiquetas"
+                    style={modalStyleTags}
+                >
+                        <div className="top-container-modal">
+                            <h2>Gerenciar Etiquetas</h2>
+                            <button
+                                onClick={()=>{
+                                    setTagsModalIsOpen(false);
+                                }}
+                                style={{fontSize:30}}
+                            >&times;</button>
+                        </div>
+
+                        <div className="container-tags-modal">
+                            <form className="form-tags" onSubmit={handleCreateTags}>
+                                <h3 htmlFor="">Criar Etiqueta</h3>
+                                    
+                                <div>
+                                    <label htmlFor="addTagName">Nome</label>
+                                    <input type="text" name="addTagName" id="" required/>
+                                </div>
+
+                                <div>
+                                    <label htmlFor="addTagColor">Cor</label>
+                                    <input type="color" name="addTagColor" id="" required />
+                                </div>
+
+                                <button type="submit">Salvar</button>
+                            </form>
+
+                            <div>
+                                <h3>Minhas Etiquetas</h3>
+                                <ul>
+                                    {tags.length <= 0 ? (
+                                        <p>Nenhuma etiqueta criada.</p>
+                                    ) : (
+                                        <div>
+                                            {tags.map((item,i)=>(
+                                                <li style={{backgroundColor: item.color}} key={i}>{item.name} 
+                                                    <button onClick={()=>{setSelectedTag(item),setEditTagsModalIsOpen(!editTagsModalIsOpen)}}><SquarePen></SquarePen></button> 
+                                                    <button onClick={()=>handleDeleteTags(item)}><Trash></Trash> </button>
+                                                </li>
+                                            ))}
+                                            {editTagsModalIsOpen ? (
+                                                <form className="form-tags-edit" onSubmit={handleEditTags}>
+                                                    <div>
+                                                        <label htmlFor="editTagName">Nome</label>
+                                                        <input type="text" name="editTagName" id="" required/>
+                                                    </div>
+
+                                                    <div>
+                                                        <label htmlFor="editTagColor">Cor</label>
+                                                        <input type="color" name="editTagColor" id="" required />
+                                                    </div>
+
+                                                    <button type="submit">Salvar Alterações</button>
+                                                </form>
+                                            ) : ('')}
+                                        </div>
+                                    )}
+                                </ul>
+                            </div>
+                        </div>
 
                 </Modal>
+
+                <AlertModals
+                    phrase={formSuccess ? formSuccess : formError}
+                    isOpen={alertModalIsOpen}
+                    type={alertType}
+                    setIsOpen={setAlertModalIsOpen}
+                >
+
+                </AlertModals>
             </main>
         </>
     );

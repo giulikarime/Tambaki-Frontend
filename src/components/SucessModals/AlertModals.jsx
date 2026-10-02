@@ -2,7 +2,7 @@ import './alert_modals.css';
 import Modal from 'react-modal'
 import { useEffect, useRef, useState } from "react";
 
-function AlertModals({phrase,isOpen,setIsOpen,type = 'sucess'}){
+function AlertModals({phrase,isOpen,setIsOpen,type = 'success'}){
 
     const isError = type === 'error';
 
@@ -46,12 +46,12 @@ useEffect(() => {
             isOpen={isOpen}
             style={modalStyle}
             className={{
-                base: 'sucess-modal-content',
-                afterOpen: 'sucess-modal-content--after-open',
-                beforeClose: 'sucess-modal-content--before-close',
+                base: 'success-modal-content',
+                afterOpen: 'success-modal-content--after-open',
+                beforeClose: 'success-modal-content--before-close',
             }}
         >
-            <div className='container-sucess'>
+            <div className='container-success'>
                 <p>{phrase}</p>
             </div>
         </Modal>

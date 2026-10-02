@@ -2,13 +2,13 @@ import { useEffect, useRef, useState } from "react";
 import Header from "../../components/HeaderAndSidebar/Header";
 import Sidebar from "../../components/HeaderAndSidebar/Sidebar";
 import { useNavigate } from "react-router-dom";
-import {ChevronLeft,ChevronRight,ChevronDown,Funnel,Plus,Search,SquarePen,Trash} from "lucide-react";
-
-import { getUsers, createUsers } from "../../services/users";
+import {ChevronLeft,ChevronRight,ChevronDown,Funnel,Plus,Search,SquarePen,Trash, X} from "lucide-react";
 import './users_page.css'
 import { AuthContext } from "../../services/AuthContext";
 import Modal from 'react-modal'
-import React, { Fragment } from 'react';
+import React from 'react';
+import { uploadFile } from "../../services/upload";
+import { getUsers, createUsers, editUsers, deleteUsers, getUserEnums } from "../../services/user";
 
 function UsersPage(){
 
@@ -16,6 +16,13 @@ function UsersPage(){
     const [hasInteracted, setHasInteracted] = useState(false);
     const navigate = useNavigate();
     const [formError,setFormError] = useState('');
+    const [formSuccess,setFormSuccess] = useState('');
+    const [alertType,setAlertType] = useState('');
+    const [alertModalIsOpen,setAlertModalIsOpen] = useState('');
+    const [documentUrl,setDocumentUrl] = useState('');
+    const [fileName,setFileName] = useState('Nenhum arquivo selecionado.')
+    const [newDocumentUrlUser,setNewDocumentUrlUser] = useState(fileName)
+    const [editUserStatus,setEditUserStatus] = useState(false);
 
     const [allUsers,setAllUsers] = useState([]);
     const {user} = useState(AuthContext);
@@ -26,7 +33,6 @@ function UsersPage(){
     const [shiftValue,setShiftValue] = useState('');
 
     const [usersEnums,setUsersEnums] = useState({
-        roles: [],
         access_levels: [],
         employ_types: [],
         shifts: [],
@@ -38,13 +44,13 @@ function UsersPage(){
         {label: 'Email', model: 'input', type: 'email', name: 'email_add_user', placeholder: 'Digite um email...', placeholderEdit: `email`},
         {label: 'Telefone', model: 'input', type: 'text', name: 'phone_add_user', placeholder: 'Exemplo.: 11998876655...', placeholderEdit: `phone`},
         {label: 'Senha', model: 'input', type: 'password', name: 'pass_add_user', readOnly: true, placeholder: 'Digite uma senha...', placeholderEdit: `password`, isPassword: true},
-        {label: 'Cargo', model: 'select', name: 'role_add_user', placeholderEdit: `role`},
-        {label: 'Nível de Acesso', model: 'select', name: 'access_level_add_user', placeholderEdit: `access_level`},
-        {label: 'Modelo de Contrato', model: 'select', name: 'employ_add_user', placeholderEdit: `employ_type`},
-        {label: 'Horário', model: 'select', name: 'shift_add_user', placeholderEdit: `shift`},
+        {label: 'Cargo', model: 'input',type: 'text', name: 'role_add_user', placeholderEdit: `role`},
+        {label: 'Nível de Acesso', model: 'select', name: 'access_level_add_user', placeholderEdit: `access_level`, user_enum: usersEnums.access_levels},
+        {label: 'Modelo de Contrato', model: 'select', name: 'employ_add_user', placeholderEdit: `employ_type`, user_enum: usersEnums.employ_types},
+        {label: 'Horário', model: 'select', name: 'shift_add_user', placeholderEdit: `shift`, user_enum: usersEnums.shifts},
         {label: 'Data de Contratação', model: 'input', type: 'date', name: 'date_add_user', placeholderEdit: `hire_date`},
         {label: 'Carga Horária', model: 'input', type: 'number', name: 'hours_add_user', placeholder: 'Exemplo.: 8', placeholderEdit: `weekly_hours`},
-        {label: 'Salário', model: 'input', type: 'number', name: 'salary_add_user', placeholder: 'Exemplo.: 2750.60', placeholderEdit: `salary`},
+        {label: 'Salário', model: 'input', type: 'number', name: 'salary_add_user', placeholder: 'Exemplo.: 2750.60', placeholderEdit: `salary`, step: '0.01'},
         {label: 'Banco', model: 'input', type: 'text', name: 'bank_add_user', placeholder: 'Exemplo.: Bradesco...', placeholderEdit: `bankName`},
     ]
 
@@ -54,21 +60,32 @@ function UsersPage(){
     const [enableEditMode,setEnableEditMode] = useState(false);
     const [selectedUser,setSelectedUser] = useState(null);
 
-    const filtersModal = ["Cargo", "Nível de Acesso", "Modelo de Contrato", "Horário de Trabalho"];
+    const filtersModal = ["Nível de Acesso", "Modelo de Contrato", "Horário de Trabalho"];
     
     const filtersData = {
-        "Cargo": ["Gerente", "Administração"],
-        "Nível de Acesso": ["Master", "Senior", "Pleno", "Junior"],
-        "Modelo de Contrato": ["CLT","PJ","Temporario"],
-        "Horário de Trabalho": ["Noturno", "Manhã", "Tarde"],
+        "Nível de Acesso": usersEnums.access_levels,
+        "Modelo de Contrato": usersEnums.employ_types,
+        "Horário de Trabalho": usersEnums.shifts,
     };
 
     const [selectedModalFilters, setSelectedModalFilters] = useState({
-        "Cargo": null,
         "Nível de Acesso": null,
         "Modelo de Contrato": null,
         "Horário de Trabalho": null
     });
+
+    async function get_enums() {
+        try {
+            const enums_users = await getUserEnums();
+            setUsersEnums(enums_users);
+        } catch (error) {
+            console.error("Erro ao carregar os dados dos formularios.", error);
+        }
+    }
+
+    useEffect(()=>{
+        get_enums();
+    },[])
 
     const [filterProductModalIsOpen, setFilterProductModalIsOpen] = useState(false);
     const [filterProductIsClicked, setFilterProductIsClicked] = useState(null);
@@ -138,8 +155,40 @@ function UsersPage(){
         fileRef.current.click()
     }
 
-    function handleInputFile(e){
-        const file = e.target.files[0];
+    async function handleFileClick(event) {
+        const file = event.target.files[0];
+
+        if(!file){
+            setFileName('Nenhum arquivo selecionado');
+        }
+
+        setFileName(file.name);
+
+        try {
+            const url = await uploadFile(file);
+            setDocumentUrl(url);
+        } catch (error) {
+            console.error("Erro ao enviar arquivo: ", error);
+            setFormError('Não foi possível enviar o arquivo.');
+        }
+    }
+
+    async function handleRemoveFile() {
+         try {
+            if (documentUrl) {
+                await deleteFile(documentUrl);
+            }
+        } catch (error) {
+            console.error("Erro ao remover o arquivo do servidor: ", error);
+        } finally {
+            setFileName('Nenhum arquivo selecionado.');
+            setDocumentUrl(null);
+            setFormError(null);
+
+            if (fileRef.current) {
+                fileRef.current.value = '';
+            }
+        }
     }
 
     async function handleGetUsers() {
@@ -152,40 +201,48 @@ function UsersPage(){
     };
 
     async function handleCreateUser(e) {
-        e.preventDefalt();
+        e.preventDefault('');
         setFormError('');
+        setFormSuccess('');
+        setAlertType('');
         const formData = new FormData(e.target);
         const payload = {
-            name: String(formData.get('')),
-            cpf: String(formData.get('')),
-            email: String(formData.get('')),
-            phone: String(formData.get('')),
-            password: String(formData.get('')),
-            role: rolevalue || usersEnums.roles[0],
-            access_level: accessLevelValue || usersEnums.access_levels[0],
-            employ_type: employTypeValue || usersEnums.employ_types[0],
-            shift: shiftValue || usersEnums.shifts[0],
-            hire_date: new Date(formData.get('')).toISOString(),
-            weekly_hours: String(formData.get('')),
-            salary: parseFloatString(formData.get('')),
-            bankName: String(formData.get('')),
-            active: String(formData.get('')),
-            storeUnitId: user.storeUnitId
+            name: String(formData.get('name_add_user')),
+            cpf: String(formData.get('cpf_add_user')),
+            email: String(formData.get('email_add_user')),
+            phone: String(formData.get('phone_add_user')),
+            password: String(formData.get('pass_add_user')),
+            role: formData.get('role_add_user') || usersEnums.roles[0],
+            access_level: formData.get('access_level_add_user') || usersEnums.access_levels[0],
+            employ_type: formData.get('employ_add_user') || usersEnums.employ_types[0],
+            shift: formData.get('shift_add_user') || usersEnums.shifts[0],
+            hire_date: new Date(formData.get('date_add_user')).toISOString(),
+            weekly_hours: String(formData.get('hours_add_user')),
+            salary: parseFloat(formData.get('salary_add_user')),
+            bankName: String(formData.get('bank_add_user')),
+            active: true,
+            employe_document: documentUrl,
+            storeUnitId: user?.storeUnitId
         }
 
         try{
             await createUsers(payload);
             await handleGetUsers();
+            setFormSuccess("Funcionário criado com sucesso!");
+            setAlertType('success');
+            setAlertModalIsOpen(true);
             e.target.reset()
         } catch(error){
-            console.log("Erro ao criar usuário.",error);
-            setFormError("Erro ao criar usuário. Verifique os dados e tente novamente.")
+            setFormError(error.message);
+            setAlertType('error');
+            setAlertModalIsOpen(true);
         }
     }
 
     useEffect(()=>{
         handleGetUsers();
     },[])
+
 
     return(
         <>
@@ -285,24 +342,32 @@ function UsersPage(){
                                 item.model === 'input' ? (
                                     <div key={index} className="fields">
                                         <label>{item.label}</label>
-                                        <input className="input-select-model" name={item.name} type={item.type} placeholder={item.placeholder} />
+                                        <input step={item.step} className="input-select-model" name={item.name} type={item.type} placeholder={item.placeholder} />
                                     </div>
-                                ) : (
+                                ) : item.user_enum ? (
                                     <div key={index} className="fields">
                                         <label>{item.label}</label>
                                         <select className="input-select-model" name={item.name}>
-                                            <option>Outros</option>
+                                            {item.user_enum.map((enums,i)=>(
+                                                <option key={i}>{enums}</option>
+                                            ))}
                                         </select>
                                     </div>
-                                )
+                                ) : ('')
                             ))}
 
                             <div className="fields">
                                 <label htmlFor="">Contrato de Trabalho</label>
                                 <button type="button" onClick={handleButtonFile} className="btn-modal-file-users">
-                                    <input hidden onChange={handleInputFile} ref={fileRef} type="file" name="" id="" />
+                                    <input hidden onChange={handleFileClick} ref={fileRef} type="file" name="" id="" />
                                     <p>Adicionar arquivo</p>
                                 </button>
+                                <div className='file_name_style'>
+                                    <p style={{fontSize: 14, whiteSpace: 'nowrap'}}>{fileName}</p>
+                                    {fileName === "Nenhum arquivo selecionado." ? "" : <button type="button" onClick={handleRemoveFile}>
+                                        <X color={'#3553b5'} size={15}></X>
+                                    </button>}
+                                </div>
                             </div>
                         </div>
                         <button className="btn-modal-submit" type="submit">Salvar</button>
@@ -361,10 +426,26 @@ function UsersPage(){
 
                                     <div className="fields">
                                         <label htmlFor="">Contrato de Trabalho</label>
-                                        <button type="button" onClick={handleButtonFile} className="btn-modal-file-users">
-                                            <input hidden onChange={handleInputFile} ref={fileRef} type="file" name="" id="" />
+                                        <button type="button"
+                                            onClick={editUserStatus ? handleButtonClick : () => {
+                                                        if (selectedUser?.employe_document) {
+                                                            window.open(selectedUser.employe_document, '_blank', 'noopener,noreferrer');
+                                                        } else {
+                                                            setFormError('Nenhum arquivo cadastrado para este produto.');
+                                                        }
+                                                }}
+                                            className="btn-modal-file-users">
+                                            <input hidden onChange={handleFileClick} ref={fileRef} type="file" name="" id="" />
                                             <p>{enableEditMode ? ("Adicionar arquivo") : ("Ver arquivo")}</p>
                                         </button>
+                                        <div className='file_name_style'>
+                                            <p style={{fontSize: 14, whiteSpace: 'nowrap'}}>{newDocumentUrlUser? newDocumentUrlUser.split('/').pop() : fileName}</p>
+                                            {newDocumentUrlUser ? (
+                                                !editUserStatus ? "" : <button type="button" onClick={()=>setNewDocumentUrlUser(null)}>
+                                                    <X color={'#3553b5'} size={15}></X>
+                                                </button>
+                                            ) : ''}
+                                        </div>
                                     </div>
                                 </div>
                                 {enableEditMode ? (

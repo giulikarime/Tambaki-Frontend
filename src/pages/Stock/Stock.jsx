@@ -90,7 +90,7 @@ function Stock() {
     const matchingBatchesEdit = products.filter(item => item.name === selectedProduct?.name);
     const [editProductStatus, setEditProductStatus] = useState(false);
     const [formError, setFormError] = useState('');
-    const [alertType, setAlertType] = useState('sucess');
+    const [alertType, setAlertType] = useState('success');
     const [fileName,setFileName] = useState('Nenhum arquivo selecionado.');
 
     const [newDocumentUrlProduct,setNewDocumentUrlProduct] = useState(fileName);
@@ -443,7 +443,7 @@ function Stock() {
             setAddProductModalIsOpen(false);
             setSelectAllergensForProducts([]);
             setModalPhrase('Produto criado com sucesso!');
-            setAlertType('sucess');
+            setAlertType('success');
             setAlertModalIsOpen(true);
             handleRemoveFile();
             e.target.reset();
@@ -527,7 +527,7 @@ function Stock() {
             setEditProductModalIsOpen(false);
             setEditProductStatus(false);
             setModalPhrase(`${selectedProduct.name} editado com sucesso!`);
-            setAlertType('sucess');
+            setAlertType('success');
             setAlertModalIsOpen(true);
         } catch (error) {
             setFormError(error.message);
@@ -546,7 +546,7 @@ function Stock() {
             setEditProductModalIsOpen(false);
             setEditProductStatus(false);
             setSelectedProduct(null);
-            setAlertType('sucess');
+            setAlertType('success');
             setModalPhrase(`${selectedProduct.name} deletado com sucesso!`);
             setAlertModalIsOpen(true);
         } catch (error) {
@@ -621,7 +621,7 @@ function Stock() {
             await get_products();
             setEntranceProductModalIsOpen(false);[]
             setModalPhrase(`Entrada de ${entranceSelectedProduct.name} feita com sucesso!`);
-            setAlertType('sucess');
+            setAlertType('success');
             setAlertModalIsOpen(true);
             setWriteOffSelectedProduct(null);
             e.target.reset();
@@ -650,7 +650,7 @@ function Stock() {
             await writeOffProducts(writeOffSelectedProduct.id, new_stock_quantity);
             await get_products();
             setRemoveProductModalIsOpen(false);
-            setAlertType('sucess');
+            setAlertType('success');
             setModalPhrase(`Baixa de ${writeOffSelectedProduct.name} feita com sucesso!`);
             setAlertModalIsOpen(true);
             setWriteOffSelectedProduct(null);

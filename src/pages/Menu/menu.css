@@ -182,7 +182,52 @@ text-align: center;
     height: 200px;
 }
 
+.container-exibe-image{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    gap: 20px;
+    border-radius: 20px;
+    width: 250px;
+    height: 200px;
+    border: 1px solid black;
+}
+
+.card-full-image{
+    width: 100%;
+    height: 100%;
+    border-radius: 20px;
+}
+
+.container-buttons-change-image{
+    position: absolute;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 5px;
+}
+
 .form-add-menu{
     display: flex;
     flex-direction: row;
+}
+
+.btn-change-image-bg{
+    background-color: rgba(0, 0, 0, 0.514);
+    border-radius: 50px;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.container-tags-modal{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
 }

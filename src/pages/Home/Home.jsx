@@ -26,7 +26,7 @@ function Home() {
     const [editTableStatus,setEditTableStatus] = useState(false);
     const [selectedTable, setSelectedTable] = useState(null);
     const [formError, setFormError] = useState("");
-    const [sucessPhrase,setSucessPhrase] = useState("");
+    const [successPhrase,setSuccessPhrase] = useState("");
     const [alertType,setAlertType] = useState('');
     const [alertModalIsOpen,setAlertModalIsOpen] = useState(false);
 
@@ -121,7 +121,7 @@ function Home() {
         e.preventDefault();
         setFormError("");
         setAlertType("");
-        setSucessPhrase("");
+        setSuccessPhrase("");
         const formData = new FormData(e.target);
 
         const max_quant = Number(formData.get('table_max'));
@@ -144,8 +144,8 @@ function Home() {
             await createTable(payload);
             await refreshTables();
             setCreateTableModalIsOpen(false);
-            setSucessPhrase("Mesa criada com sucesso!");
-            setAlertType('sucess');
+            setSuccessPhrase("Mesa criada com sucesso!");
+            setAlertType('success');
             setAlertModalIsOpen(true);
             e.target.reset();
         } catch(error){
@@ -160,7 +160,7 @@ function Home() {
         e.preventDefault();
         setFormError("");
         setAlertType("");
-        setSucessPhrase("");
+        setSuccessPhrase("");
         const formData = new FormData(e.target);
         const payload = {
             table_number: Number(formData.get('table_number')),
@@ -172,8 +172,8 @@ function Home() {
             await refreshTables();
             setEditTableModalIsOpen(false);
             setEditTableStatus(false);
-            setSucessPhrase(`Mesa ${selectedTable.table_number} editada com sucesso!`);
-            setAlertType('sucess');
+            setSuccessPhrase(`Mesa ${selectedTable.table_number} editada com sucesso!`);
+            setAlertType('success');
             setAlertModalIsOpen(true);
         } catch(error){
             console.error("Erro ao atualizar mesa: ", error);
@@ -192,7 +192,7 @@ function Home() {
     async function confirmDeleteTable() {
         setFormError("");
         setAlertType("");
-        setSucessPhrase("");
+        setSuccessPhrase("");
     try {
         await deleteTable(selectedTable.id);
         await refreshTables();
@@ -200,8 +200,8 @@ function Home() {
         setEditTableStatus(false);
         setSelectedTable(null);
         setConfirmDeleteModalIsOpen(false);
-        setSucessPhrase(`Mesa ${selectedTable.table_number} deletada com sucesso!`);
-        setAlertType('sucess');
+        setSuccessPhrase(`Mesa ${selectedTable.table_number} deletada com sucesso!`);
+        setAlertType('success');
         setAlertModalIsOpen(true);
     } catch (error) {
         console.error("Erro ao excluir mesa: ", error);
@@ -364,7 +364,7 @@ function Home() {
                         </div>
                     </Modal>
                     <AlertModals
-                        phrase={sucessPhrase ? sucessPhrase : formError}
+                        phrase={successPhrase ? successPhrase : formError}
                         isOpen={alertModalIsOpen}
                         setIsOpen={setAlertModalIsOpen}
                         type={alertType}
