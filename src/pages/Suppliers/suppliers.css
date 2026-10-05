@@ -80,8 +80,8 @@
     width: 100%;
     display: flex;
     justify-content: center;
-    border-radius: 5px;
-    box-shadow: 0 5px 30px 0 rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    box-shadow: 0 5px 30px 0 rgba(73, 64, 107, 0.2);
     overflow: hidden;
 }
 
@@ -101,6 +101,7 @@
 li button{
     font-size: 15px;
 }
+
 
 .entreprise{
     background-color: #1a3573;
@@ -132,7 +133,17 @@ li button{
     color: #203371;
 }
 
-.see-more-users{
+.see-more-users-suppliers{
     background-color: #3a74fa;
+    width: 100%;
+    border-radius: 50px;
+    padding: 6px 5px;
+    color: white;
+    font-weight: 700;
 }
+
+.see-more-users-suppliers:hover{
+    cursor: pointer;
+}
+
 

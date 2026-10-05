@@ -196,8 +196,7 @@ function Suppliers(){
                         <div style={{display:'flex',flexDirection:'row',alignItems:'center',gap:15}}>
                             <button onClick={()=>setCreateSupModalIsOpen(!createSupModalIsOpen)} className='btn-plus-stock'><Plus></Plus></button>
                             <button
-                                onClick={()=>setFilterProductModalIsOpen(!filterProductModalIsOpen)}
-                             className='btn-funnel-base' 
+                                onClick={()=>setFilterProductModalIsOpen(!filterProductModalIsOpen)} 
                              className="btn-stock-base">Filtrar <Funnel size={20}></Funnel></button>
                             <div style={{ position: "relative"}}>
                                 <Search 
@@ -247,7 +246,7 @@ function Suppliers(){
                                             <td><button onClick={()=>{
                                                 setEditSupModalIsOpen(!editSupModalIsOpen)
                                                 setSelectedSupplier(sup)
-                                                }} className="see-more-users">Ver mais</button></td>
+                                                }} className="see-more-users-suppliers">Ver mais</button></td>
                                         </tr>
                                     </>
                                 ))}

@@ -312,7 +312,7 @@ function UsersPage(){
                                             <td><button onClick={()=>{
                                                 setEditUserModalIsOpen(!editUserModalIsOpen)
                                                 setSelectedUser(employees)
-                                                }} className="see-more-users">Ver mais</button></td>
+                                                }} className="see-more-users-page">Ver mais</button></td>
                                         </tr>
                                     </>
                                 ))}

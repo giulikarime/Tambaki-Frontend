@@ -42,7 +42,14 @@ th{
     color: #4b455f
 }
 
-.see-more-users{
+.btn-plus-stock{
+    background-color: #cae2ff;
+    border-radius: 10px;
+    width: 35px;
+    height: 35px;
+}
+
+.see-more-users-page{
     background-color: #df8400;
     width: 100%;
     border-radius: 50px;
@@ -51,7 +58,7 @@ th{
     font-weight: 700;
 }
 
-.see-more-users:hover{
+.see-more-users-page:hover{
     cursor: pointer;
 }
 
@@ -163,8 +170,8 @@ form{
 .container-users{
     background-color: #fffdf8;
     width: 100%;
-    border-radius: 5px;
-    box-shadow: 0 5px 30px 0 rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    box-shadow: 0 5px 30px 0 rgba(73, 64, 107, 0.2);
     overflow: hidden;
 }
 
