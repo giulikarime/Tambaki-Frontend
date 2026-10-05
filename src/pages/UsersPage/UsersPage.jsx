@@ -291,14 +291,14 @@ function UsersPage(){
                         </div>
                     </div>
                     <div className="container-users">
-                        <table>
+                        <table className="table">
                             <thead className="thead-style tr-th-group">
-                                <th>NOME</th>
-                                <th>CARGO</th>
-                                <th>EMAIL</th>
-                                <th>TELEFONE</th>
-                                <th>NÍVEL DE ACESSO</th>
-                                <th>INFORMAÇÕES</th>
+                                <th className='name'>NOME</th>
+                                <th className='role'>CARGO</th>
+                                <th className='email-users'>EMAIL</th>
+                                <th className='phone-users'>TELEFONE</th>
+                                <th className='access_level'>NÍVEL DE ACESSO</th>
+                                <th className='info-users'>INFORMAÇÕES</th>
                             </thead>
                             <tbody>
                                 {allUsers.map((employees,index)=>(

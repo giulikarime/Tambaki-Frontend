@@ -18,7 +18,7 @@
     flex-direction: row;
     gap: 5px;
     background-color: rgb(255, 212, 131);
-    padding: 5px 10px;
+    padding: 5px 5px;
     border-radius: 50px;
     align-items: center;
 }
@@ -28,12 +28,12 @@
 }
 
 .add-category-ul-list{
-    position: absolute;
+    position: relative;
     display: flex;
     align-items: center;
     bottom: 0;
     right: 0;
-    margin: 10px;
+    margin: 5px;
     background-color: #333333;
     color: white;
     border-radius: 50px;
@@ -41,7 +41,7 @@
 }
 
 .add-categorie-select{
-    position: absolute;
+    position: relative;
     bottom: 0;
     right: 0;
     transform: translate(190px,-5px);
@@ -57,13 +57,13 @@
 
 .add-categorie-select::after{
     content: '';
-    position: absolute;
+    position: relative;
     bottom: 15px;
     left: -15px;
     width: 0;
     height: 0;
-    border-top: 10px solid transparent;
-    border-bottom: 10px solid transparent;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
     border-right: 15px solid #f7f2f2;
 }
 
@@ -75,6 +75,64 @@
     background-color: rgb(122, 154, 223);
 }
 
+.container-suppliers{
+    background-color: #fffdf8;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    border-radius: 5px;
+    box-shadow: 0 5px 30px 0 rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+}
+
+.container-suppliers table{
+    width: 100%;
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+.table th{
+  padding: 20px 16px;         
+  font-weight: 700;
+  border: none;
+  text-align: center;
+}
+
 li button{
     font-size: 15px;
 }
+
+.entreprise{
+    background-color: #1a3573;
+    color: white;
+}
+
+.category{
+    background-color: #264a9f;
+    color: white;
+}
+
+.deadline{
+    background-color: #3b74fa;
+    color: white;
+}
+
+.phone{
+    background-color: #7ca6fc;
+    color: #203371;
+}
+
+.email{
+    background-color: #a1c0fc;
+    color: #2e479c;
+}
+
+.info{
+    background-color: #deeaff;
+    color: #203371;
+}
+
+.see-more-users{
+    background-color: #3a74fa;
+}
+
