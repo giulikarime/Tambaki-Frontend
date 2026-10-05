@@ -2,13 +2,13 @@ import { useEffect, useRef, useState } from "react";
 import Header from "../../components/HeaderAndSidebar/Header";
 import Sidebar from "../../components/HeaderAndSidebar/Sidebar";
 import { useNavigate } from "react-router-dom";
-import {ChevronLeft,ChevronRight,ChevronDown,Funnel,Plus,Search,SquarePen,Trash, X} from "lucide-react";
+import {ChevronLeft,Funnel,Plus,Search,SquarePen,Trash, X} from "lucide-react";
 import './users_page.css'
 import { AuthContext } from "../../services/AuthContext";
 import Modal from 'react-modal'
-import React from 'react';
 import { uploadFile } from "../../services/upload";
 import { getUsers, createUsers, editUsers, deleteUsers, getUserEnums } from "../../services/user";
+import FiltersModal from "../../components/FiltersModal/FiltersModal";
 
 function UsersPage(){
 
@@ -96,30 +96,6 @@ function UsersPage(){
             [category]: prev[category] === option ? null : option
         }));
     };
-
-    const modalFilterProductsStyle = {
-        overlay: {
-            backgroundColor: '#191444be',
-            position: 'fixed',
-            zIndex: 100,
-            inset: 0
-        },
-        content: {
-            position: 'fixed',
-            top: '0',
-            right: '0',
-            left: 'auto',
-            bottom: '0',
-            width: '300px',
-            maxHeight: '100vh',
-            padding: '20px',
-            border: 'none',
-            boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
-            backgroundColor: '#fff',
-            margin: '0'
-        }
-
-    }
 
     const modalStyle = {
         overlay: {
@@ -462,67 +438,14 @@ function UsersPage(){
                     })()}
                 </Modal>
 
-                <Modal
+                <FiltersModal
                     isOpen={filterProductModalIsOpen}
-                    onRequestClose={() => setFilterProductModalIsOpen(false)}
-                    contentLabel="Modal de Filtros"
-                    shouldCloseOnOverlayClick={true}
-                    style={modalFilterProductsStyle}
-                    >
-                    <div className="container-filters">
-                        <div className="top-container-filters">
-                        <h1>Filtrar Por</h1>
-                        <button onClick={() => setFilterProductModalIsOpen(false)}>&times;</button>
-                        </div>
-
-                        {filtersModal.map((filters_item, index) => {
-                            const isExpanded = filterProductIsClicked === index;
-
-                            return (
-                                <React.Fragment key={filters_item}>
-                                    <button 
-                                        type="button"
-                                        onClick={() => setFilterProductIsClicked(isExpanded ? null : index)} 
-                                        className="btn_filters_modal"
-                                    >
-                                        {filters_item} 
-                                        {isExpanded ? <ChevronDown /> : <ChevronRight />}
-                                    </button>
-
-                                    {isExpanded && (
-                                        <ul className="container-filters-options-users">
-                                            {(filtersData[filters_item] || []).map((option) => {
-                                                const isSelected = selectedModalFilters[filters_item] === option;
-
-                                                return (
-                                                    <li key={option}>
-                                                        <button 
-                                                            type="button"
-                                                            onClick={() => handleSelectModalFilter(filters_item, option)}
-                                                            className={isSelected ? "filter-option-active" : ""}
-                                                        >
-                                                            {option} {isSelected && "✓"}
-                                                        </button>
-                                                    </li>
-                                                );
-                                            })}
-                                        </ul>
-                                    )}
-                                </React.Fragment>
-                            );
-                        })}
-
-                        <button 
-                        className="btn-clear-filters"
-                        onClick={() => setSelectedModalFilters({
-                                "Cargo": null,
-                                "Nível de Acesso": null,
-                                "Modelo de Contrato": null,
-                                "Horário de Trabalho": null
-                            })}
-                        >Limpar Filtros do Modal</button>
-                    </div>
-                    </Modal>
+                    setIsOpen={setFilterProductModalIsOpen}
+                    filtersTitle={filtersModal}
+                    filtersData={filtersData}
+                    selectedFilters={selectedModalFilters}
+                    setSelectedFilters={selectedModalFilters}>
+                </FiltersModal>
 
             </main>
         </>

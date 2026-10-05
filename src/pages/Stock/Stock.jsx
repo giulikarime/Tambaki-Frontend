@@ -13,6 +13,7 @@ import { getLoggedUser } from "../../services/auth";
 import { uploadFile} from "../../services/upload";
 import AlertModals from "../../components/SucessModals/AlertModals";
 import ProductCard from "../../components/ProductCard/ProductCard";
+import FiltersModal from '../../components/FiltersModal/FiltersModal';
 
 function Stock() {
     // ===================== Navegação e layout padrão =====================
@@ -52,6 +53,10 @@ function Stock() {
     const [hasInteracted, setHasInteracted] = useState(false);
 
     // ===================== Filtro via modal (Categoria, Armazenamento, Alergênicos, Status) =====================
+    const [filterProductModalIsOpen, setFilterProductModalIsOpen] = useState(false);
+    const [filterProductIsClicked, setFilterProductIsClicked] = useState(null);
+    const [isCustomSelectMode, setIsCustomSelectMode] = useState(false);
+
     const filtersModal = ["Categoria", "Local de Armazenamento", "Alergênicos", "Status"];
 
     const filtersData = {
@@ -68,9 +73,6 @@ function Stock() {
         "Status": null
     });
 
-    const [filterProductModalIsOpen, setFilterProductModalIsOpen] = useState(false);
-    const [filterProductIsClicked, setFilterProductIsClicked] = useState(null);
-    const [isCustomSelectMode, setIsCustomSelectMode] = useState(false);
 
     const handleSelectModalFilter = (category, option) => {
         setSelectedModalFilters(prev => ({
@@ -199,29 +201,6 @@ function Stock() {
         flexDirection: 'column',
         gap: '20px'
     }
-    };
-
-    const modalFilterProductsStyle = {
-        overlay: {
-            backgroundColor: '#191444be',
-            position: 'fixed',
-            zIndex: 100,
-            inset: 0
-        },
-        content: {
-            position: 'fixed',
-            top: '0',
-            right: '0',
-            left: 'auto',
-            bottom: '0',
-            width: '300px',
-            maxHeight: '100vh',
-            padding: '20px',
-            border: 'none',
-            boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
-            backgroundColor: '#fff',
-            margin: '0'
-        }
     };
 
     // ===================== Valores derivados (texto de status do estoque) =====================
@@ -1067,67 +1046,6 @@ function Stock() {
                 </Modal>
 
                 <Modal
-                    isOpen={filterProductModalIsOpen}
-                    onRequestClose={() => setFilterProductModalIsOpen(!filterProductModalIsOpen)}
-                    contentLabel="Modal de Filtros"
-                    shouldCloseOnOverlayClick={true}
-                    style={modalFilterProductsStyle}
-                >
-                    <div className="container-filters">
-                        <div className="top-container-filters">
-                            <h1>Filtrar Por</h1>
-                            <button onClick={() => setFilterProductModalIsOpen(!filterProductModalIsOpen)}>&times;</button>
-                        </div>
-                        
-                        {filtersModal.map((filters_item, index) => {
-                            const icon = filterProductIsClicked === index ? <ChevronDown /> : <ChevronRight />;
-
-                            return (
-                                <React.Fragment key={filters_item}>
-                                    <button 
-                                        onClick={() => setFilterProductIsClicked(filterProductIsClicked === index ? null : index)} 
-                                        className="btn_filters_modal"
-                                    >
-                                        {filters_item} {icon}
-                                    </button>
-
-                                    {filterProductIsClicked === index && (
-                                        <ul className="container-filters-options">
-                                            {filtersData[filters_item].map((option) => {
-                                                const isSelected = selectedModalFilters[filters_item] === option;
-
-                                                return (
-                                                    <button 
-                                                        key={option}
-                                                        onClick={() => handleSelectModalFilter(filters_item, option)}
-                                                        className={isSelected ? "filter-option-active" : ""}
-                                                    >
-                                                        {option.replaceAll('_'," ")} {isSelected && "✓"}
-                                                    </button>
-                                                );
-                                            })}
-                                        </ul>
-                                    )}
-                                </React.Fragment>
-                            );
-                        })}
-
-                        {/* Botão para limpar os filtros do modal de uma vez */}
-                        <button 
-                            className="btn-clear-filters"
-                            onClick={() => setSelectedModalFilters({
-                                "Categoria": null,
-                                "Local de Armazenamento": null,
-                                "Alergênicos": null,
-                                "Status": null
-                            })}
-                        >
-                            Limpar Filtros do Modal
-                        </button>
-                    </div>
-                </Modal>
-
-                <Modal
                     isOpen={editProductModalIsOpen}
                     onRequestClose={() => {
                         setEditProductModalIsOpen(!editProductModalIsOpen)
@@ -1330,6 +1248,15 @@ function Stock() {
                     setIsOpen={setAlertModalIsOpen}
                     type={alertType}
                 />
+
+                <FiltersModal
+                    isOpen={filterProductModalIsOpen}
+                    setIsOpen={setFilterProductModalIsOpen}
+                    filtersTitle={filtersModal}
+                    filtersData={filtersData}
+                    selectedFilters={selectedModalFilters}
+                    setSelectedFilters={selectedModalFilters}>
+                </FiltersModal>
 
             </main>
         </>
