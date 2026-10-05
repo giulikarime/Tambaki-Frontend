@@ -785,8 +785,8 @@ function Stock() {
                                                     <label>{mode.label}</label>
                                                     <select className="input-modal-add-product" name={mode.name}>
                                                         {mode.enum ? 
-                                                        mode.product_enum.map((p_enum, ind)=>(
-                                                            <option value={p_enum} key={ind}>{p_enum.replaceAll('_',' ')}</option>
+                                                        mode.product_enum.map((p_enum, i)=>(
+                                                            <option value={p_enum} key={i}>{p_enum.replaceAll('_',' ')}</option>
                                                         ))
                                                         : suppliers.map((sup,i)=>(
                                                             <option value={sup.id} key={i}>{sup.company_name}</option>
