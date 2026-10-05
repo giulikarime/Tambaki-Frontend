@@ -194,10 +194,10 @@ function Suppliers(){
                             <p style={{ color: '#777171ff' }}>Localize seus fornecedores e edite informações</p>
                         </div>
                         <div style={{display:'flex',flexDirection:'row',alignItems:'center',gap:15}}>
-                            <button onClick={()=>setCreateSupModalIsOpen(!createSupModalIsOpen)} id='btn-plus-stock'><Plus></Plus></button>
+                            <button onClick={()=>setCreateSupModalIsOpen(!createSupModalIsOpen)} className='btn-plus-stock'><Plus></Plus></button>
                             <button
                                 onClick={()=>setFilterProductModalIsOpen(!filterProductModalIsOpen)}
-                             id='btn-funnel-base' 
+                             className='btn-funnel-base' 
                              className="btn-stock-base">Filtrar <Funnel size={20}></Funnel></button>
                             <div style={{ position: "relative"}}>
                                 <Search 
@@ -226,15 +226,14 @@ function Suppliers(){
                         </div>
                     </div>
                     <div className="container-suppliers">
-                        <table> 
-
+                        <table className="table"> 
                             <thead className="thead-style-sup tr-th-group">
-                                <th id="entreprise">EMPRESA</th>
-                                <th id="category">CATEGORIA</th>
-                                <th id="deadline">PRAZO</th>
-                                <th id="phone">TELEFONE</th>
-                                <th id="email">EMAIL</th>
-                                <th id="info">INFORMAÇÕES</th>
+                                <th className="entreprise">EMPRESA</th>
+                                <th className="category">CATEGORIA</th>
+                                <th className="deadline">PRAZO</th>
+                                <th className="phone">TELEFONE</th>
+                                <th className="email">EMAIL</th>
+                                <th className="info">INFORMAÇÕES</th>
                             </thead>
                             <tbody>
                                 {allSuppliers.map((sup,index)=>(
@@ -332,7 +331,7 @@ function Suppliers(){
                                             <div className="fields">
                                                 <label htmlFor="">Contrato Assinado</label>
                                                 <button type="button" onClick={handleButtonFile} className="btn-modal-file-users">
-                                                    <input hidden onChange={handleInputFile} ref={fileRef} type="file" name="" id="" />
+                                                    <input hidden onChange={handleInputFile} ref={fileRef} type="file" name="" className="" />
                                                     <p>Adicionar arquivo</p>
                                                 </button>
                                             </div>
@@ -441,7 +440,7 @@ function Suppliers(){
                                                     <div className="fields">
                                                         <label htmlFor="">Contrato Assinado</label>
                                                         <button type="button" onClick={handleButtonFile} className="btn-modal-file-users">
-                                                            <input hidden onChange={handleInputFile} ref={fileRef} type="file" name="" id="" />
+                                                            <input hidden onChange={handleInputFile} ref={fileRef} type="file" name="" className="" />
                                                             <p>Adicionar arquivo</p>
                                                         </button>
                                                     </div>

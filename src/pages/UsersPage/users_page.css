@@ -163,61 +163,47 @@ form{
 .container-users{
     background-color: #fffdf8;
     width: 100%;
-    display: flex;
-    justify-content: center;
     border-radius: 5px;
     box-shadow: 0 5px 30px 0 rgba(0, 0, 0, 0.2);
+    overflow: hidden;
 }
 
 .container-users table{
     width: 100%;
     border-collapse: collapse;
+    border-spacing: 0;
 }
 
-#name{
+.table th{
+  padding: 20px 16px;         
+  font-weight: 700;
+  border: none;
+  text-align: center;
+}
+
+
+.name{
 background-color: #ffa000;
-border-top-left-radius: 5px;
-border-top-right-radius: 5px;
-text-align: center;
 }
 
-#role{
+.role{
 background-color: #ffb300;
-border-top-left-radius: 5px;
-border-top-right-radius: 5px;
-text-align: center;
-
 }
 
-#email-users{
+.email-users{
 background-color: #ffd54f;
-border-top-left-radius: 5px;
-border-top-right-radius: 5px;
-text-align: center;
-
 }
 
-#phone-users{
+.phone-users{
 background-color: #ffe082;
-border-top-left-radius: 5px;
-border-top-right-radius: 5px;
-text-align: center;
-
 }
 
-#access_level{
+.access_level{
 background-color: #ffecb3;
-border-top-left-radius: 5px;
-border-top-right-radius: 5px;
-text-align: center;
-
 }
 
-#info-users{
+.info-users{
 background-color: #ffe0b2;
-border-top-left-radius: 5px;
-border-top-right-radius: 5px;
-text-align: center;
-
 }
+
 

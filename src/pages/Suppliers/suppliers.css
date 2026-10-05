@@ -82,63 +82,53 @@
     justify-content: center;
     border-radius: 5px;
     box-shadow: 0 5px 30px 0 rgba(0, 0, 0, 0.2);
+    overflow: hidden;
 }
 
 .container-suppliers table{
     width: 100%;
     border-collapse: collapse;
+    border-spacing: 0;
 }
 
+.table th{
+  padding: 20px 16px;         
+  font-weight: 700;
+  border: none;
+  text-align: center;
+}
 
 li button{
     font-size: 15px;
 }
 
-#entreprise{
+.entreprise{
     background-color: #1a3573;
-    border-top-left-radius: 5px;
-    border-top-right-radius: 5px;
-    text-align: center;
     color: white;
 }
 
-#category{
+.category{
     background-color: #264a9f;
-    border-top-left-radius: 5px;
-    border-top-right-radius: 5px;
-    text-align: center;
     color: white;
 }
 
-#deadline{
+.deadline{
     background-color: #3b74fa;
-    border-top-left-radius: 5px;
-    border-top-right-radius: 5px;
-    text-align: center;
     color: white;
 }
 
-#phone{
+.phone{
     background-color: #7ca6fc;
-    border-top-left-radius: 5px;
-    border-top-right-radius: 5px;
-    text-align: center;
     color: #203371;
 }
 
-#email{
+.email{
     background-color: #a1c0fc;
-    border-top-left-radius: 5px;
-    border-top-right-radius: 5px;
-    text-align: center;
     color: #2e479c;
 }
 
-#info{
+.info{
     background-color: #deeaff;
-    border-top-left-radius: 5px;
-    border-top-right-radius: 5px;
-    text-align: center;
     color: #203371;
 }
 
