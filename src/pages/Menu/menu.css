@@ -228,6 +228,106 @@ text-align: center;
 
 .container-tags-modal{
     display: flex;
+    width: 550px;
     flex-direction: row;
     justify-content: space-between;
+    margin-right: 20px;
+    margin-right: 9px;
+    padding: 10px;
+}
+
+#container-create-label{
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+
+#submit-label{
+    background-color: #7eb5f8;
+    color: #000000;
+    font-size: 14px;
+    font-weight: 700;
+    border-radius: 8px;
+    width: 230px;
+    height: 30px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 30px;
+    align-items: center;
+    position: relative;
+    cursor: pointer;
+    text-align: center;
+}
+
+#submit-label:hover{
+    background-color: #6aa0e0;
+}
+
+.labelName{
+    border-radius: 5px;
+    border: 1px solid #000000;
+    width: 160px;
+    height: 20px;
+    display: flex;
+    flex-direction: row;
+    margin-top: 5px;
+}
+
+
+
+
+.label-style{
+    border-radius: 5px;
+    width: 200px;
+    height: 30px;
+    margin: 10px 5px 5px 0px;
+    list-style-type: none;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+}
+
+#save-changes{
+    background-color: #f5ae47;
+    font-size: 14px;
+    font-weight: 700;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 30px;
+    align-items: center;
+    position: relative;
+    cursor: pointer;
+    text-align: center;
+    width: 230px;
+    height: 30px;
+}
+
+#save-changes:hover{
+    background-color: #e29736;
+}
+
+.edit-tag-color{
+    border: none;
+    width: 60px;
+    height: 30px;
+    background-color: transparent;
+    cursor: pointer;
+    display: flex;
+    flex-direction: row;
+    margin-top: 7px;
+}
+
+#label-img{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    margin-left: 100px;
 }
