@@ -279,7 +279,8 @@ function UsersPage(){
                                     type="search" 
                                     placeholder="Buscar usuários..." 
                                     style={{ 
-                                    backgroundColor: "#cae2ff", 
+                                    backgroundColor: "transparent",
+                                    border: "1px solid #00000065",  
                                     fontSize: "16px", 
                                     padding: "10px 20px", 
                                     paddingLeft: "50px",
