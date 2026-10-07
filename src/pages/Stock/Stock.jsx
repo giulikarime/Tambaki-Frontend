@@ -228,8 +228,8 @@ function Stock() {
     const qtdVencendo = produtosProximosVencimento.length;
 
     const text_vencidos = qtdVencendo.length > 0
-        ? ''
-        : `- ${String(qtdVencendo)} perto do vencimento`;
+        ? `- ${String(qtdVencendo)} perto do vencimento`
+        : '';
 
     // ===================== Lista de produtos filtrada (botões + modal) =====================
     const today = new Date();
@@ -439,7 +439,7 @@ function Stock() {
         if (!formData.has(fieldName)) return fallback;
         const raw = formData.get(fieldName);
         if (raw === '' || raw === null) return fallback;
-        const parsed = parseInt(raw);
+        const parsed = parseFloat(raw);
         return isNaN(parsed) ? fallback : parsed;
     }
 
@@ -741,22 +741,24 @@ function Stock() {
                                             mode.multiply ? (
                                                 <div className="fields-allergens">
                                                     <label>{mode.label}</label>
-                                                    <ul className="input-select-model ul-list">
-                                                        {selectAllergensForProducts.length <=0 ? (
-                                                            <p>Nenhum alergênico selecionado.</p>
-                                                        ) : (
-                                                            selectAllergensForProducts.map((allergen,i)=>(
-                                                                <li
-                                                                    key={i}
-                                                                    className="li-style-model"
-                                                                >{allergen.replaceAll('_',' ')}
-                                                                    <button
-                                                                        type="button"
-                                                                        onClick={()=>setSelectAllergensForProducts(prev => prev.filter(a => a !== allergen))}
-                                                                    >&times;</button>
-                                                                </li>
-                                                            ))
-                                                        )}
+                                                    <div style={{display:'flex',flexDirection:'row',gap: '10px',alignItems:'center'}}>
+                                                        <ul className="input-select-model ul-list">
+                                                            {selectAllergensForProducts.length <=0 ? (
+                                                                <p>Nenhum alergênico selecionado.</p>
+                                                            ) : (
+                                                                selectAllergensForProducts.map((allergen,i)=>(
+                                                                    <li
+                                                                        key={i}
+                                                                        className="li-style-model"
+                                                                    >{allergen.replaceAll('_',' ')}
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={()=>setSelectAllergensForProducts(prev => prev.filter(a => a !== allergen))}
+                                                                        >&times;</button>
+                                                                    </li>
+                                                                ))
+                                                            )}
+                                                        </ul>
                                                         <button 
                                                             className="add-category-ul-list"
                                                             type="button"
@@ -764,7 +766,7 @@ function Stock() {
                                                         >
                                                             <Plus></Plus>
                                                         </button>
-                                                    </ul>
+                                                    </div>
                                                     {addAllergensToListModal ? (
                                                         <ul className="add-allergen-select">
                                                             {mode.product_enum.map((all,i)=>(
@@ -1255,7 +1257,7 @@ function Stock() {
                     filtersTitle={filtersModal}
                     filtersData={filtersData}
                     selectedFilters={selectedModalFilters}
-                    setSelectedFilters={selectedModalFilters}>
+                    setSelectedFilters={setSelectedModalFilters}>
                 </FiltersModal>
 
             </main>

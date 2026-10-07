@@ -33,11 +33,13 @@
     align-items: center;
     bottom: 0;
     right: 0;
-    margin: 5px;
     background-color: #333333;
     color: white;
     border-radius: 50px;
     padding: 5px;
+    width: 40px;
+    height: 37px;
+    justify-content: center;
 }
 
 .add-categorie-select{
@@ -80,8 +82,8 @@
     width: 100%;
     display: flex;
     justify-content: center;
-    border-radius: 5px;
-    box-shadow: 0 5px 30px 0 rgba(0, 0, 0, 0.2);
+    border-radius: 15px;
+    box-shadow: 0 5px 30px 0 rgba(141, 19, 19, 0.2);
     overflow: hidden;
 }
 
@@ -132,7 +134,12 @@ li button{
     color: #203371;
 }
 
-.see-more-users{
+.see-more-sup{
     background-color: #3a74fa;
+    width: 100%;
+    border-radius: 50px;
+    padding: 6px 5px;
+    color: white;
+    font-weight: 700;
 }
 

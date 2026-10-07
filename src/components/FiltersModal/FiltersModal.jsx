@@ -86,16 +86,21 @@ function FiltersModal({
                             {isExpanded && filtersData[title] && (
                                 <ul className="container-filters-options">
                                     {filtersData[title].map((option) => {
-                                        const isSelected = selectedFilters[title] === option;
+                                        // 1. Extrai o texto/valor legível para comparação e exibição
+                                        const optionValue = typeof option === 'object' ? (option.value || option.name || option.id) : option;
+                                        const optionLabel = typeof option === 'object' ? (option.label || option.name) : String(option);
+
+                                        // 2. Compara se o item atual é o selecionado
+                                        const isSelected = selectedFilters[title] === optionValue;
 
                                         return (
                                             <button
                                                 type="button"
-                                                key={option}
-                                                onClick={() => handleSelectFilter(title, option)}
+                                                key={optionValue}
+                                                onClick={() => handleSelectFilter(title, optionValue)}
                                                 className={isSelected ? "filter-option-active" : ""}
                                             >
-                                                {option.replaceAll('_', ' ')} {isSelected && "✓"}
+                                                {optionLabel.replaceAll('_', ' ')} {isSelected && " ✓"}
                                             </button>
                                         );
                                     })}

@@ -27,11 +27,7 @@ function UsersPage(){
 
     const [allUsers,setAllUsers] = useState([]);
     const user = getLoggedUser();
-
-    const [rolevalue,setRoleValue] = useState('');
-    const [accessLevelValue,setAccessLevelValue] = useState('');
-    const [employTypeValue,setEmployTypeValue] = useState('');
-    const [shiftValue,setShiftValue] = useState('');
+    const [search,setSearch] = useState('');
 
     const [usersEnums,setUsersEnums] = useState({
         access_level: [],
@@ -75,6 +71,41 @@ function UsersPage(){
         "Horário de Trabalho": null
     });
 
+    const filteredUsers = allUsers.filter((user) => {
+        if (search.trim() !== '') {
+            const term = search.toLowerCase();
+            const matchesName = user.name?.toLowerCase().includes(term);
+            const matchesEmail = user.email?.toLowerCase().includes(term);
+            const matchesRole = user.role?.toLowerCase().includes(term);
+
+            if (!matchesName && !matchesEmail && !matchesRole) {
+                return false;
+            }
+        }
+
+        if (selectedModalFilters["Nível de Acesso"]) {
+            const userAccess = user.access_level || user.accessLevel;
+            if (userAccess !== selectedModalFilters["Nível de Acesso"]) {
+                return false;
+            }
+        }
+
+        if (selectedModalFilters["Modelo de Contrato"]) {
+            const userEmploy = user.employ_type || user.employType;
+            if (userEmploy !== selectedModalFilters["Modelo de Contrato"]) {
+                return false;
+            }
+        }
+
+        if (selectedModalFilters["Horário de Trabalho"]) {
+            if (user.shift !== selectedModalFilters["Horário de Trabalho"]) {
+                return false;
+            }
+        }
+
+        return true;
+    });
+
     useEffect(()=>{
         async function get_enums() {
             try {
@@ -88,15 +119,7 @@ function UsersPage(){
         get_enums();
     },[])
 
-    const [filterProductModalIsOpen, setFilterProductModalIsOpen] = useState(false);
-    const [filterProductIsClicked, setFilterProductIsClicked] = useState(null);
-
-    const handleSelectModalFilter = (category, option) => {
-        setSelectedModalFilters(prev => ({
-            ...prev,
-            [category]: prev[category] === option ? null : option
-        }));
-    };
+    const [filterModalIsOpen, setModalFilterIsOpen] = useState(false);
 
     const modalStyle = {
         overlay: {
@@ -177,6 +200,14 @@ function UsersPage(){
         }
     }
 
+    function parseNumberOrFallback(formData, fieldName, fallback) {
+        if (!formData.has(fieldName)) return fallback;
+        const raw = formData.get(fieldName);
+        if (raw === '' || raw === null) return fallback;
+        const parsed = parseInt(raw);
+        return isNaN(parsed) ? fallback : parsed;
+    }
+
     async function handleCreateUser(e) {
         e.preventDefault('');
         setFormError('');
@@ -189,7 +220,7 @@ function UsersPage(){
             email: String(formData.get('email_add_user')),
             phone: String(formData.get('phone_add_user')),
             password: String(formData.get('pass_add_user')),
-            role: formData.get('role_add_user') || usersEnums.roles[0],
+            role: String(formData.get('role_add_user')),
             access_level: formData.get('access_level_add_user') || usersEnums.access_level[0],
             employ_type: formData.get('employ_add_user') || usersEnums.employ_type[0],
             shift: formData.get('shift_add_user') || usersEnums.shift[0],
@@ -224,6 +255,7 @@ function UsersPage(){
         setFormSuccess('');
         setAlertType('');
         const formData = new FormData(e.target);
+        console.log(parseNumberOrFallback(formData,'salary_add_user',selectedUser.salary));
         const payload = {
             name: String(formData.get('name_add_user')) || selectedUser.name,
             cpf: String(formData.get('cpf_add_user')) || selectedUser.cpf,
@@ -236,7 +268,7 @@ function UsersPage(){
             shift: formData.get('shift_add_user') || selectedUser.shift,
             hire_date: new Date(formData.get('date_add_user')).toISOString() || selectedUser.hire_date,
             weekly_hours: parseInt(formData.get('hours_add_user')) || selectedUser.weekly_hours,
-            salary: parseFloat(formData.get('salary_add_user')) || selectedUser.salary,
+            salary: parseNumberOrFallback(formData,'salary_add_user',selectedUser.salary),
             bankName: String(formData.get('bank_add_user')) || selectedUser.bankName,
             active: true,
             employe_document: documentUrl || selectedUser.employe_document,
@@ -244,7 +276,7 @@ function UsersPage(){
         }
 
         try{
-            await editUsers(payload);
+            await editUsers(payload,selectedUser.id);
             await handleGetUsers();
             setEditUserModalIsOpen(false);
             setFormSuccess(`Funcionário(a) ${selectedUser.name} editado com sucesso!`);
@@ -290,6 +322,7 @@ function UsersPage(){
             }
             }, [editUserModalIsOpen, selectedUser]);
 
+
     return(
         <>
             <Header expanded={expanded} setExpand={setExpand} setHasInteracted={setHasInteracted} ></Header>
@@ -300,16 +333,15 @@ function UsersPage(){
                         <div style={{display:'flex',flexDirection:'column',gap:15}}>
                             <div style={{display:'flex',flexDirection:'row',gap: 15,alignItems:'center'}}>
                                 <button className="btn-back-base" onClick={()=>navigate(-1)}><ChevronLeft></ChevronLeft></button>
-                                <h1>Funcionários</h1>
+                                <h1>Usuários</h1>
                             </div>
                             <p style={{ color: '#777171ff' }}>Localize seus usuários e edite informações</p>
                         </div>
                         <div style={{display:'flex',flexDirection:'row',alignItems:'center',gap:15}}>
-                            <button onClick={()=>setCreateUserModalIsOpen(!createUserModalIsOpen)} id='btn-plus-stock'><Plus></Plus></button>
+                            <button onClick={()=>setCreateUserModalIsOpen(!createUserModalIsOpen)} className='btn-plus-stock orange'><Plus></Plus></button>
                             <button
-                                onClick={()=>setFilterProductModalIsOpen(!filterProductModalIsOpen)}
-                             id='btn-funnel-base' 
-                             className="btn-stock-base">Filtrar <Funnel size={20}></Funnel></button>
+                                onClick={()=>setModalFilterIsOpen(!filterModalIsOpen)}
+                             className="btn-funnel-base btn-stock-base orange">Filtrar <Funnel size={20}></Funnel></button>
                             <div style={{ position: "relative"}}>
                                 <Search 
                                     style={{ 
@@ -319,18 +351,21 @@ function UsersPage(){
                                     transform: "translateY(-50%)", 
                                     color: "#00000065" 
                                     }} 
-                                    size={20} 
+                                    size={20}
                                 />
                                 <input 
                                     type="search" 
+                                    value={search}
+                                    onChange={(e) => setSearch(e.target.value)}
                                     placeholder="Buscar usuários..." 
                                     style={{ 
-                                    backgroundColor: "#cae2ff", 
+                                    backgroundColor: "#f0b96eff", 
                                     fontSize: "16px", 
                                     padding: "10px 20px", 
                                     paddingLeft: "50px",
                                     borderRadius: "50px", 
                                     width: "100%" ,
+                                    color: 'black'
                                     }} 
                                 />
                             </div>
@@ -348,20 +383,28 @@ function UsersPage(){
                                     <th className='info-users'>INFORMAÇÕES</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                {allUsers.map((employees,index)=>(
-                                    <tr className="tr-th-group" key={index}>
-                                            <td>{employees.name}</td>
-                                            <td>{employees.role}</td>
-                                            <td>{employees.email}</td>
-                                            <td>{employees.phone}</td>
-                                            <td>{employees.access_level}</td>
-                                            <td><button onClick={()=>{
-                                                setEditUserModalIsOpen(true)
-                                                setSelectedUser(employees)
-                                                }} className="see-more-users">Ver mais</button></td>
-                                        </tr>
-                                ))}
+                                <tbody>
+                                {filteredUsers.length != 0 ? 
+                                    filteredUsers.map((employees,index)=>(
+                                            <tr className="tr-th-group" key={index}>
+                                                    <td>{employees.name}</td>
+                                                    <td>{employees.role}</td>
+                                                    <td>{employees.email}</td>
+                                                    <td>{employees.phone}</td>
+                                                    <td>{employees.access_level}</td>
+                                                    <td><button onClick={()=>{
+                                                        setEditUserModalIsOpen(true)
+                                                        setSelectedUser(employees)
+                                                        }} className="see-more-users">Ver mais</button></td>
+                                                </tr>
+                                        )) : (
+                                            <tr>
+                                                <td colSpan="6" style={{ textAlign: 'center' }}>
+                                                    <p>Nenhum usuário encontrado.</p>
+                                                </td>
+                                            </tr>
+                                        )    
+                                    }
                             </tbody>
                         </table>
                     </div>
@@ -425,7 +468,7 @@ function UsersPage(){
                     isOpen={editUserModalIsOpen}
                     onRequestClose={()=>{
                         setEditUserModalIsOpen(false)
-                        setEnableEditMode(false);
+                        setEnableEditMode(!enableEditMode);
                     }}
                     contentLabel="Editar Usuário"
                     shouldCloseOnOverlayClick={true}
@@ -446,7 +489,7 @@ function UsersPage(){
                                         style={{display:'flex',flexDirection:'row',alignItems:'center',gap:'10px',fontSize:'18px'}}>{enable_edit_text}<SquarePen></SquarePen></button>
                                     <button onClick={()=>{
                                         setEditUserModalIsOpen(false)
-                                        setEnableEditMode(false)
+                                        setEnableEditMode(!enableEditMode)
                                     }}>&times;</button>
                                 </div>
                                 <p style={{'fontSize': 15,'color': '#777171ff'}}>{subtitle_edit_text}</p>
@@ -474,7 +517,7 @@ function UsersPage(){
                                         item.model === 'input' ?  (
                                             <div key={index} className="fields">
                                                 <label>{item.label}</label>
-                                                <input readOnly={!enableEditMode} className="input-select-model" name={item.name} type={item.type} 
+                                                <input step={item.step} readOnly={!enableEditMode} className="input-select-model" name={item.name} type={item.type} 
                                                     placeholder={ item.isPassword? '••••••••' : selectedUser?.[item.placeholderEdit]} />
                                             </div>
                                         ) : (
@@ -493,7 +536,7 @@ function UsersPage(){
                                     <div className="fields">
                                         <label htmlFor="">Contrato de Trabalho</label>
                                         <button type="button"
-                                            onClick={editUserStatus ? handleButtonClick : () => {
+                                            onClick={enableEditMode ? handleButtonFile : () => {
                                                         if (selectedUser?.employe_document) {
                                                             window.open(selectedUser.employe_document, '_blank', 'noopener,noreferrer');
                                                         } else {
@@ -501,13 +544,17 @@ function UsersPage(){
                                                         }
                                                 }}
                                             className="btn-modal-file-users">
-                                            <input hidden onChange={handleFileClick} ref={fileRef} type="file" name="" id="" />
+
                                             <p>{enableEditMode ? ("Adicionar arquivo") : ("Ver arquivo")}</p>
+                                            {enableEditMode && (
+                                                <input hidden type="file" name="" id="" ref={fileRef} onChange={handleFileClick}/>
+                                            )}
+
                                         </button>
                                         <div className='file_name_style'>
                                             <p style={{fontSize: 14, whiteSpace: 'nowrap'}}>{newDocumentUrlUser? newDocumentUrlUser.split('/').pop() : fileName}</p>
                                             {newDocumentUrlUser ? (
-                                                !editUserStatus ? "" : <button type="button" onClick={()=>setNewDocumentUrlUser(null)}>
+                                                !enableEditMode ? "" : <button type="button" onClick={()=>setNewDocumentUrlUser(null)}>
                                                     <X color={'#3553b5'} size={15}></X>
                                                 </button>
                                             ) : ''}
@@ -529,12 +576,12 @@ function UsersPage(){
                 </Modal>
 
                 <FiltersModal
-                    isOpen={filterProductModalIsOpen}
-                    setIsOpen={setFilterProductModalIsOpen}
+                    isOpen={filterModalIsOpen}
+                    setIsOpen={setModalFilterIsOpen}
                     filtersTitle={filtersModal}
                     filtersData={filtersData}
                     selectedFilters={selectedModalFilters}
-                    setSelectedFilters={selectedModalFilters}>
+                    setSelectedFilters={setSelectedModalFilters}>
                 </FiltersModal>
 
                 <AlertModals
