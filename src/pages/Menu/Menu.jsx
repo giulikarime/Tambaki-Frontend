@@ -551,7 +551,7 @@ function Menu() {
                     style={modalStyleTags}
                 >
                         <div className="top-container-modal">
-                            <h2>Gerenciar Etiquetas</h2>
+                            <h2 className="title">Gerenciar Etiquetas</h2>
                             <button
                                 onClick={()=>{
                                     setTagsModalIsOpen(false);
@@ -561,48 +561,52 @@ function Menu() {
                         </div>
 
                         <div className="container-tags-modal">
+                            <div id="container-create-label">
                             <form className="form-tags" onSubmit={handleCreateTags}>
                                 <h3 htmlFor="">Criar Etiqueta</h3>
                                     
                                 <div>
                                     <label htmlFor="addTagName">Nome</label>
-                                    <input type="text" name="addTagName" id="" required/>
+                                    <input type="text" name="addTagName" className="labelName" required/>
                                 </div>
 
                                 <div>
                                     <label htmlFor="addTagColor">Cor</label>
-                                    <input type="color" name="addTagColor" id="" required />
+                                    <input type="color" name="addTagColor" className="edit-tag-color" required />
                                 </div>
 
-                                <button type="submit">Salvar</button>
+                                <button type="submit" id="submit-label">Salvar</button>
                             </form>
-
+                            
+                            </div>
                             <div>
-                                <h3>Minhas Etiquetas</h3>
+                                <h3 className="title">Minhas Etiquetas</h3>
                                 <ul>
                                     {tags.length <= 0 ? (
                                         <p>Nenhuma etiqueta criada.</p>
                                     ) : (
                                         <div>
                                             {tags.map((item,i)=>(
-                                                <li style={{backgroundColor: item.color}} key={i}>{item.name} 
-                                                    <button onClick={()=>{setSelectedTag(item),setEditTagsModalIsOpen(!editTagsModalIsOpen)}}><SquarePen></SquarePen></button> 
-                                                    <button onClick={()=>handleDeleteTags(item)}><Trash></Trash> </button>
+                                                <li className="label-style" style={{backgroundColor: item.color}} key={i}>{item.name} 
+                                                    <div id="label-img">
+                                                        <button onClick={()=>{setSelectedTag(item),setEditTagsModalIsOpen(!editTagsModalIsOpen)}}><SquarePen></SquarePen></button> 
+                                                        <button onClick={()=>handleDeleteTags(item)}><Trash></Trash> </button>
+                                                    </div>
                                                 </li>
                                             ))}
                                             {editTagsModalIsOpen ? (
                                                 <form className="form-tags-edit" onSubmit={handleEditTags}>
                                                     <div>
                                                         <label htmlFor="editTagName">Nome</label>
-                                                        <input type="text" name="editTagName" id="" required/>
+                                                        <input type="text" name="editTagName" className="labelName" required/>
                                                     </div>
 
                                                     <div>
                                                         <label htmlFor="editTagColor">Cor</label>
-                                                        <input type="color" name="editTagColor" id="" required />
+                                                        <input type="color" name="editTagColor" className="edit-tag-color" required />
                                                     </div>
 
-                                                    <button type="submit">Salvar Alterações</button>
+                                                    <button type="submit" id="save-changes">Salvar Alterações</button>
                                                 </form>
                                             ) : ('')}
                                         </div>
