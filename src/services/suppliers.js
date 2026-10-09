@@ -14,3 +14,9 @@ export async function getSuppliers() {
 
     return data;
 }
+
+export async function getSuppliersEnums() {
+    const response = await fetch(`${API_URL}/suppliers/enums`);
+    if (!response.ok) throw new Error('Erro ao buscar enums de fornecedores');
+    return response.json();
+}

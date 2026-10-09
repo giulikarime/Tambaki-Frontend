@@ -42,11 +42,11 @@
     justify-content: center;
 }
 
-.add-categorie-select{
-    position: relative;
+.add-categorie-select-sup{
+    position: absolute;
     bottom: 0;
     right: 0;
-    transform: translate(190px,-5px);
+    transform: translate(220px,10px);
     list-style-type: none;
     background-color: #f7f2f2;
     border-radius: 5px;
@@ -55,9 +55,10 @@
     filter: drop-shadow(-7px 7px 3px rgba(85, 35, 35, 0.2));
     padding: 15px 0 15px 0;
     z-index: 5;
+    width: 200px;
 }
 
-.add-categorie-select::after{
+.add-categorie-select-sup::after{
     content: '';
     position: relative;
     bottom: 15px;
@@ -69,11 +70,11 @@
     border-right: 15px solid #f7f2f2;
 }
 
-.add-categorie-select li{
+.add-categorie-select-sup li{
     padding: 3px 15px 3px 15px
 }
 
-.add-categorie-select li:hover{
+.add-categorie-select-sup li:hover{
     background-color: rgb(122, 154, 223);
 }
 

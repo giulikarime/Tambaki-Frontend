@@ -4,7 +4,7 @@ import Sidebar from "../../components/HeaderAndSidebar/Sidebar";
 import { useNavigate } from "react-router-dom";
 import {ChevronLeft,ChevronRight,ChevronDown,Funnel,Plus,Search,SquarePen,Trash} from "lucide-react";
 
-import { getSuppliers } from "../../services/suppliers";
+import { getSuppliers, getSuppliersEnums } from "../../services/suppliers";
 import './suppliers.css'
 import { AuthContext } from "../../services/AuthContext";
 import Modal from 'react-modal'
@@ -25,11 +25,8 @@ function Suppliers(){
     const [employTypeValue,setEmployTypeValue] = useState('');
     const [shiftValue,setShiftValue] = useState('');
 
-    const [usersEnums,setUsersEnums] = useState({
-        roles: [],
-        access_levels: [],
-        employ_types: [],
-        shifts: [],
+    const [suppliersEnums,setSuppliersEnums] = useState({
+        category: [],
     })
 
     const inputValues = [
@@ -42,7 +39,7 @@ function Suppliers(){
         {label: 'Telefone', model: 'input', type: 'text', name: 'phone_add_supplier',placeholder: 'Exemplo.: 1198765342', placeholderEdit: `phone`},
         {label: 'Prazo de Entrega', model: 'select', name: 'lead_time_days_add_supplier', placeholderEdit: `lead_time_days`},
         {label: 'Contrato de Trabalho', model: 'input', type: 'file', name: 'url_add_supplier'},
-        {label: 'Categorias', model: 'input', type: 'text', list: true, name: 'categories_add_supplier',placeholder: 'Selecione categorias...', placeholderEdit: `categories`}
+        {label: 'Categorias', model: 'input', type: 'text', list: true, name: 'categories_add_supplier',placeholder: 'Selecione categorias...', placeholderEdit: `categories`},
     ]
 
     //modais
@@ -54,7 +51,7 @@ function Suppliers(){
     const filtersModal = ["Categoria","Prazo"];
     
     const filtersData = {
-        "Categoria": ["Carnes_e_Pescados", "Hortifrúti", "Laticínios", "Embutidos", "Secos"],
+        "Categoria": suppliersEnums.category,
         "Prazo": ["1 a 3 dias", "4 a 6 dias", "7 a 10 dias", "+10 dias"],
     };
 
@@ -62,6 +59,19 @@ function Suppliers(){
         "Categoria": null,
         "Prazo": null,
     });
+
+    useEffect(()=>{
+        async function get_enums() {
+            try {
+                const enums_suppliers = await getSuppliersEnums();
+                setSuppliersEnums(enums_suppliers || {});
+            } catch (error) {
+                console.error("Erro ao carregar os dados dos formularios.", error);
+            }
+        }
+
+        get_enums();
+    },[])
 
     const [selectCategoriesForSupplier,setSelectCategoriesForSupplier] = useState([]);
 
@@ -162,8 +172,22 @@ function Suppliers(){
         fileRef.current.click()
     }
 
-    function handleInputFile(e){
-        const file = e.target.files[0];
+    async function handleFileClick(event) {
+        const file = event.target.files[0];
+
+        if(!file){
+            setFileName('Nenhum arquivo selecionado');
+        }
+
+        setFileName(file.name);
+
+        try {
+            const url = await uploadFile(file);
+            setDocumentUrl(url);
+        } catch (error) {
+            console.error("Erro ao enviar arquivo: ", error);
+            setFormError('Não foi possível enviar o arquivo.');
+        }
     }
 
     async function handleGetSuppliers() {
@@ -227,19 +251,20 @@ function Suppliers(){
                     <div className="container-suppliers">
                         <table className="table"> 
                             <thead className="thead-style-sup tr-th-group">
-                                <th className="entreprise">EMPRESA</th>
-                                <th className="category">CATEGORIA</th>
-                                <th className="deadline">PRAZO</th>
-                                <th className="phone">TELEFONE</th>
-                                <th className="email">EMAIL</th>
-                                <th className="info">INFORMAÇÕES</th>
+                                <tr>
+                                    <th className="entreprise">EMPRESA</th>
+                                    <th className="category">CATEGORIA</th>
+                                    <th className="deadline">PRAZO</th>
+                                    <th className="phone">TELEFONE</th>
+                                    <th className="email">EMAIL</th>
+                                    <th className="info">INFORMAÇÕES</th>
+                                </tr>
                             </thead>
                             <tbody>
                                 {allSuppliers.map((sup,index)=>(
-                                    <>
-                                        <tr className="tr-th-group" key={index}>
+                                    <tr className="tr-th-group" key={index}>
                                             <td>{sup.company_name}</td>
-                                            <td>{sup.category}</td>
+                                            <td>{sup.category.replaceAll('_'," ")}</td>
                                             <td>{sup.lead_time_days} {sup.lead_time_days > 1 ? 'dias' : 'dia'}</td>
                                             <td>{sup.phone}</td>
                                             <td>{sup.email}</td>
@@ -247,8 +272,7 @@ function Suppliers(){
                                                 setEditSupModalIsOpen(!editSupModalIsOpen)
                                                 setSelectedSupplier(sup)
                                                 }} className="see-more-sup">Ver mais</button></td>
-                                        </tr>
-                                    </>
+                                    </tr>
                                 ))}
                             </tbody>
                         </table>
@@ -275,7 +299,7 @@ function Suppliers(){
                         </div>
                         <p style={{'font-size': 15,'color': '#777171ff'}}>Adicione fornecedores à sua unidade.</p>
                     </div>
-                    <form action="">
+                    <form action="" onClick={()=>addCategorySelectIsClicked ? setAddCategorySelectIsClicked(false) : ''}>
 
                         <div className="container-form">
                             {inputValues.map((item,index)=>(
@@ -284,21 +308,23 @@ function Suppliers(){
                                     
                                         <div key={index} className="fields" style={{position:'relative'}}>
                                             <label>{item.label}</label>
-                                            <ul className="input-select-model ul-list">
-                                                {selectCategoriesForSupplier.length <=0 ? (
-                                                    <p>Nenhuma categoria adicionada.</p>
-                                                ) : (
-                                                    selectCategoriesForSupplier.map((categoria)=>(
-                                                        <li
-                                                            className="li-style-model"
-                                                        >{categoria.replaceAll('_',' ')}
-                                                            <button
-                                                                type="button"
-                                                                onClick={()=>setSelectCategoriesForSupplier(prev => prev.filter(c => c !== categoria))}
-                                                            >&times;</button>
-                                                        </li>
-                                                    ))
-                                                )}
+                                            <div style={{display:'flex',flexDirection:'row',gap: '10px',alignItems:'center'}}>
+                                                <ul className="input-select-model ul-list">
+                                                    {selectCategoriesForSupplier.length <=0 ? (
+                                                        <p>Nenhuma categoria adicionada.</p>
+                                                    ) : (
+                                                        selectCategoriesForSupplier.map((categoria)=>(
+                                                            <li
+                                                                className="li-style-model"
+                                                            >{categoria.replaceAll('_',' ')}
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={()=>setSelectCategoriesForSupplier(prev => prev.filter(c => c !== categoria))}
+                                                                >&times;</button>
+                                                            </li>
+                                                        ))
+                                                    )}                           
+                                                </ul>
                                                 <button 
                                                     className="add-category-ul-list"
                                                     type="button"
@@ -306,10 +332,9 @@ function Suppliers(){
                                                 >
                                                     <Plus></Plus>
                                                 </button>
-                                                
-                                            </ul>
+                                            </div>
                                             {addCategorySelectIsClicked ? (
-                                                    <ul className="add-categorie-select">
+                                                    <ul className="add-categorie-select-sup">
                                                         {filtersData['Categoria'].map((cat,i)=>(
                                                             <li key={i} value={cat}>
                                                                 <button
@@ -327,10 +352,10 @@ function Suppliers(){
                                         
                                     ) : (
                                         item.type === 'file' ? (
-                                            <div className="fields">
+                                            <div key={index} className="fields">
                                                 <label htmlFor="">Contrato Assinado</label>
                                                 <button type="button" onClick={handleButtonFile} className="btn-modal-file-users">
-                                                    <input hidden onChange={handleInputFile} ref={fileRef} type="file" name="" className="" />
+                                                    <input hidden onChange={handleFileClick} ref={fileRef} type="file" name="" className="" />
                                                     <p>Adicionar arquivo</p>
                                                 </button>
                                             </div>
@@ -371,7 +396,7 @@ function Suppliers(){
                     {(()=>{
                         const principal_edit_text = enableEditMode ? `Edite ${selectedSupplier?.company_name}` : `${selectedSupplier?.company_name}`;
                         const enable_edit_text = enableEditMode ? `Desabilitar Edição` : `Habilitar Edição`;
-                        const subtitle_edit_text = enableEditMode ? `Edite os dados de ${selectedSupplier?.company_name}` : "" ;
+                        const subtitle_edit_text = enableEditMode ? `Edite os dados de ${selectedSupplier?.company_name}` : `Visualize os dados de ${selectedSupplier?.company_name}` ;
 
                         return(
                             <>
@@ -398,17 +423,22 @@ function Suppliers(){
                                             
                                                 <div key={index} className="fields" style={{position:'relative'}}>
                                                     <label>{item.label}</label>
-                                                    <ul className="input-select-model ul-list">
-                                                        {selectCategoriesForSupplier.map((categoria)=>(
-                                                            <li
-                                                                className="li-style-model"
-                                                            >{categoria.replaceAll('_',' ')} 
-                                                                {enableEditMode? <button
-                                                                    type="button"
-                                                                    onClick={()=>setSelectCategoriesForSupplier(prev=> prev.filter(c => c!== categoria))}
-                                                                >&times;</button> : ''}
-                                                            </li>
-                                                        ))}
+                                                    <div style={{display:'flex',flexDirection:'row',gap: '10px',alignItems:'center'}}>
+                                                        <ul className="input-select-model ul-list">
+                                                            {selectCategoriesForSupplier.length === 0 ? (
+                                                                <p>Nenhuma categoria foi adicionada.</p>
+                                                            ) : 
+                                                            selectCategoriesForSupplier.map((categoria)=>(
+                                                                <li
+                                                                    className="li-style-model"
+                                                                >{categoria.replaceAll('_',' ')} 
+                                                                    {enableEditMode? <button
+                                                                        type="button"
+                                                                        onClick={()=>setSelectCategoriesForSupplier(prev=> prev.filter(c => c!== categoria))}
+                                                                    >&times;</button> : ''}
+                                                                </li>
+                                                            ))}
+                                                        </ul>
                                                         {enableEditMode ? 
                                                             <button 
                                                                 type="button"
@@ -416,8 +446,8 @@ function Suppliers(){
                                                                 className="add-category-ul-list"><Plus></Plus></button> 
                                                             : ''
                                                         }
-                                                    </ul>
-                                                        {addCategorySelectIsClicked ? (
+                                                    </div>
+                                                    {addCategorySelectIsClicked ? (
                                                             <ul className="add-categorie-select">
                                                                 {filtersData['Categoria'].map((cat,i)=>(
                                                                     <li key={i} value={cat}>
@@ -431,29 +461,40 @@ function Suppliers(){
                                                                 ))}
                                                             </ul>
                                                         ) : ('')}
-                                                    
                                                 </div>
                                                 
                                             ) : (
                                                 item.type === 'file' ? (
-                                                    <div className="fields">
+                                                    <div key={index} className="fields">
                                                         <label htmlFor="">Contrato Assinado</label>
-                                                        <button type="button" onClick={handleButtonFile} className="btn-modal-file-users">
-                                                            <input hidden onChange={handleInputFile} ref={fileRef} type="file" name="" className="" />
-                                                            <p>Adicionar arquivo</p>
+                                                        <button type="button" 
+                                                            onClick={enableEditMode ? handleButtonFile : () => {
+                                                        if (selectedSupplier?.url_document) {
+                                                            window.open(selectedSupplier.url_document, '_blank', 'noopener,noreferrer');
+                                                        } else {
+                                                            setFormError('Nenhum arquivo cadastrado para esse fornecedor.');
+                                                        }
+                                                        }} 
+                                                        className="btn-modal-file-users">
+                                                            <p>{enableEditMode?  'Adicionar Arquivo' : 'Ver arquivo'}</p>
+                                                            {enableEditMode && (
+                                                                <input hidden type="file" name="" id="" ref={fileRef} onChange={handleFileClick}/>
+                                                            )}
                                                         </button>
                                                     </div>
                                                 ) : (
                                                     <div key={index} className="fields">
                                                         <label>{item.label}</label>
-                                                        <input className="input-select-model" name={item.name} type={item.type} placeholder={item.placeholder} />
+                                                        <input className="input-select-model" name={item.name} type={item.type} placeholder={selectedSupplier?.[item.placeholderEdit]} />
                                                     </div>
                                                 )
                                         )) : (
                                             <div key={index} className="fields">
                                                 <label>{item.label}</label>
                                                 <select readOnly={!enableEditMode} className="input-select-model" name={item.name}>
-                                                    <option>Outros</option>
+                                                    {filtersData["Prazo"].map((prazo,index)=>(
+                                                        <option key={index} value={prazo}>{prazo}</option>
+                                                    ))}
                                                 </select>
                                             </div>
                                         )
