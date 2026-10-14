@@ -21,12 +21,16 @@ import Header from "../../components/HeaderAndSidebar/Header";
 import Sidebar from "../../components/HeaderAndSidebar/Sidebar";
 import logoTambaki from "../../assets/Tambaki_Prototype.png";
 import "./configuration.css";
+import { getLoggedUser } from "../../services/auth";
+import {Dot, LockIcon, User2Icon } from "lucide-react";
 
 export default function Configuration() {
   const navigate = useNavigate();
 
   const [expanded, setExpand] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
+
+  const user = getLoggedUser();
 
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -143,30 +147,43 @@ export default function Configuration() {
   };
 
   return (
-    <div className="config-root-container">
-      {toastMessage && (
-        <div className="config-toast animate-slide-in">
-          <CheckCircle2 size={20} color="#15803d" />
-          <span>{toastMessage}</span>
-        </div>
-      )}
-
+    <>
       <Header expanded={expanded} setExpand={setExpand} setHasInteracted={setHasInteracted} />
-
-      <div className="config-workspace">
+      <main>
         <Sidebar expanded={expanded} hasInteracted={hasInteracted} />
+      <div className="principal-menu-config">
 
         <div className="config-scroll-area">
           <div className="config-top-bar">
             <button
-              className="config-back-circle-btn"
+              className="btn-back-base"
               onClick={()=>navigate(-1)}
               title="Voltar"
               aria-label="Voltar para tela anterior"
             >
               <ChevronLeft size={20} color="#ffffff" strokeWidth={2.5} />
             </button>
-            <h1 className="config-page-heading">Configurações</h1>
+            <h1 className="config-page-heading">CONFIGURAÇÕES</h1>
+          </div>
+
+          <div id="card-perfil">
+                <div id="icon-about-me">
+                    <div id="icon">
+                        <User2Icon  color={'rgb(15, 21, 58)'} size={70}></User2Icon>
+                    </div>
+                    <div id="about-me">
+                        <h2>{user?.name}</h2>
+                        <div id="group-about-me">
+                            <p>{user?.role}</p>
+                            <Dot color={'rgb(77, 75, 75)'}></Dot>
+                            <p>{user?.storeUnitId}</p>
+                        </div>
+                    </div>
+                </div>
+                <div id="gerenciamento">
+                    <LockIcon color={'rgb(77, 75, 75)'} size={45}></LockIcon>
+                    <p>Seu perfil é gerenciado pela unidade {user?.storeUnit?.company_name}. Alterações de cargo e permissões são autorizadas pelo responsável administrativo.</p>
+                </div>
           </div>
 
           <div className="config-main-card">
@@ -763,6 +780,7 @@ export default function Configuration() {
           </div>
         </div>
       )}
-    </div>
+    </main>
+    </>
   );
 }
