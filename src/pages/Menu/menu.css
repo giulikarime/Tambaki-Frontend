@@ -4,7 +4,6 @@ main {
     background-color: #fff8e9;
     display: flex;
     flex-direction: column;
-    
 }
 
 
@@ -55,24 +54,23 @@ main {
     margin-left: 930px;
 }
 
-.btn-menu-filter{
-background-color: #7eb5f8;
-color: #000000;
-font-size: 18px;
-font-weight: 700;
-border-radius: 8px;
-width: 170px;
-height: 40px;
-display: flex;
-flex-direction: row;
-justify-content: center;
-gap: 30px;
-align-items: center;
-position: relative;
-cursor: pointer;
-text-align: center;
+.btn-menu-filter {
+    background-color: #7eb5f8;
+    color: #000000;
+    font-size: 18px;
+    font-weight: 700;
+    border-radius: 8px;
+    width: 170px;
+    height: 40px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 30px;
+    align-items: center;
+    position: relative;
+    cursor: pointer;
+    text-align: center;
 }
-
 
 
 #menu-header-bottom {
@@ -90,8 +88,7 @@ text-align: center;
     max-height: 70vh;
 }
 
-
-#container-cards::-webkit-scrollbar{
+#container-cards::-webkit-scrollbar {
     display: none;
 }
 
@@ -99,13 +96,12 @@ text-align: center;
     background-color: #fff;
     display: flex;
     flex-direction: column;
-    align-items: left;
+    align-items: flex-start; /* corrigido: "left" não é valor válido em align-items */
     width: 250px;
     border-radius: 12px;
-    overflow: hidden; 
+    overflow: hidden;
     box-shadow: 0 7px 8px rgba(57, 33, 66, 0.15);
 }
-
 
 .imgMenu {
     width: 100%;
@@ -121,7 +117,6 @@ text-align: center;
     object-position: center;
     display: block;
 }
-
 
 .menuCard-bottom {
     display: flex;
@@ -151,26 +146,27 @@ text-align: center;
 }
 
 
-.top-container-menu{
+.top-container-menu {
     display: flex;
     flex-direction: row;
     gap: 10px;
     width: 100%;
 }
 
-.top-container-modal{
+.top-container-modal {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
 }
 
-.modal-conteudo{
+.modal-conteudo {
     max-height: 60vh;
+    overflow-y: auto; /* adicionado: sem isso o max-height não rola, só vaza */
     display: grid;
     grid-template-columns: repeat(3, 1fr);
 }
 
-.container-add-image{
+.container-add-image {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -182,7 +178,7 @@ text-align: center;
     height: 200px;
 }
 
-.container-exibe-image{
+.container-exibe-image {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -195,28 +191,31 @@ text-align: center;
     border: 1px solid black;
 }
 
-.card-full-image{
+.card-full-image {
     width: 100%;
     height: 100%;
+    object-fit: cover; /* adicionado: evita imagem esticada */
     border-radius: 20px;
 }
 
-.container-buttons-change-image{
+.container-buttons-change-image {
     position: absolute;
     width: 100%;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     padding: 5px;
+    box-sizing: border-box; /* adicionado: width 100% + padding estourava a caixa */
 }
 
-.form-add-menu{
+.form-add-menu {
     display: flex;
     flex-direction: row;
 }
 
-.btn-change-image-bg{
+.btn-change-image-bg {
     background-color: rgba(0, 0, 0, 0.514);
+    border: none;
     border-radius: 50px;
     width: 30px;
     height: 30px;
@@ -224,48 +223,61 @@ text-align: center;
     flex-direction: row;
     align-items: center;
     justify-content: center;
+    cursor: pointer;
 }
 
-.container-tags-modal{
+
+/* ===== Modal de etiquetas ===== */
+/* (estas regras faltavam no arquivo) */
+
+.container-tags-modal {
     display: flex;
-    width: 550px;
+    width: 100%;
+    box-sizing: border-box;
     flex-direction: row;
     justify-content: space-between;
-    margin-right: 20px;
-    margin-right: 9px;
+    gap: 30px;
     padding: 10px;
 }
 
-#container-create-label{
+#container-create-label {
     display: flex;
     flex-direction: column;
     gap: 20px;
 }
 
+.form-tags,
+.form-tags-edit {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
 
-#submit-label{
+.form-tags-edit {
+    margin-top: 20px;
+}
+
+#submit-label {
     background-color: #7eb5f8;
     color: #000000;
     font-size: 14px;
     font-weight: 700;
     border-radius: 8px;
-    width: 230px;
+    width: 170px;
     height: 30px;
     display: flex;
     flex-direction: row;
     justify-content: center;
-    gap: 30px;
     align-items: center;
-    position: relative;
     cursor: pointer;
     text-align: center;
 }
 
-#submit-label:hover{
+#submit-label:hover {
     background-color: #6aa0e0;
 }
 
-.labelName{
+.labelName {
     border-radius: 5px;
     border: 1px solid #000000;
     width: 160px;
@@ -275,23 +287,7 @@ text-align: center;
     margin-top: 5px;
 }
 
-
-
-
-.label-style{
-    border-radius: 5px;
-    width: 200px;
-    height: 30px;
-    margin: 10px 5px 5px 0px;
-    list-style-type: none;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    white-space: nowrap;
-}
-
-#save-changes{
+#save-changes {
     background-color: #f5ae47;
     font-size: 14px;
     font-weight: 700;
@@ -299,35 +295,120 @@ text-align: center;
     display: flex;
     flex-direction: row;
     justify-content: center;
-    gap: 30px;
     align-items: center;
-    position: relative;
     cursor: pointer;
     text-align: center;
-    width: 230px;
+    width: 180px;
     height: 30px;
 }
 
-#save-changes:hover{
+#save-changes:hover {
     background-color: #e29736;
 }
 
-.edit-tag-color{
-    border: none;
-    width: 60px;
-    height: 30px;
-    background-color: transparent;
-    cursor: pointer;
-    display: flex;
-    flex-direction: row;
-    margin-top: 7px;
+/* limite de altura da lista de etiquetas: o que passar disso rola */
+.tags-scroll {
+    width: 262px;
+    max-height: 320px;
+    overflow-y: auto;
+    overflow-x: hidden; /* sem barra de rolagem horizontal embaixo */
+    padding-right: 6px;
+    box-sizing: border-box;
 }
 
-#label-img{
+.tags-list {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.label-style {
+    border-radius: 5px;
+    width: 100%;
+    height: 30px;
+    margin: 8px 0;
+    padding: 0 10px;
+    list-style-type: none;
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: center;
-    gap: 5px;
-    margin-left: 100px;
+    justify-content: space-between; /* nome à esquerda, botões à direita */
+    box-sizing: border-box;
+}
+
+.label-name {
+    flex: 1;
+    min-width: 0;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.label-actions {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0; /* os botões ficam sempre na mesma coluna */
+}
+
+.label-actions button {
+    background: transparent;
+    border: none;
+    color: inherit; /* o ícone acompanha a cor do texto */
+    cursor: pointer;
+    display: flex;
+    padding: 2px;
+}
+
+
+/* Seletor de cores */
+
+.field-label {
+    display: block;
+    margin-bottom: 6px;
+}
+
+.color-picker {
+    display: grid;
+    grid-template-columns: repeat(2, max-content); /* 2 grupos por linha = 6 cores por linha */
+    gap: 8px 14px;
+}
+
+.color-row {
+    display: flex;
+    flex-direction: row;
+    gap: 6px;
+}
+
+.color-option {
+    position: relative; /* corrigido: o radio escondido é absolute e precisa de referência */
+    display: block;
+    cursor: pointer;
+}
+
+.color-option input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.color-option span {
+    display: block;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    box-sizing: border-box;
+}
+
+.color-option input:checked + span {
+    border-color: #000;
+    box-shadow: 0 0 0 2px #fff inset;
+}
+
+.color-option input:focus-visible + span {
+    outline: 2px solid #7eb5f8;
+    outline-offset: 2px;
 }
