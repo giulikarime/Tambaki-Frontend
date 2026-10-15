@@ -185,10 +185,7 @@ function Header({ expanded, setExpand,setHasInteracted }){
             >
                 <ul style={{}} className="user-menu">
                     <li>
-                        <button className="btn-user-modal" onClick={()=>redirect('/perfil')}><User color='black'></User>Perfil</button>
-                    </li>
-                    <li>
-                        <button className="btn-user-modal" onClick={()=>redirect('/configuration')}><Settings color='black'></Settings>Configurações</button>
+                        <button className="btn-user-modal" onClick={()=>redirect('/configuration')}><User color='black'></User>Perfil e Configurações</button>
                     </li>
                     <li>
                         <button className="btn-user-modal" style={{color:'red'}} onClick={logOut}><LogOut color='red'></LogOut>Sair</button>

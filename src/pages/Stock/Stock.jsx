@@ -655,7 +655,7 @@ function Stock() {
             <main>
                 <Sidebar expanded={expanded} hasInteracted={hasInteracted} ></Sidebar>
                 <div id="principal-menu-stock">
-                    <div id='container'>
+                    <div className='container-stock'>
                         <div id="top-container">
                             <div className="groups-top-container">
                                 <button onClick={() => navigate(-1)} className="btn-back-base"><ChevronLeft></ChevronLeft></button>

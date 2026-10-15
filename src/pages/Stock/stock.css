@@ -16,7 +16,7 @@ main{
     gap: 40px;
 }
 
-#container{
+.container-stock{
     display: flex;
     flex-direction: column;
     gap: 15px;

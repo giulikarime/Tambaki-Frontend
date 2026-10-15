@@ -13,6 +13,12 @@
     color: #747474;
 }
 
+.container{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
 .li-style-model{
     display: flex;
     flex-direction: row;

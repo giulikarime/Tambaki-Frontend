@@ -330,46 +330,19 @@ function UsersPage(){
                 <Sidebar expanded={expanded} hasInteracted={hasInteracted} ></Sidebar>
                 <div className="principal-menu-users">
                     <div className="top-container-users">
-                        <div style={{display:'flex',flexDirection:'column',gap:15}}>
+                        <div className="container">
                             <div style={{display:'flex',flexDirection:'row',gap: 15,alignItems:'center'}}>
                                 <button className="btn-back-base" onClick={()=>navigate(-1)}><ChevronLeft></ChevronLeft></button>
                                 <h1>Usuários</h1>
                             </div>
-                            <p style={{ color: '#777171ff' }}>Localize seus usuários e edite informações</p>
-                        </div>
-                        <div style={{display:'flex',flexDirection:'row',alignItems:'center',gap:15}}>
-                            <button onClick={()=>setCreateUserModalIsOpen(!createUserModalIsOpen)} className='btn-plus-stock orange'><Plus></Plus></button>
-                            <button
-                                onClick={()=>setModalFilterIsOpen(!filterModalIsOpen)}
-                             className="btn-funnel-base btn-stock-base orange">Filtrar <Funnel size={20}></Funnel></button>
-                            <div style={{ position: "relative"}}>
-                                <Search 
-                                    style={{ 
-                                    position: "absolute", 
-                                    left: "16px", 
-                                    top: "50%", 
-                                    transform: "translateY(-50%)", 
-                                    color: "#00000065" 
-                                    }} 
-                                    size={20}
-                                />
-                                <input 
-                                    type="search" 
-                                    value={search}
-                                    onChange={(e) => setSearch(e.target.value)}
-                                    placeholder="Buscar usuários..." 
-                                    style={{ 
-                                    backgroundColor: "#f0b96eff", 
-                                    fontSize: "16px", 
-                                    padding: "10px 20px", 
-                                    paddingLeft: "50px",
-                                    borderRadius: "50px", 
-                                    width: "100%" ,
-                                    color: 'black'
-                                    }} 
-                                />
+                            <div style={{display:'flex',flexDirection:'row',alignItems:'center',gap:15}}>
+                                <button onClick={()=>setCreateUserModalIsOpen(!createUserModalIsOpen)} className='btn-plus-item orange'>Adicionar Usuário<Plus></Plus></button>
+                                <button
+                                    onClick={()=>setModalFilterIsOpen(!filterModalIsOpen)}
+                                className="btn-funnel-base btn-plus-item filter">Filtrar <Funnel size={20}></Funnel></button>
                             </div>
                         </div>
+                        <p style={{ color: '#777171ff' }}>Localize seus usuários e edite informações</p>
                     </div>
                     <div className="container-users">
                         <table className="table">

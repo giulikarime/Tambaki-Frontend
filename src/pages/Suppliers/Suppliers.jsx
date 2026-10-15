@@ -1,14 +1,16 @@
-import { useEffect, useRef, useState } from "react";
+import { use, useEffect, useRef, useState } from "react";
 import Header from "../../components/HeaderAndSidebar/Header";
 import Sidebar from "../../components/HeaderAndSidebar/Sidebar";
 import { useNavigate } from "react-router-dom";
-import {ChevronLeft,ChevronRight,ChevronDown,Funnel,Plus,Search,SquarePen,Trash} from "lucide-react";
-
-import { getSuppliers, getSuppliersEnums } from "../../services/suppliers";
+import {ChevronLeft,ChevronRight,ChevronDown,Funnel,Plus,Search,SquarePen,Trash, X} from "lucide-react";
+import { getSuppliers, getSuppliersEnums, createSuppliers, editSuppliers, deleteSuppliers } from "../../services/suppliers";
 import './suppliers.css'
 import { AuthContext } from "../../services/AuthContext";
 import Modal from 'react-modal'
 import React, { Fragment } from 'react';
+import FiltersModal from "../../components/FiltersModal/FiltersModal";
+import AlertModals from "../../components/SucessModals/AlertModals";
+import { uploadFile } from "../../services/upload";
 
 function Suppliers(){
 
@@ -16,6 +18,9 @@ function Suppliers(){
     const [hasInteracted, setHasInteracted] = useState(false);
     const navigate = useNavigate();
     const [formError,setFormError] = useState('');
+    const [formSuccess,setFormSuccess] = useState('');
+    const [alertType,setAlertType] = useState('');
+    const [alertModalIsOpen,setAlertModalIsOpen] = useState(false);
 
     const [allSuppliers,setAllSuppliers] = useState([]);
     const {user} = useState(AuthContext);
@@ -33,8 +38,8 @@ function Suppliers(){
         {label: 'Razão Social', model: 'input', type: 'text', name: 'company_name_add_supplier', placeholder: 'Digite o nome comercial...', placeholderEdit: `company_name`},
         {label: 'Nome Fantasia', model: 'input', type: 'text', name: 'trade_name_add_supplier', placeholder: 'Digite o nome fantasia...', placeholderEdit: `trade_name`},
         {label: 'CNPJ', model: 'input', type: 'text', name: 'cnpj_add_supplier', placeholder: 'Digite o CNPJ...', placeholderEdit: `cnpj`},
-        {label: 'Formas de Pagamento', model: 'input', type: 'text', name: 'payment_terms_add_supplier', placeholder: 'Insira formas de pagamento...', placeholderEdit: `payment_terms`},
         {label: 'Endereço', model: 'input', type: 'text', name: 'adress_add_supplier', placeholder: 'Exemplo: Av. Paulista, 26, Paulista...', placeholderEdit: `adress`},
+        {label: 'Nome do Responsável', model: 'input', type: 'text', name: 'resposible_name_add_supplier',placeholder: 'Digite o nome do responsável...', placeholderEdit: `resposible_name`},
         {label: 'Email', model: 'input', type: 'email', name: 'email_add_supplier',placeholder: 'Exemplo.: saborecia@gmail.com', placeholderEdit: `email`},
         {label: 'Telefone', model: 'input', type: 'text', name: 'phone_add_supplier',placeholder: 'Exemplo.: 1198765342', placeholderEdit: `phone`},
         {label: 'Prazo de Entrega', model: 'select', name: 'lead_time_days_add_supplier', placeholderEdit: `lead_time_days`},
@@ -47,6 +52,17 @@ function Suppliers(){
     const [editSupModalIsOpen,setEditSupModalIsOpen] = useState(false);
     const [enableEditMode,setEnableEditMode] = useState(false);
     const [selectedSupplier,setSelectedSupplier] = useState(null);
+
+    const [editCategoryEnum,setEditCategoryEnum] = useState([]);
+
+    const [selectCategoriesForSupplier,setSelectCategoriesForSupplier] = useState([]);
+    const [filterModalIsOpen, setFilterModalIsOpen] = useState(false);
+
+    useEffect(() => {
+            if (selectedSupplier) {
+                setEditCategoryEnum(selectedSupplier.category || []);
+            }
+        }, [selectedSupplier]);
 
     const filtersModal = ["Categoria","Prazo"];
     
@@ -73,41 +89,6 @@ function Suppliers(){
         get_enums();
     },[])
 
-    const [selectCategoriesForSupplier,setSelectCategoriesForSupplier] = useState([]);
-
-    const [filterProductModalIsOpen, setFilterProductModalIsOpen] = useState(false);
-    const [filterProductIsClicked, setFilterProductIsClicked] = useState(null);
-
-    const handleSelectModalFilter = (category, option) => {
-        setSelectedModalFilters(prev => ({
-            ...prev,
-            [category]: prev[category] === option ? null : option
-        }));
-    };
-
-    const modalFilterProductsStyle = {
-        overlay: {
-            backgroundColor: '#191444be',
-            position: 'fixed',
-            zIndex: 100,
-            inset: 0
-        },
-        content: {
-            position: 'fixed',
-            top: '0',
-            right: '0',
-            left: 'auto',
-            bottom: '0',
-            width: '300px',
-            maxHeight: '100vh',
-            padding: '20px',
-            border: 'none',
-            boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
-            backgroundColor: '#fff',
-            margin: '0'
-        }
-
-    }
 
     const modalStyle = {
         overlay: {
@@ -137,33 +118,6 @@ function Suppliers(){
         }
     }
 
-    const modalCategoriesStyle ={
-        overlay:{
-            position: 'fixed',
-            zIndex: 100,
-            inset: 0
-        },
-        content:{
-            position: 'absolute',
-            overflowY: 'auto',
-            maxHeight: '30vh',
-            scrollbarWidth: 'none',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%,-50%)',
-            bottom: 'auto',
-            width: '65%',
-            padding: '20px',
-            borderRadius: '16px',
-            border: 'none',
-            boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
-            backgroundColor: '#fff',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '20px'
-        }
-    }
-
     const [addCategorySelectIsClicked,setAddCategorySelectIsClicked] = useState(false);
 
     const fileRef = useRef(null);
@@ -171,6 +125,10 @@ function Suppliers(){
     function handleButtonFile(){
         fileRef.current.click()
     }
+
+    const [documentUrl,setDocumentUrl] = useState('');
+    const [fileName,setFileName] = useState('Nenhum arquivo selecionado.');
+    const [newDocumentUrlSupplier,setNewDocumentUrlSupplier] = useState(fileName)
 
     async function handleFileClick(event) {
         const file = event.target.files[0];
@@ -190,6 +148,24 @@ function Suppliers(){
         }
     }
 
+    async function handleRemoveFile() {
+         try {
+            if (documentUrl) {
+                await deleteFile(documentUrl);
+            }
+        } catch (error) {
+            console.error("Erro ao remover o arquivo do servidor: ", error);
+        } finally {
+            setFileName('Nenhum arquivo selecionado.');
+            setDocumentUrl(null);
+            setFormError(null);
+
+            if (fileRef.current) {
+                fileRef.current.value = '';
+            }
+        }
+    }
+
     async function handleGetSuppliers() {
         try{
             const suppliers = await getSuppliers();
@@ -203,6 +179,144 @@ function Suppliers(){
         handleGetSuppliers();
     },[])
 
+    const [search,setSearch] = useState('');
+
+    const filteredSuppliers = allSuppliers.filter((supplier)=>{
+        if(search.trim() !== ''){
+            const term = search.toLowerCase();
+            const matchesCompanyName = supplier.company_name?.toLowerCase().includes(term);
+            const matchesTradeName = supplier.trade_name?.toLowerCase().includes(term);
+
+            if(!matchesCompanyName && !matchesTradeName && !matchesCategory){
+                return false;
+            }
+        }
+
+        if(selectedModalFilters["Categoria"]){
+            if(supplier.category !== selectedModalFilters["Categoria"]){
+                return false;
+            }
+        }
+
+        if(selectedModalFilters["Prazo"]){
+            const days = Number(supplier.lead_time_days);
+            const selectedPrazo = selectedModalFilters["Prazo"];
+
+            let matchesPrazo = false;
+
+            if (selectedPrazo === "1 a 3 dias") {
+                matchesPrazo = days >= 1 && days <= 3;
+            } else if (selectedPrazo === "4 a 6 dias") {
+                matchesPrazo = days >= 4 && days <= 6;
+            } else if (selectedPrazo === "7 a 10 dias") {
+                matchesPrazo = days >= 7 && days <= 10;
+            } else if (selectedPrazo === "+10 dias") {
+                matchesPrazo = days > 10;
+            }
+
+            if (!matchesPrazo) {
+                return false;
+            }
+        }
+
+        return true;
+    })
+
+    async function handleCreateSupplier(e){
+        e.preventDefault();
+        setFormError('');
+        setFormSuccess('');
+        setAlertType('');
+
+        const formData = new FormData(e.target);
+
+        const payload = {
+            company_name: formData.get('company_name_add_supplier'),
+            trade_name: formData.get('trade_name_add_supplier'),
+            cnpj: formData.get('cnpj_add_supplier'),
+            phone: formData.get('phone_add_supplier'),
+            email: formData.get('email_add_supplier'),
+            adress: formData.get('adress_add_supplier'),
+            category: formData.get('categories_add_supplier'),
+            url_document: documentUrl,
+            lead_time_days: parseInt(formData.get('lead_time_days_add_supplier')),
+            resposible_name: formData.get('resposible_name_add_supplier'),
+        };
+
+        try{
+            await createSuppliers(payload);
+            await handleGetSuppliers();
+            setCreateSupModalIsOpen(false);
+            setSelectCategoriesForSupplier([])
+            setFormSuccess('Fornecedor adicionado com sucesso.');
+            setAlertType('success');
+            setAlertModalIsOpen(true);
+            handleRemoveFile();
+            e.target.reset();
+        } catch(error){
+            setFormError(error.message);
+            console.log(error.message)
+            setAlertType('error');
+            setAlertModalIsOpen(true);
+        }
+    }
+
+    async function handleEditSupplier(e){
+        e.preventDefault();
+        setFormError('');
+        setFormSuccess('');
+        setAlertType('');
+
+        const formData = new FormData(e.target);
+
+        const payload = {
+            company_name: formData.get('company_name_add_supplier') || selectedSupplier.company_name,
+            trade_name: formData.get('trade_name_add_supplier') || selectedSupplier.trade_name,
+            cnpj: formData.get('cnpj_add_supplier') || selectedSupplier.cnpj,
+            phone: formData.get('phone_add_supplier') || selectedSupplier.phone,
+            email: formData.get('email_add_supplier') || selectedSupplier.email,
+            adress: formData.get('adress_add_supplier') || selectedSupplier.adress,
+            category: formData.get('categories_add_supplier') || selectedSupplier.category,
+            url_document: documentUrl || selectedSupplier.url_document,
+            lead_time_days: parseInt(formData.get('lead_time_days_add_supplier')) || selectedSupplier.lead_time_days,
+            resposible_name: formData.get('resposible_name_add_supplier') || selectedSupplier.resposible_name,
+        };
+
+        try{
+            await editSuppliers(payload,selectedSupplier.id);
+            await handleGetSuppliers();
+            setEditSupModalIsOpen(false);
+            setFormSuccess(`${selectedSupplier.company_name} editado(a) com sucesso.`);
+            setAlertType('success');
+            setAlertModalIsOpen(true);
+        } catch(error){
+            setFormError(error.message);
+            console.log(error.message)
+            setAlertType('error');
+            setAlertModalIsOpen(true);
+        }
+    }
+
+    async function handleDeleteSupplier(){
+        setFormError('');
+        setFormSuccess('');
+        setAlertType('');
+
+        try{
+            await deleteSuppliers(selectedSupplier.id);
+            await handleGetSuppliers();
+            setEditSupModalIsOpen(false);
+            setFormSuccess(`${selectedSupplier.company_name} deletado(a) com sucesso.`);
+            setAlertType('success');
+            setAlertModalIsOpen(true);
+        } catch(error){
+            setFormError(error.message);
+            console.log(error.message)
+            setAlertType('error');
+            setAlertModalIsOpen(true);
+        }
+    }
+
     return(
         <>
             <Header expanded={expanded} setExpand={setExpand} setHasInteracted={setHasInteracted} ></Header>
@@ -210,43 +324,19 @@ function Suppliers(){
                 <Sidebar expanded={expanded} hasInteracted={hasInteracted} ></Sidebar>
                 <div className="principal-menu-users">
                     <div className="top-container-users">
-                        <div style={{display:'flex',flexDirection:'column',gap:15}}>
+                        <div className="container">
                             <div style={{display:'flex',flexDirection:'row',gap: 15,alignItems:'center'}}>
                                 <button className="btn-back-base" onClick={()=>navigate(-1)}><ChevronLeft></ChevronLeft></button>
                                 <h1>Fornecedores</h1>
                             </div>
-                            <p style={{ color: '#777171ff' }}>Localize seus fornecedores e edite informações</p>
-                        </div>
-                        <div style={{display:'flex',flexDirection:'row',alignItems:'center',gap:15}}>
-                            <button onClick={()=>setCreateSupModalIsOpen(!createSupModalIsOpen)} className='btn-plus-stock'><Plus></Plus></button>
-                            <button
-                                onClick={()=>setFilterProductModalIsOpen(!filterProductModalIsOpen)}
-                                className='btn-funnel-base btn-stock-base'>Filtrar <Funnel size={20}></Funnel></button>
-                            <div style={{ position: "relative"}}>
-                                <Search 
-                                    style={{ 
-                                    position: "absolute", 
-                                    left: "16px", 
-                                    top: "50%", 
-                                    transform: "translateY(-50%)", 
-                                    color: "#00000065" 
-                                    }} 
-                                    size={20} 
-                                />
-                                <input 
-                                    type="search" 
-                                    placeholder="Buscar fornecedores..." 
-                                    style={{ 
-                                    backgroundColor: "#cae2ff", 
-                                    fontSize: "16px", 
-                                    padding: "10px 20px", 
-                                    paddingLeft: "50px",
-                                    borderRadius: "50px", 
-                                    width: "100%" ,
-                                    }} 
-                                />
+                            <div style={{display:'flex',flexDirection:'row',alignItems:'center',gap:15}}>
+                                <button onClick={()=>setCreateSupModalIsOpen(!createSupModalIsOpen)} className='btn-plus-item sup'>Adicionar Fornecedor<Plus></Plus></button>
+                                <button
+                                    onClick={()=>setFilterModalIsOpen(!filterModalIsOpen)}
+                                    className='btn-funnel-base btn-plus-item blue-filter'>Filtrar <Funnel size={20}></Funnel></button>
                             </div>
                         </div>
+                        <p style={{ color: '#777171ff' }}>Localize seus fornecedores e edite informações</p>
                     </div>
                     <div className="container-suppliers">
                         <table className="table"> 
@@ -261,8 +351,9 @@ function Suppliers(){
                                 </tr>
                             </thead>
                             <tbody>
-                                {allSuppliers.map((sup,index)=>(
-                                    <tr className="tr-th-group" key={index}>
+                                {filteredSuppliers.length != 0 ? 
+                                    filteredSuppliers.map((sup,i)=>(
+                                        <tr className="tr-th-group" key={i}>
                                             <td>{sup.company_name}</td>
                                             <td>{sup.category.replaceAll('_'," ")}</td>
                                             <td>{sup.lead_time_days} {sup.lead_time_days > 1 ? 'dias' : 'dia'}</td>
@@ -272,8 +363,15 @@ function Suppliers(){
                                                 setEditSupModalIsOpen(!editSupModalIsOpen)
                                                 setSelectedSupplier(sup)
                                                 }} className="see-more-sup">Ver mais</button></td>
-                                    </tr>
-                                ))}
+                                        </tr>
+                                    )) : (
+                                        <tr>
+                                            <td colSpan="6" style={{ textAlign: 'center' }}>
+                                                <p>Nenhum fornecedor encontrado.</p>
+                                            </td>
+                                        </tr>
+                                    )
+                                }
                             </tbody>
                         </table>
                     </div>
@@ -297,9 +395,9 @@ function Suppliers(){
                                 setAddCategorySelectIsClicked(false)
                                 }}>&times;</button>
                         </div>
-                        <p style={{'font-size': 15,'color': '#777171ff'}}>Adicione fornecedores à sua unidade.</p>
+                        <p style={{'fontSize': 15,'color': '#777171ff'}}>Adicione fornecedores à sua unidade.</p>
                     </div>
-                    <form action="" onClick={()=>addCategorySelectIsClicked ? setAddCategorySelectIsClicked(false) : ''}>
+                    <form action="" onSubmit={handleCreateSupplier} onClick={()=>addCategorySelectIsClicked ? setAddCategorySelectIsClicked(false) : ''}>
 
                         <div className="container-form">
                             {inputValues.map((item,index)=>(
@@ -358,6 +456,12 @@ function Suppliers(){
                                                     <input hidden onChange={handleFileClick} ref={fileRef} type="file" name="" className="" />
                                                     <p>Adicionar arquivo</p>
                                                 </button>
+                                                <div className='file_name_style'>
+                                                    <p style={{fontSize: 14, whiteSpace: 'nowrap'}}>{fileName}</p>
+                                                    {fileName === "Nenhum arquivo selecionado." ? "" : <button type="button" onClick={handleRemoveFile}>
+                                                        <X color={'#3553b5'} size={15}></X>
+                                                    </button>}
+                                                </div>
                                             </div>
                                         ) : (
                                             <div key={index} className="fields">
@@ -412,9 +516,9 @@ function Suppliers(){
                                         setAddCategorySelectIsClicked(false)
                                     }}>&times;</button>
                                 </div>
-                                <p style={{'font-size': 15,'color': '#777171ff'}}>{subtitle_edit_text}</p>
+                                <p style={{'fontSize': 15,'color': '#777171ff'}}>{subtitle_edit_text}</p>
                             </div>
-                            <form action="">
+                            <form action="" onSubmit={handleEditSupplier}>
 
                                 <div className="container-form">
                                     {inputValues.map((item,index)=>(
@@ -425,10 +529,10 @@ function Suppliers(){
                                                     <label>{item.label}</label>
                                                     <div style={{display:'flex',flexDirection:'row',gap: '10px',alignItems:'center'}}>
                                                         <ul className="input-select-model ul-list">
-                                                            {selectCategoriesForSupplier.length === 0 ? (
+                                                            {editCategoryEnum.length === 0 ? (
                                                                 <p>Nenhuma categoria foi adicionada.</p>
                                                             ) : 
-                                                            selectCategoriesForSupplier.map((categoria)=>(
+                                                            editCategoryEnum.map((categoria)=>(
                                                                 <li
                                                                     className="li-style-model"
                                                                 >{categoria.replaceAll('_',' ')} 
@@ -503,7 +607,7 @@ function Suppliers(){
                                 {enableEditMode ? (
                                     <div style={{display:'flex',flexDirection:'row',gap: 10}}>
                                         <button className="btn-modal-submit" type="submit">Salvar</button>
-                                        <button className="btn-modal-submit trash"><Trash></Trash></button>
+                                        <button onClick={handleDeleteSupplier} className="btn-modal-submit trash"><Trash></Trash></button>
                                     </div>
                                 ) : (
                                     ''
@@ -514,65 +618,21 @@ function Suppliers(){
                     })()}
                 </Modal>
 
-                <Modal
-                    isOpen={filterProductModalIsOpen}
-                    onRequestClose={() => setFilterProductModalIsOpen(false)}
-                    contentLabel="Modal de Filtros"
-                    shouldCloseOnOverlayClick={true}
-                    style={modalFilterProductsStyle}
-                    >
-                    <div className="container-filters">
-                        <div className="top-container-filters">
-                        <h1>Filtrar Por</h1>
-                        <button onClick={() => setFilterProductModalIsOpen(false)}>&times;</button>
-                        </div>
+                <FiltersModal
+                    isOpen={filterModalIsOpen}
+                    setIsOpen={setFilterModalIsOpen}
+                    filtersTitle={filtersModal}
+                    filtersData={filtersData}
+                    selectedFilters={selectedModalFilters}
+                    setSelectedFilters={setSelectedModalFilters}>
+                </FiltersModal>
 
-                        {filtersModal.map((filters_item, index) => {
-                            const isExpanded = filterProductIsClicked === index;
-
-                            return (
-                                <React.Fragment key={filters_item}>
-                                    <button 
-                                        type="button"
-                                        onClick={() => setFilterProductIsClicked(isExpanded ? null : index)} 
-                                        className="btn_filters_modal"
-                                    >
-                                        {filters_item} 
-                                        {isExpanded ? <ChevronDown /> : <ChevronRight />}
-                                    </button>
-
-                                    {isExpanded && (
-                                        <ul className="container-filters-options-users">
-                                            {(filtersData[filters_item] || []).map((option) => {
-                                                const isSelected = selectedModalFilters[filters_item] === option;
-
-                                                return (
-                                                    <li key={option}>
-                                                        <button 
-                                                            type="button"
-                                                            onClick={() => handleSelectModalFilter(filters_item, option)}
-                                                            className={isSelected ? "filter-option-active" : ""}
-                                                        >
-                                                            {option.replaceAll('_',' ')} {isSelected && "✓"}
-                                                        </button>
-                                                    </li>
-                                                );
-                                            })}
-                                        </ul>
-                                    )}
-                                </React.Fragment>
-                            );
-                        })}
-
-                        <button 
-                        className="btn-clear-filters"
-                        onClick={() => setSelectedModalFilters({
-                                "Categoria": null,
-                                "Prazo": null,
-                            })}
-                        >Limpar Filtros do Modal</button>
-                    </div>
-                    </Modal>
+                    <AlertModals
+                        phrase={formSuccess ? formSuccess : formError}
+                        isOpen={alertModalIsOpen}
+                        setIsOpen={setAlertModalIsOpen}
+                        type={alertType}
+                    />
 
             </main>
         </>

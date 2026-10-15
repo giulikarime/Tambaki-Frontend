@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import Header from "../../components/HeaderAndSidebar/Header";
 import Sidebar from "../../components/HeaderAndSidebar/Sidebar";
-import MenuCard from "./MenuCard";
 import { Plus, Funnel, ChevronDown, ChevronRight, ChevronLeft, Search, Camera, Form, SquarePen, Trash } from "lucide-react";
 import './menu.css';
 import Modal from 'react-modal';
@@ -433,6 +432,7 @@ function Menu() {
                 <Sidebar expanded={expanded} hasInteracted={hasInteracted} ></Sidebar>
                 <div className="principal-menu-users">
                     <div className="top-container-users">
+<<<<<<< HEAD
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 15 }}>
                             <div style={{ display: 'flex', flexDirection: 'row', gap: 15, alignItems: 'center' }}>
                                 <button className="btn-back-base" onClick={() => navigate(-1)}><ChevronLeft></ChevronLeft></button>
@@ -447,7 +447,23 @@ function Menu() {
                                 onClick={() => setFilterProductModalIsOpen(!filterProductModalIsOpen)}
                                 id='btn-funnel-base'
                                 className="btn-stock-base">Filtrar <Funnel size={20}></Funnel></button>
+=======
+                        <div className="container">
+                            <div style={{display:'flex',flexDirection:'row',gap: 15,alignItems:'center'}}>
+                                <button className="btn-back-base" onClick={()=>navigate(-1)}><ChevronLeft></ChevronLeft></button>
+                                <h1>Cardápio</h1>
+                            </div>
+                            <div style={{display:'flex',flexDirection:'row',alignItems:'center',gap:15}}>
+                                <button onClick={()=>setAddMenuModalIsOpen(!addMenuModalIsOpen)} id='btn-plus-stock'><Plus></Plus></button>
+                                <button onClick={()=>setTagsModalIsOpen(!tagsModalIsOpen)} className="btn-stock-base">Etiquetas</button>
+                                <button
+                                    onClick={()=>setFilterProductModalIsOpen(!filterProductModalIsOpen)}
+                                id='btn-funnel-base' 
+                                className="btn-stock-base">Filtrar <Funnel size={20}></Funnel></button>
+                            </div>
+>>>>>>> 818716953b3b62dce979e396c2acd2922b9fef2c
                         </div>
+                         <p style={{ color: '#777171ff' }}>Visualize e edite seu cardápio.</p>
                     </div>
                     <div>
                         {menu.length <= 0 ? (
