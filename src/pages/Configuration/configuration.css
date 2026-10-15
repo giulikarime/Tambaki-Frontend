@@ -1,11 +1,13 @@
-main{
+main {
     width: 100vw;
-    height: 93vh;
+    height: 100vh;
     background-color: #fff8e9;
+    overflow: hidden;
 }
 
-.principal-menu-config{
+.principal-menu-config {
   width: 70%;
+  max-height: calc(100vh - 160px);
   position: absolute;
   top: 150px;
   left: 50%;
@@ -14,6 +16,12 @@ main{
   flex-direction: column;
   gap: 40px;
   overflow-y: auto;
+  -webkit-mask-image: linear-gradient(to bottom, black 95%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 95%, transparent 100%);
+}
+
+.principal-menu-config::-webkit-scrollbar{
+    display: none;
 }
 
 .config-workspace {
@@ -34,6 +42,7 @@ main{
   display: flex;
   align-items: center;
   gap: 12px;
+  transform: translateX(20%);
 }
 
 /*CARD*/
@@ -462,6 +471,7 @@ main{
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  margin-bottom: 20px;
 }
 
 .config-primary-pill-btn {
@@ -866,7 +876,11 @@ main{
     display: flex;
     flex-direction: row;
     align-items: center;
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
     gap: 30px;
-    font-size: 16px;
-    color: rgb(77, 75, 75)
+    font-size: 14px;
+    color: rgb(77, 75, 75);
+    width: 90%;
 }

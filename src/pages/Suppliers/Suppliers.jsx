@@ -324,45 +324,19 @@ function Suppliers(){
                 <Sidebar expanded={expanded} hasInteracted={hasInteracted} ></Sidebar>
                 <div className="principal-menu-users">
                     <div className="top-container-users">
-                        <div style={{display:'flex',flexDirection:'column',gap:15}}>
+                        <div className="container">
                             <div style={{display:'flex',flexDirection:'row',gap: 15,alignItems:'center'}}>
                                 <button className="btn-back-base" onClick={()=>navigate(-1)}><ChevronLeft></ChevronLeft></button>
                                 <h1>Fornecedores</h1>
                             </div>
-                            <p style={{ color: '#777171ff' }}>Localize seus fornecedores e edite informações</p>
-                        </div>
-                        <div style={{display:'flex',flexDirection:'row',alignItems:'center',gap:15}}>
-                            <button onClick={()=>setCreateSupModalIsOpen(!createSupModalIsOpen)} className='btn-plus-stock'><Plus></Plus></button>
-                            <button
-                                onClick={()=>setFilterModalIsOpen(!filterModalIsOpen)}
-                                className='btn-funnel-base btn-stock-base'>Filtrar <Funnel size={20}></Funnel></button>
-                            <div style={{ position: "relative"}}>
-                                <Search 
-                                    style={{ 
-                                    position: "absolute", 
-                                    left: "16px", 
-                                    top: "50%", 
-                                    transform: "translateY(-50%)", 
-                                    color: "#00000065" 
-                                    }} 
-                                    size={20} 
-                                />
-                                <input 
-                                    type="search" 
-                                    value={search}
-                                    placeholder="Buscar fornecedores..." 
-                                    onChange={(e)=>setSearch(e.target.value)}
-                                    style={{ 
-                                    backgroundColor: "#cae2ff", 
-                                    fontSize: "16px", 
-                                    padding: "10px 20px", 
-                                    paddingLeft: "50px",
-                                    borderRadius: "50px", 
-                                    width: "100%" ,
-                                    }} 
-                                />
+                            <div style={{display:'flex',flexDirection:'row',alignItems:'center',gap:15}}>
+                                <button onClick={()=>setCreateSupModalIsOpen(!createSupModalIsOpen)} className='btn-plus-item sup'>Adicionar Fornecedor<Plus></Plus></button>
+                                <button
+                                    onClick={()=>setFilterModalIsOpen(!filterModalIsOpen)}
+                                    className='btn-funnel-base btn-plus-item blue-filter'>Filtrar <Funnel size={20}></Funnel></button>
                             </div>
                         </div>
+                        <p style={{ color: '#777171ff' }}>Localize seus fornecedores e edite informações</p>
                     </div>
                     <div className="container-suppliers">
                         <table className="table"> 

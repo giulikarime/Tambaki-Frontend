@@ -130,21 +130,22 @@ function Financial(){
                 <Sidebar expanded={expanded} hasInteracted={hasInteracted} ></Sidebar>
                 <div className="principal-menu-users">
                     <div className="top-container-users">
-                        <div style={{display:'flex',flexDirection:'column',gap:15}}>
+                        <div className="container">
                             <div style={{display:'flex',flexDirection:'row',gap: 15,alignItems:'center'}}>
                                 <button className="btn-back-base" onClick={()=>navigate(-1)}><ChevronLeft></ChevronLeft></button>
                                 <h1>Dashboard Financeiro</h1>
                             </div>
-                            <p style={{ color: '#777171ff' }}>Unidade XYZ - {month.charAt(0).toUpperCase() + month.slice(1)} {year}</p>
+                            <div className="groups-top-container">
+                                <button
+                                    className="btn-stock-base">Definir Metas
+                                </button>
+                                <button
+                                    onClick={()=>setFilterModalIsOpen(!filterModalIsOpen)}
+                                    className="btn-stock-base btn-funnel-base">Filtrar <Funnel size={20}></Funnel>
+                                </button>
+                            </div>
                         </div>
-                        <div>
-                            <button>Definir Metas</button>
-                            <button
-                                onClick={()=>setFilterModalIsOpen(!filterModalIsOpen)}
-                                id='btn-funnel-base' 
-                                className="btn-stock-base">Filtrar <Funnel size={20}></Funnel>
-                            </button>
-                        </div>
+                        <p style={{ color: '#777171ff' }}>Unidade XYZ - {month.charAt(0).toUpperCase() + month.slice(1)} {year}</p>
                     </div>
                     <div className="cards-dashboard">
                         {cardsData.map((card,index)=>(

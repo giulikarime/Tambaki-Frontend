@@ -5,7 +5,6 @@ import Financial from './pages/Financial/Financial';
 import Menu from './pages/Menu/Menu';
 import Stock from './pages/Stock/Stock';
 import UsersPage from './pages/UsersPage/UsersPage';
-import Perfil from './pages/Perfil/Perfil';
 import Configuration from './pages/Configuration/Configuration';
 import OrderTicket from './pages/Ticket/OrderTicket/OrderTicket';
 import { Navigate, Routes, Route } from 'react-router-dom'
@@ -46,7 +45,6 @@ function App() {
       <Route path='/menu' element={<Menu />}></Route>
       <Route path='/stock' element={<Stock />}></Route>
       <Route path='/users' element={<UsersPage />}></Route>
-      <Route path='/perfil' element={<Perfil />}></Route>
       <Route path='/configuration' element={<Configuration />}></Route>
       <Route path='/order_ticket' element={<OrderTicket />}></Route>
       <Route path='/open_all_tickets' element={<OpenAllTickets />}></Route>
