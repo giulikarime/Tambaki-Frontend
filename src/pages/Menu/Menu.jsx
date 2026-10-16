@@ -6,11 +6,14 @@ import './menu.css';
 import Modal from 'react-modal';
 import React from 'react';
 import { useNavigate } from "react-router-dom";
-import { getMenu, getMenuEnums } from "../../services/menu";
+import { getMenu, getMenuEnums, createMenu, editMenu, deleteMenu } from "../../services/menu";
 import AlertModals from "../../components/SucessModals/AlertModals";
 import { getTags, createTags, deleteTags, editTags } from "../../services/tags";
 import { TAG_COLORS, ALLOWED_COLORS } from './colors/Tagcolors';
 import { getContrastColor } from './colors/Constratcolor';
+import FiltersModal from "../../components/FiltersModal/FiltersModal";
+import { getProductEnums } from "../../services/products";
+import { getLoggedUser } from "../../services/auth";
 
 function ColorPicker({ name, defaultValue }) {
     return (
@@ -41,8 +44,20 @@ function Menu() {
     const [formSuccess, setFormSuccess] = useState('');
     const [alertType, setAlertType] = useState('');
     const [alertModalIsOpen, setAlertModalIsOpen] = useState(false);
+    const [selectedMenu,setSelectedMenu] = useState('');
+    const user = getLoggedUser();
 
     const [menu, setMenu] = useState([]);
+
+    const [itensEnums,setItensEnums] = useState({
+        allergens: [],
+    });
+
+    const [addAllergensToListModal,setAddAllergensToListModal] = useState(false)
+    const [addTagsToListModal,setAddTagsToListModal] = useState(false)
+
+    const [selectedAllergensForMenu,setSelectedAllergensForMenu] = useState([]);
+    const [selectedTagsForMenu,setSelectedTagsForMenu] = useState([]);
 
     const [menuEnums, setMenuEnums] = useState({
         category: [],
@@ -56,6 +71,8 @@ function Menu() {
     const [preview, setPreview] = useState([]);
     const [indexOfPreview, setIndexOfPreview] = useState(0);
 
+    const [newPreview,setNewPreview] = useState([]);
+
     const filtersModal = ["Categorias", "Etiquetas"];
     const filtersData = {
         "Categorias": menuEnums.category,
@@ -67,17 +84,9 @@ function Menu() {
     });
 
     const [filterProductModalIsOpen, setFilterProductModalIsOpen] = useState(false);
-    const [filterProductIsClicked, setFilterProductIsClicked] = useState(null);
     const [expanded, setExpand] = useState(false);
     const [hasInteracted, setHasInteracted] = useState(false);
     const [addMenuModalIsOpen, setAddMenuModalIsOpen] = useState(false);
-
-    function handleSelectModalFilter(category, option) {
-        setSelectedModalFilters(prev => ({
-            ...prev,
-            [category]: prev[category] === option ? null : option
-        }));
-    }
 
     const modalStyle = {
         overlay: {
@@ -142,7 +151,7 @@ function Menu() {
         overlay: {
             backgroundColor: '#191444be',
             position: 'fixed',
-            zIndex: 101, // acima do modal de etiquetas (100)
+            zIndex: 101,
             inset: 0
         },
         content: {
@@ -167,36 +176,14 @@ function Menu() {
         }
     }
 
-    const modalFilterProductsStyle = {
-        overlay: {
-            backgroundColor: '#191444be',
-            position: 'fixed',
-            zIndex: 100,
-            inset: 0
-        },
-        content: {
-            position: 'fixed',
-            top: '0',
-            right: '0',
-            left: 'auto',
-            bottom: '0',
-            width: '300px',
-            maxHeight: '100vh',
-            padding: '20px',
-            border: 'none',
-            boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
-            backgroundColor: '#fff',
-            margin: '0'
-        }
-    };
-
     const inputValues = [
-        { label: "Nome do Prato", mode: "input", type: "text", name: "addDishesName" },
-        { label: "Descrição", mode: "textarea", name: "addDishesDesc" },
-        { label: "Preço", mode: "input", type: "number", name: "addDishesPrice" },
-        { label: "Alergênicos", mode: "select", name: "addDishesAllergens" },
-        { label: "Etiqueta", mode: "select", name: "addDishesTag" },
-        { label: ".", text: 'Salvar', mode: "button", type: 'submit', name: "addDishesTag" },
+        { label: "Nome do Prato", mode: "input", type: "text", name: "addDishesName", placeholder: 'Digite um nome...' },
+        { label: "Preço", mode: "input", type: "number", name: "addDishesPrice" , placeholder: 'Exemplo.: 25,99',step: 0.1 },
+        { label: "Descrição", mode: "textarea", name: "addDishesDesc" , placeholder: 'Descreva o prato..' },
+        { label: "Alergênicos", mode: "select", name: "addDishesAllergens", allergen: true, menu_enum: itensEnums.allergens },
+        { label: "Etiquetas", mode: "select", name: "addDishesTag", tag: true },
+        { label: "Categoria", mode: "select", name: "addDishesCategory", enum: true, menu_enum: itensEnums.category },
+        { label: ".", text: 'Salvar', mode: "button", type: 'submit'},
     ]
 
     async function get_menus() {
@@ -222,6 +209,20 @@ function Menu() {
             }
         }
         get_enums();
+    }, []);
+
+    
+
+    useEffect(() => {
+        async function get_allergens() {
+            try {
+                const allergens_enums = await getProductEnums();
+                setItensEnums(allergens_enums);
+            } catch (error) {
+                console.error("Erro ao carregar os dados dos formularios.", error);
+            }
+        }
+        get_allergens();
     }, []);
 
     async function get_tags() {
@@ -299,6 +300,27 @@ function Menu() {
         )
     }
 
+    function handleDeleteCurrentImage() {
+        if (!preview || preview.length === 0) return;
+
+        URL.revokeObjectURL(preview[indexOfPreview]);
+
+        const updatedPreviews = preview.filter((_, index) => index !== indexOfPreview);
+        setPreview(updatedPreviews);
+
+        if (indexOfPreview >= updatedPreviews.length) {
+            setIndexOfPreview(Math.max(0, updatedPreviews.length - 1));
+        }
+    }
+
+    function parseNumberOrFallback(formData, fieldName, fallback) {
+        if (!formData.has(fieldName)) return fallback;
+        const raw = formData.get(fieldName);
+        if (raw === '' || raw === null) return fallback;
+        const parsed = parseFloat(raw);
+        return isNaN(parsed) ? fallback : parsed;
+    }
+
     async function handleCreateMenu(e) {
         e.preventDefault();
         setFormError('');
@@ -314,8 +336,112 @@ function Menu() {
             return;
         }
 
+        const formattedTags = selectedTagsForMenu.map(tag => {
+            const tagName = typeof tag === 'object' ? tag.name : tag;
+                return { name: tagName };
+        });
+
         const payload = {
-            //Terminar de fazer quando o back estiver pronto.
+            name: String(formData.get('addDishesName')),
+            price: parseFloat(formData.get('addDishesPrice')),
+            description: String(formData.get('addDishesDesc')),
+            category: String(formData.get('addDishesCategory')),
+            img: preview,
+            allergens: selectedAllergensForMenu || null,
+            tags: formattedTags || null,
+            available: true,
+            unitId: user?.storeUnitId
+        }
+
+        try{
+            await createMenu(payload);
+            await get_menus();
+            setAddMenuModalIsOpen(false);
+            setSelectedAllergensForMenu([]);
+            setSelectedTagsForMenu([]);
+            setFormSuccess("Prato criado com sucesso!");
+            setAlertType('success');
+            setAlertModalIsOpen(true);
+            e.target.reset();
+        }catch (error){
+            setFormError(error.message);
+            console.log(error.message);
+            setAlertType('error');
+            setAlertModalIsOpen(true);
+        }
+    }
+
+    async function handleEditMenu(e) {
+        e.preventDefault();
+        setFormError('');
+        setFormSuccess('');
+        setAlertType('');
+
+        const formData = new FormData(e.target);
+
+        if (!preview || preview.length <= 0) {
+            setFormError('A imagem do cardápio não pode ser vazia');
+            setAlertType('error');
+            setAlertModalIsOpen(true);
+            return;
+        }
+
+        const formattedTags = selectedTagsForMenu.map(tag => {
+            const tagName = typeof tag === 'object' ? tag.name : tag;
+                return { name: tagName };
+        });
+
+        const payload = {
+            name: String(formData.get('addDishesName')) || selectedMenu.name,
+            price: parseFloat(formData.get('addDishesPrice')) || selectedMenu.price,
+            description: String(formData.get('addDishesDesc')) || selectedMenu.description,
+            category: String(formData.get('addDishesCategory')) || selectedMenu.category,
+            img: newPreview || selectedMenu.img,
+            allergens: selectedAllergensForMenu || null,
+            tags: selectedTagsForMenu || null,
+            available: true,
+            unitId: user?.storeUnitId
+        }
+
+        try{
+            await editMenu(payload,selectedMenu.id);
+            await get_menus();
+            setAddMenuModalIsOpen(false);//trocar para modal de edição
+            setSelectedAllergensForMenu([]);
+            setSelectedTagsForMenu([]);
+            setFormSuccess(`${selectedMenu.name} editado com sucesso!`);
+            setAlertType('success');
+            setAlertModalIsOpen(true);
+            e.target.reset();
+        }catch (error){
+            setFormError(error.message);
+            console.log(error.message);
+            setAlertType('error');
+            setAlertModalIsOpen(true);
+        }
+    }
+
+    async function handleDeleteMenu(e) {
+        e.preventDefault();
+        setFormError('');
+        setFormSuccess('');
+        setAlertType('');
+
+        try{
+            await deleteMenu(selectedMenu.id);
+            await get_menus();
+            setAddMenuModalIsOpen(false);//trocar para modal de edição
+            setSelectedAllergensForMenu([]);
+            setSelectedTagsForMenu([]);
+            setFormSuccess(`${selectedMenu.name} deletado com sucesso!`);
+            setAlertType('success');
+            setAlertModalIsOpen(true);
+            e.target.reset();
+        }catch (error){
+            setFormError(error.message);
+            console.log(error.message);
+            setAlertType('error');
+            setAlertModalIsOpen(true);
         }
     }
 
@@ -413,7 +539,6 @@ function Menu() {
         }
     }
 
-
     function openEditTagModal() {
         setEditTagsModalIsOpen(true);
         setTagsModalIsOpen(false);
@@ -424,46 +549,28 @@ function Menu() {
         setTagsModalIsOpen(true);
     }
 
-
     return (
         <>
-            <Header expanded={expanded} setExpand={setExpand} setHasInteracted={setHasInteracted} ></Header>
+            <Header expanded={expanded} setExpand={setExpand} setHasInteracted={setHasInteracted} />
             <main>
-                <Sidebar expanded={expanded} hasInteracted={hasInteracted} ></Sidebar>
+                <Sidebar expanded={expanded} hasInteracted={hasInteracted} />
                 <div className="principal-menu-users">
                     <div className="top-container-users">
-<<<<<<< HEAD
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 15 }}>
-                            <div style={{ display: 'flex', flexDirection: 'row', gap: 15, alignItems: 'center' }}>
-                                <button className="btn-back-base" onClick={() => navigate(-1)}><ChevronLeft></ChevronLeft></button>
-                                <h1>Cardápio</h1>
-                            </div>
-                            <p style={{ color: '#777171ff' }}>Visualize e edite seu cardápio.</p>
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 15 }}>
-                            <button onClick={() => setAddMenuModalIsOpen(!addMenuModalIsOpen)} id='btn-plus-stock'><Plus></Plus></button>
-                            <button onClick={() => setTagsModalIsOpen(!tagsModalIsOpen)} className="btn-stock-base">Etiquetas</button>
-                            <button
-                                onClick={() => setFilterProductModalIsOpen(!filterProductModalIsOpen)}
-                                id='btn-funnel-base'
-                                className="btn-stock-base">Filtrar <Funnel size={20}></Funnel></button>
-=======
                         <div className="container">
-                            <div style={{display:'flex',flexDirection:'row',gap: 15,alignItems:'center'}}>
-                                <button className="btn-back-base" onClick={()=>navigate(-1)}><ChevronLeft></ChevronLeft></button>
+                            <div style={{ display: 'flex', flexDirection: 'row', gap: 15, alignItems: 'center' }}>
+                                <button className="btn-back-base" onClick={() => navigate(-1)}><ChevronLeft /></button>
                                 <h1>Cardápio</h1>
                             </div>
-                            <div style={{display:'flex',flexDirection:'row',alignItems:'center',gap:15}}>
-                                <button onClick={()=>setAddMenuModalIsOpen(!addMenuModalIsOpen)} id='btn-plus-stock'><Plus></Plus></button>
-                                <button onClick={()=>setTagsModalIsOpen(!tagsModalIsOpen)} className="btn-stock-base">Etiquetas</button>
+                            <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 15 }}>
+                                <button onClick={() => setAddMenuModalIsOpen(!addMenuModalIsOpen)} className='btn-plus-item menu'>Adicionar Prato<Plus /></button>
+                                <button onClick={() => setTagsModalIsOpen(!tagsModalIsOpen)} className="btn-stock-base">Etiquetas</button>
                                 <button
-                                    onClick={()=>setFilterProductModalIsOpen(!filterProductModalIsOpen)}
-                                id='btn-funnel-base' 
-                                className="btn-stock-base">Filtrar <Funnel size={20}></Funnel></button>
+                                    onClick={() => setFilterProductModalIsOpen(!filterProductModalIsOpen)}
+                                    id='btn-funnel-base'
+                                    className="btn-stock-base">Filtrar <Funnel size={20} /></button>
                             </div>
->>>>>>> 818716953b3b62dce979e396c2acd2922b9fef2c
                         </div>
-                         <p style={{ color: '#777171ff' }}>Visualize e edite seu cardápio.</p>
+                        <p style={{ color: '#777171ff' }}>Visualize e edite seu cardápio.</p>
                     </div>
                     <div>
                         {menu.length <= 0 ? (
@@ -479,69 +586,6 @@ function Menu() {
                 </div>
 
                 <Modal
-                    isOpen={filterProductModalIsOpen}
-                    onRequestClose={() => setFilterProductModalIsOpen(false)}
-                    contentLabel="Modal de Filtros"
-                    shouldCloseOnOverlayClick={true}
-                    style={modalFilterProductsStyle}
-                >
-                    <div className="container-filters">
-                        <div className="top-container-filters">
-                            <h1>Filtrar Por</h1>
-                            <button onClick={() => setFilterProductModalIsOpen(false)}>&times;</button>
-                        </div>
-
-                        {filtersModal.map((filters_item, index) => {
-                            const icon = filterProductIsClicked === index ? <ChevronDown /> : <ChevronRight />;
-
-                            return (
-                                <React.Fragment key={filters_item}>
-                                    <button
-                                        onClick={() => setFilterProductIsClicked(filterProductIsClicked === index ? null : index)}
-                                        className="btn_filters_modal"
-                                    >
-                                        {filters_item} {icon}
-                                    </button>
-
-                                    {filterProductIsClicked === index && (
-                                        <ul className="container-filters-options">
-                                            {(filtersData[filters_item] || []).map((option) => {
-                                                const isObject = typeof option === 'object' && option !== null;
-                                                const optionValue = isObject ? (option.id || option.name) : option;
-                                                const optionLabel = isObject
-                                                    ? option.name
-                                                    : option.replaceAll("_", " ");
-                                                const isSelected = selectedModalFilters[filters_item] === optionValue;
-
-                                                return (
-                                                    <button
-                                                        key={optionValue}
-                                                        onClick={() => handleSelectModalFilter(filters_item, optionValue)}
-                                                        className={isSelected ? "filter-option-active" : ""}
-                                                    >
-                                                        {optionLabel} {isSelected && "✓"}
-                                                    </button>
-                                                );
-                                            })}
-                                        </ul>
-                                    )}
-                                </React.Fragment>
-                            );
-                        })}
-
-                        <button
-                            className="btn-clear-filters"
-                            onClick={() => setSelectedModalFilters({
-                                "Categorias": null,
-                                "Etiquetas": null
-                            })}
-                        >
-                            Limpar Filtros do Modal
-                        </button>
-                    </div>
-                </Modal>
-
-                <Modal
                     isOpen={addMenuModalIsOpen}
                     onRequestClose={() => {
                         setAddMenuModalIsOpen(!addMenuModalIsOpen)
@@ -551,89 +595,207 @@ function Menu() {
                     contentLabel="Modal de Adicionar Prato"
                     style={modalStyle}
                 >
-                    <div className="top-container-modal">
-                        <h2>Novo prato</h2>
-                        <button
-                            onClick={() => {
-                                setAddMenuModalIsOpen(!addMenuModalIsOpen)
-                                emptyPreviewBeforeSaving()
-                            }}
-                            style={{ fontSize: 30 }}
-                        >&times;</button>
+                    <div className="top-container" 
+                        onClick={()=>{
+                            setAddAllergensToListModal(false)
+                            setAddTagsToListModal(false)
+                        }}>
+                        <div className="group-one-top-container">
+                            <h2>Novo prato</h2>
+                            <button
+                                onClick={() => {
+                                    setAddMenuModalIsOpen(!addMenuModalIsOpen)
+                                    emptyPreviewBeforeSaving()
+                                }}
+                                style={{ fontSize: 30 }}
+                            >&times;</button>
+                        </div>
+                        <p style={{'fontSize': 15,'color': '#777171ff'}}>Adiciona pratos ao seu cardápio.</p>
                     </div>
 
-                    <form className="form-add-menu">
-
-                        <div>
+                    <form className="form-add-menu" 
+                        onClick={()=>{
+                            addAllergensToListModal? setAddAllergensToListModal(false) : ('')
+                            addTagsToListModal? setAddTagsToListModal(false) : ('')
+                        }}
+                        onSubmit={handleCreateMenu}
+                        >
+                        <div className="container-add-img">
                             <div
                                 onDrop={handleDrop}
                                 onDragOver={handleDragOver}
                             >
                                 {preview.length > 0 ? (
                                     <div className="container-exibe-image">
-                                        <img src={preview[indexOfPreview]} className="card-full-image"></img>
+                                        <img src={preview[indexOfPreview]} className="card-full-image" alt="Preview" />
                                         {preview.length > 1 ? (
                                             <div className="container-buttons-change-image">
                                                 <button
                                                     type="button"
                                                     className="btn-change-image-bg"
-                                                    onClick={handleChangeImageLeft}><ChevronLeft color="white"></ChevronLeft></button>
+                                                    onClick={handleChangeImageLeft}><ChevronLeft color="white" />
+                                                </button>
                                                 <button
                                                     type="button"
                                                     className="btn-change-image-bg"
-                                                    onClick={handleChangeImageRight}><ChevronRight color="white"></ChevronRight></button>
+                                                    onClick={handleChangeImageRight}><ChevronRight color="white" />
+                                                </button>
                                             </div>
                                         ) : ('')}
+                                        <div className="container-buttons-delete-image">
+                                            <button type="button" className="btn-change-image-bg delete" onClick={handleDeleteCurrentImage}>
+                                                <Trash color="white"></Trash>
+                                            </button>
+                                        </div>
                                     </div>
                                 ) : (
                                     <div className="container-add-image">
-                                        <label htmlFor="">Arraste ou solte imagens aqui</label>
-                                        <Camera></Camera>
+                                        <label style={{fontSize:18, color: 'grey',textAlign:'center'}}>Arraste ou solte<br/> imagens aqui</label>
+                                        <Camera color="grey" size={50} strokeWidth={1} />
                                     </div>
                                 )}
                             </div>
 
-                            <button type="button" onClick={handleButtonClickFile}>
+                            <button type="button" className="btn-add-img" onClick={handleButtonClickFile}>
                                 <input
-                                    className=""
                                     type="file"
                                     accept="image/*"
                                     style={{ display: "none" }}
                                     ref={imgRef}
                                     onChange={handleImageChange}
                                 />
-                                <label htmlFor="">Adicione imagens</label>
+                                <label>Adicione imagens</label>
                             </button>
                         </div>
 
-                        <div className="modal-conteudo">
+                        <div className="container-form">
                             {inputValues.map((item, index) => (
                                 <div key={index}>
                                     {item.mode === "input" ? (
-                                        <div>
-                                            <label htmlFor="">{item.label}</label>
-                                            <input type={item.type} name={item.name}></input>
+                                        <div className="fields">
+                                            <label>{item.label}</label>
+                                            <input step={item.step} className="input-select-model" type={item.type} name={item.name} placeholder={item.placeholder} />
                                         </div>
                                     ) : item.mode === 'textarea' ? (
-                                        <div>
-                                            <label htmlFor="">{item.label}</label>
-                                            <textarea name={item.name}></textarea>
-                                        </div>
-                                    ) : item.mode === 'select' ? (
-                                        <div>
+                                        <div className="fields">
                                             <label>{item.label}</label>
-                                            <select></select>
+                                            <textarea className="input-select-model" name={item.name} placeholder={item.placeholder} ></textarea>
                                         </div>
-                                    ) : (
-                                        <div>
-                                            <label style={{ color: 'white' }} htmlFor="">{item.label}</label>
-                                            <button type={item.type}>{item.text}</button>
+                                    ) : item.mode === 'select' && item.allergen ? (
+                                        <div className="fields allergens">
+                                            <label>{item.label}</label>
+                                            <div style={{display:'flex',flexDirection:'row',gap: '10px',alignItems:'center'}}>
+                                                <ul className="input-select-model ul-list">
+                                                    {selectedAllergensForMenu.length <= 0 ? (
+                                                        <p>Nenhum alergênico selecionado.</p>
+                                                    ) : (
+                                                        selectedAllergensForMenu.map((allergen, i) => (
+                                                            <li
+                                                                key={i}
+                                                                className="li-style-model"
+                                                            >
+                                                                {allergen.replaceAll('_', ' ')}
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => setSelectedAllergensForMenu(prev => prev.filter(a => a !== allergen))}
+                                                                >&times;</button>
+                                                            </li>
+                                                        ))
+                                                    )}
+                                                </ul>
+                                                <button 
+                                                    className="add-category-ul-list"
+                                                    type="button"
+                                                    onClick={()=>setAddAllergensToListModal(!addAllergensToListModal)}
+                                                >
+                                                    <Plus></Plus>
+                                                </button>
+                                            </div>
+
+                                            {addAllergensToListModal ? (
+                                                <ul className="add-allergen-select">
+                                                    {item.menu_enum?.map((all, i) => (
+                                                        <li key={i} value={all}>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    setSelectedAllergensForMenu(prev =>
+                                                                    prev.includes(all) ? prev : [...prev, all])
+                                                                }}
+                                                            >{all.replaceAll('_', ' ')}</button>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            ) : ('')}
+                                        </div>
+                                    ) : item.mode === 'select' && item.tag ? (
+                                        <div className="fields allergens">
+                                            <label>{item.label}</label>
+                                            <div style={{display:'flex',flexDirection:'row',gap: '10px',alignItems:'center'}}>
+                                                <ul className="input-select-model ul-list">
+                                                    {selectedTagsForMenu.length <= 0 ? (
+                                                        <p>Nenhuma etiqueta selecionada.</p>
+                                                    ) : (
+                                                        selectedTagsForMenu.map((tag, i) => (
+                                                            <li
+                                                                key={i}
+                                                                className="li-style-model"
+                                                            >
+                                                                {tag.name}
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => setSelectedTagsForMenu(prev => prev.filter(a => a !== tag))}
+                                                                >&times;</button>
+                                                            </li>
+                                                        ))
+                                                    )}
+                                                </ul>
+                                                <button 
+                                                    className="add-category-ul-list"
+                                                    type="button"
+                                                    onClick={()=>setAddTagsToListModal(!addTagsToListModal)}
+                                                >
+                                                    <Plus></Plus>
+                                                </button>
+                                            </div>
+
+                                            {addTagsToListModal && (
+                                                <ul className="add-allergen-select">
+                                                    {tags.length <=0 ? (
+                                                        <li>Ainda não existem etiquetas</li>
+                                                    ) : 
+                                                        tags.map((tag, i) => (
+                                                            <li key={i} value={tag}>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => {
+                                                                        setSelectedTagsForMenu(prev =>
+                                                                        prev.includes(tag) ? prev : [...prev, tag])
+                                                                    }}
+                                                                >{tag.name}</button>
+                                                            </li>
+                                                        ))}
+                                                </ul>
+                                            )}
+                                        </div>
+                                    ) : item.mode === 'select' && item.enum ? (
+                                        <div className="fields">
+                                            <label>{item.label}</label>
+                                            <select className="input-select-model" name={item.name}>
+                                                {(menuEnums.category ?? []).map((cat,i)=>(
+                                                    <option value={cat} key={i}>{String(cat.replaceAll('_',' '))}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    ) :(
+                                        <div className="fields">
+                                            <label style={{ color: 'white' }}>{item.label}</label>
+                                            <button className="btn-modal-submit menu" type={item.type}>{item.text}</button>
                                         </div>
                                     )}
                                 </div>
                             ))}
                         </div>
-
                     </form>
                 </Modal>
 
@@ -689,43 +851,40 @@ function Menu() {
                             {tags.length <= 0 ? (
                                 <p>Nenhuma etiqueta criada.</p>
                             ) : (
-                                <>
-                                    <div className="tags-scroll">
-                                        <ul className="tags-list">
-                                            {tags.map((item, i) => (
-                                                <li
-                                                    className="label-style"
-                                                    key={item.id ?? i}
-                                                    style={{
-                                                        backgroundColor: item.color,
-                                                        color: getContrastColor(item.color),
-                                                    }}
-                                                >
-                                                    <span className="label-name">{item.name}</span>
+                                <div className="tags-scroll">
+                                    <ul className="tags-list">
+                                        {tags.map((item, i) => (
+                                            <li
+                                                className="label-style"
+                                                key={item.id ?? i}
+                                                style={{
+                                                    backgroundColor: item.color,
+                                                    color: getContrastColor(item.color),
+                                                }}
+                                            >
+                                                <span className="label-name">{item.name}</span>
 
-                                                    <div className="label-actions">
-                                                        <button
-                                                            onClick={() => {
-                                                                setSelectedTag(item);
-                                                                openEditTagModal();
-                                                            }}
-                                                        >
-                                                            <SquarePen size={16} />
-                                                        </button>
-                                                        <button onClick={() => handleDeleteTags(item)}>
-                                                            <Trash size={16} />
-                                                        </button>
-                                                    </div>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
-
-                                </>
+                                                <div className="label-actions">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setSelectedTag(item);
+                                                            openEditTagModal();
+                                                        }}
+                                                    >
+                                                        <SquarePen size={16} />
+                                                    </button>
+                                                    <button type="button" onClick={() => handleDeleteTags(item)}>
+                                                        <Trash size={16} />
+                                                    </button>
+                                                </div>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
                             )}
                         </div>
                     </div>
-
                 </Modal>
 
                 <Modal
@@ -775,17 +934,24 @@ function Menu() {
                     </form>
                 </Modal>
 
+                <FiltersModal
+                    isOpen={filterProductModalIsOpen}
+                    setIsOpen={setFilterProductModalIsOpen}
+                    filtersTitle={filtersModal}
+                    filtersData={filtersData}
+                    selectedFilters={selectedModalFilters}
+                    setSelectedFilters={setSelectedModalFilters}>
+                </FiltersModal>
+
                 <AlertModals
                     phrase={formSuccess ? formSuccess : formError}
                     isOpen={alertModalIsOpen}
                     type={alertType}
                     setIsOpen={setAlertModalIsOpen}
-                >
-
-                </AlertModals>
+                />
             </main>
         </>
     );
 }
 
-export default Menu
+export default Menu;

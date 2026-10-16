@@ -355,7 +355,7 @@ function Suppliers(){
                                     filteredSuppliers.map((sup,i)=>(
                                         <tr className="tr-th-group" key={i}>
                                             <td>{sup.company_name}</td>
-                                            <td>{sup.category.replaceAll('_'," ")}</td>
+                                            <td>{String(sup.category).replaceAll('_',' ')}</td>
                                             <td>{sup.lead_time_days} {sup.lead_time_days > 1 ? 'dias' : 'dia'}</td>
                                             <td>{sup.phone}</td>
                                             <td>{sup.email}</td>

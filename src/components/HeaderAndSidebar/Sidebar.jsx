@@ -1,7 +1,6 @@
 import { House, Utensils, HandCoins, PackageOpen, UserCheck, Store } from "lucide-react"
 import { useLocation, useNavigate } from 'react-router-dom'
 import './sidebar.css'
-import { useState } from "react";
 
 function Sidebar({ expanded, hasInteracted }) {
 
@@ -32,7 +31,6 @@ function Sidebar({ expanded, hasInteracted }) {
                         <button 
                             onClick={() => {
                                 redirect(url)
-                                setButtonIsClicked(id)
                             }} 
                             className={`sidebar-item ${isActive ? 'bg-true' : 'bg-false'}`}
                             key={id}>

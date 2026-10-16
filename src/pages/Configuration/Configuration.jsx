@@ -177,13 +177,13 @@ export default function Configuration() {
                         <div id="group-about-me">
                             <p>{user?.role}</p>
                             <Dot color={'rgb(77, 75, 75)'}></Dot>
-                            <p>{user?.storeUnitId}</p>
+                            <p>{user?.storeUnit?.company_name}</p>
                         </div>
                     </div>
                 </div>
                 <div id="gerenciamento">
                     <LockIcon color={'rgb(77, 75, 75)'} size={25}></LockIcon>
-                    <p>Seu perfil é gerenciado pela unidade {user?.storeUnit?.company_name}. Alterações de cargo e permissões são autorizadas pelo responsável administrativo.</p>
+                    <p>Seu perfil é gerenciado pela {user?.storeUnit?.company_name}. Alterações de cargo e permissões são autorizadas pelo responsável administrativo.</p>
                 </div>
             </div>
 
