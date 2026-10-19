@@ -117,6 +117,10 @@ form{
     gap: 10px
 }
 
+.btn-plus-item.menu{
+    background-color: #87b3f2;;
+}
+
 .btn-plus-item.sup{
     background-color: rgb(179, 203, 255)
 }

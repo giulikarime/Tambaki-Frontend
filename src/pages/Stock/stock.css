@@ -251,6 +251,10 @@ main{
     gap: 5px;
 }
 
+.fields.allergens{
+    position: relative;
+}
+
 .fields-double{
     display: flex;
     flex-direction: row;
@@ -453,9 +457,8 @@ main{
     padding: 15px 0 15px 0;
     z-index: 5;
     overflow-y: auto;
-    height: 200px;
+    max-height: 200px;
 }
-
 
 .add-allergen-select li{
     padding: 3px 15px 3px 15px
