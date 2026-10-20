@@ -6,6 +6,7 @@ import Modal from 'react-modal'
 import React from 'react';
 import { useNavigate } from "react-router-dom"
 import {logout} from '../../services/auth'
+import { getNotifications } from "../../services/notifications"
 
 function Header({ expanded, setExpand,setHasInteracted }){
 
@@ -26,6 +27,19 @@ function Header({ expanded, setExpand,setHasInteracted }){
     useEffect(() => {
         setExpand(preferences);
     })
+
+    async function handleGetNotifications(){
+        try{
+            const notify_item = await getNotifications();
+            setNotifications(notify_item);
+        }catch(error){
+            console.error("Notificações não encontradas no sistema.", error);
+        }
+    }
+
+    useEffect(()=>{
+        handleGetNotifications();
+    },[])
 
     useEffect(() => {
         localStorage.setItem('sidebar_boolean', JSON.stringify(preferences));
@@ -161,17 +175,24 @@ function Header({ expanded, setExpand,setHasInteracted }){
                     (<li className="notif-empty">Não há notificações por agora.</li>
 
                     ) : (
-                        notifications.map((n) => (
-                        <li key={n.id} className="notif-item">
-                            <span className="notif-dot" style={{ backgroundColor: n.color }}></span>
-                            <div className="notif-content">
-                                <p className="notif-header">
-                                    <strong>{n.category}</strong> • {n.time}
-                                </p>
-                                <p className="notif-text">{n.text}</p>
-                            </div>
-                        </li>
-                    ))
+                        notifications.map((n) => {
+
+                            const notifyColor = n.message.includes('vencer') ?
+                                 'orange' : n.message.includes('acabou') ? 
+                                 'red' : n.message.includes('acabando') ?
+                                 'orange' : n.message.includes('vencido') ?
+                                 'red' : ''
+
+                            return(
+                                <li key={n.id} className="notif-item">
+                                    <span className="notif-dot" style={{ backgroundColor: n.color }}></span>
+                                    <div className="notif-content">
+                                        <p className="notif-header"> <spam style={{fontSize: 30,color:notifyColor}}>•</spam> {n.message}</p>
+                                        {console.log(notifyColor)}
+                                    </div>
+                                </li>
+                            )
+                        })
                     )}
                 </ul>
             </Modal>

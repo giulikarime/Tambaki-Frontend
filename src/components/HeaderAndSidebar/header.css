@@ -85,6 +85,10 @@ header {
     margin: 0;
     font-size: 14px;
     color: #333;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 20px
 }
 
 .notif-header strong {

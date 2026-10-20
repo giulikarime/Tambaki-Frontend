@@ -204,51 +204,78 @@ function Stock() {
     };
 
     // ===================== Valores derivados (texto de status do estoque) =====================
-    const missingProducts = products.filter(product => product.stock_quantity === 0);
-    const midStockProducts = products.filter(product => product.stock_quantity <= product.min_stock && product.stock_quantity !== 0);
+    const missingProducts = products.filter(product => Number(product.stock_quantity) === 0);
+    const midStockProducts = products.filter(product => Number(product.stock_quantity) <= Number(product.min_stock) && Number(product.stock_quantity) !== 0);
 
     const missing_products_text = missingProducts.length > 0
-        ? `- ${String(missingProducts.length)} em falta`
+        ? `- ${missingProducts.length} em falta`
         : '';
 
     const product_running_low = midStockProducts.length > 0
         ? (midStockProducts.length === 1
-            ? `- ${String(midStockProducts.length)} próximo de acabar`
-            : `- ${String(midStockProducts.length)} próximos de acabar`)
+            ? `- ${midStockProducts.length} próximo de acabar`
+            : `- ${midStockProducts.length} próximos de acabar`)
         : '';
 
-    // Produtos com vencimento nos próximos 10 dias
-    const hoje = new Date();
-    const produtosProximosVencimento = products.filter((item) => {
-        const vencimento = new Date(item.expiration_date);
-        const diffDias = (vencimento - hoje) / (1000 * 60 * 60 * 24);
-        return diffDias <= 10;
+    // Normaliza a data de 'hoje' zerando as horas
+    const now = new Date();
+    const hoje = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    // Função auxiliar para calcular diferença em dias inteiros
+    const getDiffDias = (expirationDate) => {
+        if (!expirationDate) return null;
+        const exp = new Date(expirationDate);
+        const vencimento = new Date(exp.getFullYear(), exp.getMonth(), exp.getDate());
+        return Math.ceil((vencimento - hoje) / (1000 * 60 * 60 * 24));
+    };
+
+    // 1. Produtos JÁ VENCIDOS (dias menores que 0)
+    const produtosVencidos = products.filter((item) => {
+        const diff = getDiffDias(item.expiration_date);
+        return diff !== null && diff < 0;
     });
 
-    const qtdVencendo = produtosProximosVencimento.length;
+    // 2. Produtos PERTO DO VENCIMENTO (entre 0 e 10 dias)
+    const produtosProximosVencimento = products.filter((item) => {
+        const diff = getDiffDias(item.expiration_date);
+        return diff !== null && diff >= 0 && diff <= 10;
+    });
 
-    const text_vencidos = qtdVencendo.length > 0
-        ? `- ${String(qtdVencendo)} perto do vencimento`
+    // Mensagem para vencidos (corrigido: sem usar .length em variável numérica)
+    const text_vencidos = produtosVencidos.length > 0
+        ? `- ${produtosVencidos.length} ${produtosVencidos.length === 1 ? 'vencido' : 'vencidos'}`
+        : '';
+
+    // Mensagem para perto do vencimento
+    const text_proximos_vencimento = produtosProximosVencimento.length > 0
+        ? `- ${produtosProximosVencimento.length} perto do vencimento`
         : '';
 
     // ===================== Lista de produtos filtrada (botões + modal) =====================
     const today = new Date();
 
-    const filteredBatches = products.filter((item) => {
+   const filteredBatches = products.filter((item) => {
         let matchesBtn = true;
 
-        switch (filterBtnIsClicked) {
+        // Garante que o estado seja número
+        const selectedFilter = Number(filterBtnIsClicked);
+
+        // Garante conversão numérica e evita valores undefined/null
+        const stock = Number(item.stock_quantity ?? 0);
+        const minStock = Number(item.min_stock ?? 0);
+
+        switch (selectedFilter) {
             case 0: // Todos
                 matchesBtn = true;
                 break;
             case 1: // Estoque Saudável
-                matchesBtn = item.stock_quantity > item.min_stock;
+                matchesBtn = stock > minStock;
                 break;
             case 2: // Próximo de Acabar
-                matchesBtn = item.stock_quantity > 0 && item.stock_quantity <= item.min_stock;
+                matchesBtn = stock > 0 && stock <= minStock;
                 break;
             case 3: // Em Falta
-                matchesBtn = item.stock_quantity === 0;
+                matchesBtn = stock === 0;
                 break;
             case 4: { // Perto do Vencimento (entre 0 e 10 dias para vencer)
                 const vencimento = new Date(item.expiration_date);
@@ -671,9 +698,9 @@ function Stock() {
                         </div>
                         <div>
                             {products.length === 1 ? (
-                                <p style={{ color: '#777171ff' }}>{watched_products} {missing_products_text} {product_running_low} {text_vencidos}</p>
+                                <p style={{ color: '#777171ff' }}>{watched_products} {missing_products_text} {product_running_low} {text_vencidos} {text_proximos_vencimento}</p>
                             ) : (
-                                <p style={{ color: '#777171ff' }}>{watched_products} {missing_products_text} {product_running_low} {text_vencidos}</p>
+                                <p style={{ color: '#777171ff' }}>{watched_products} {missing_products_text} {product_running_low} {text_vencidos} {text_proximos_vencimento}</p>
                             )}
                         </div>
                     </div>
