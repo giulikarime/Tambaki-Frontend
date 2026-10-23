@@ -483,7 +483,9 @@ function Stock() {
         setModalPhrase("");
         const formData = new FormData(e.target);
 
-        if(!documentUrl){
+        const finalDocumentUrl = documentUrl || newDocumentUrlProduct || selectedProduct?.document_url;
+
+        if(!finalDocumentUrl){
             setFormError("A URL do documento não pode ser vazia.");
             setAlertType('error');
             setAlertModalIsOpen(true);
