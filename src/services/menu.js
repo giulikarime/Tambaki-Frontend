@@ -47,7 +47,7 @@ export async function editMenu(payload,id) {
     return data;
 }
 
-export async function deleteMenu() {
+export async function deleteMenu(id) {
     const response = await fetch(`${API_URL}/menu/${id}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },

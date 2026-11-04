@@ -14,6 +14,8 @@ import { getContrastColor } from './colors/Constratcolor';
 import FiltersModal from "../../components/FiltersModal/FiltersModal";
 import { getProductEnums } from "../../services/products";
 import { getLoggedUser } from "../../services/auth";
+import MenuCard from "../../components/MenuCard/MenuCard";
+import { uploadFile } from "../../services/upload";
 
 function ColorPicker({ name, defaultValue }) {
     return (
@@ -44,20 +46,20 @@ function Menu() {
     const [formSuccess, setFormSuccess] = useState('');
     const [alertType, setAlertType] = useState('');
     const [alertModalIsOpen, setAlertModalIsOpen] = useState(false);
-    const [selectedMenu,setSelectedMenu] = useState('');
+    const [selectedMenu, setSelectedMenu] = useState(null);
     const user = getLoggedUser();
 
     const [menu, setMenu] = useState([]);
 
-    const [itensEnums,setItensEnums] = useState({
+    const [itensEnums, setItensEnums] = useState({
         allergens: [],
     });
 
-    const [addAllergensToListModal,setAddAllergensToListModal] = useState(false)
-    const [addTagsToListModal,setAddTagsToListModal] = useState(false)
+    const [addAllergensToListModal, setAddAllergensToListModal] = useState(false);
+    const [addTagsToListModal, setAddTagsToListModal] = useState(false);
 
-    const [selectedAllergensForMenu,setSelectedAllergensForMenu] = useState([]);
-    const [selectedTagsForMenu,setSelectedTagsForMenu] = useState([]);
+    const [selectedAllergensForMenu, setSelectedAllergensForMenu] = useState([]);
+    const [selectedTagsForMenu, setSelectedTagsForMenu] = useState([]);
 
     const [menuEnums, setMenuEnums] = useState({
         category: [],
@@ -71,7 +73,7 @@ function Menu() {
     const [preview, setPreview] = useState([]);
     const [indexOfPreview, setIndexOfPreview] = useState(0);
 
-    const [newPreview,setNewPreview] = useState([]);
+    const [imageFilesToUpload, setImageFilesToUpload] = useState([]);
 
     const filtersModal = ["Categorias", "Etiquetas"];
     const filtersData = {
@@ -82,11 +84,14 @@ function Menu() {
         "Categorias": null,
         "Etiquetas": null,
     });
-
+    
     const [filterProductModalIsOpen, setFilterProductModalIsOpen] = useState(false);
     const [expanded, setExpand] = useState(false);
     const [hasInteracted, setHasInteracted] = useState(false);
     const [addMenuModalIsOpen, setAddMenuModalIsOpen] = useState(false);
+    
+    const [editMenuModalIsOpen, setEditMenuModalIsOpen] = useState(false);
+    const [editMenuStatus, setEditMenuStatus] = useState(false);
 
     const modalStyle = {
         overlay: {
@@ -178,12 +183,12 @@ function Menu() {
 
     const inputValues = [
         { label: "Nome do Prato", mode: "input", type: "text", name: "addDishesName", placeholder: 'Digite um nome...' },
-        { label: "Preço", mode: "input", type: "number", name: "addDishesPrice" , placeholder: 'Exemplo.: 25,99',step: 0.1 },
-        { label: "Descrição", mode: "textarea", name: "addDishesDesc" , placeholder: 'Descreva o prato..' },
+        { label: "Preço", mode: "input", type: "number", name: "addDishesPrice", placeholder: 'Exemplo.: 25,99', step: 0.1 },
+        { label: "Descrição", mode: "textarea", name: "addDishesDesc", placeholder: 'Descreva o prato..' },
         { label: "Alergênicos", mode: "select", name: "addDishesAllergens", allergen: true, menu_enum: itensEnums.allergens },
         { label: "Etiquetas", mode: "select", name: "addDishesTag", tag: true },
         { label: "Categoria", mode: "select", name: "addDishesCategory", enum: true, menu_enum: itensEnums.category },
-        { label: ".", text: 'Salvar', mode: "button", type: 'submit'},
+        { label: ".", text: 'Salvar', mode: "button", type: 'submit' },
     ]
 
     async function get_menus() {
@@ -205,13 +210,11 @@ function Menu() {
                 const enums_forms = await getMenuEnums();
                 setMenuEnums(enums_forms);
             } catch (error) {
-                console.error("Erro ao carregar os dados dos formularios.", error);
+                console.error("Erro ao carregar os dados dos formulários.", error);
             }
         }
         get_enums();
     }, []);
-
-    
 
     useEffect(() => {
         async function get_allergens() {
@@ -219,7 +222,7 @@ function Menu() {
                 const allergens_enums = await getProductEnums();
                 setItensEnums(allergens_enums);
             } catch (error) {
-                console.error("Erro ao carregar os dados dos formularios.", error);
+                console.error("Erro ao carregar os dados dos alergénicos.", error);
             }
         }
         get_allergens();
@@ -230,7 +233,7 @@ function Menu() {
             const tags_ = await getTags();
             setTags(tags_);
         } catch (error) {
-            console.error("Erro ao carregar dados dos formularios.", error);
+            console.error("Erro ao carregar dados das etiquetas.", error);
         }
     }
 
@@ -241,15 +244,31 @@ function Menu() {
     const imgRef = useRef(null);
 
     function handleButtonClickFile() {
-        imgRef.current.click();
+        if (imgRef.current) imgRef.current.click();
     }
 
     const handleImageChange = (e) => {
         const files = Array.from(e.target.files);
-        const newPreviews = files.map((file) => URL.createObjectURL(file));
+        if (files.length === 0) return;
 
+        setImageFilesToUpload((prev) => [...prev, ...files]);
+
+        const newPreviews = files.map((file) => URL.createObjectURL(file));
         setPreview((prev) => [...prev, ...newPreviews]);
     };
+
+    function emptyPreviewBeforeSaving() {
+        preview.forEach((url) => {
+            if (url && url.startsWith('blob:')) URL.revokeObjectURL(url);
+        });
+        setPreview([]);
+        setImageFilesToUpload([]);
+        setIndexOfPreview(0);
+
+        if (imgRef.current) {
+            imgRef.current.value = "";
+        }
+    }
 
     const handleDragOver = (e) => {
         e.preventDefault();
@@ -258,10 +277,11 @@ function Menu() {
     const handleDrop = (e) => {
         e.preventDefault();
         const files = Array.from(e.dataTransfer.files);
-
         const imageFiles = files.filter((file) => file.type.startsWith('image/'));
 
         if (imageFiles.length > 0) {
+            setImageFilesToUpload((prev) => [...prev, ...imageFiles]);
+
             const newPreviews = imageFiles.map((file) => URL.createObjectURL(file));
             setPreview((prev) => [...prev, ...newPreviews]);
         } else {
@@ -269,56 +289,36 @@ function Menu() {
         }
     };
 
-    function emptyPreviewBeforeSaving() {
-        preview.forEach((url) => URL.revokeObjectURL(url));
-
-        setPreview([]);
-        setIndexOfPreview(0);
-
-        if (imgRef.current) {
-            imgRef.current.value = "";
-        }
-    }
-
     function handleChangeImageRight() {
-        if (!preview || preview.length === 0) {
-            return;
-        }
-
+        if (!preview || preview.length === 0) return;
         setIndexOfPreview((prevIndex) =>
             prevIndex >= preview.length - 1 ? 0 : prevIndex + 1
-        )
+        );
     }
 
     function handleChangeImageLeft() {
-        if (!preview || preview.length === 0) {
-            return;
-        }
-
+        if (!preview || preview.length === 0) return;
         setIndexOfPreview((prevIndex) =>
             prevIndex <= 0 ? preview.length - 1 : prevIndex - 1
-        )
+        );
     }
 
     function handleDeleteCurrentImage() {
         if (!preview || preview.length === 0) return;
 
-        URL.revokeObjectURL(preview[indexOfPreview]);
+        if (preview[indexOfPreview]?.startsWith('blob:')) {
+            URL.revokeObjectURL(preview[indexOfPreview]);
+        }
 
         const updatedPreviews = preview.filter((_, index) => index !== indexOfPreview);
         setPreview(updatedPreviews);
 
+        const updatedFiles = imageFilesToUpload.filter((_, index) => index !== indexOfPreview);
+        setImageFilesToUpload(updatedFiles);
+
         if (indexOfPreview >= updatedPreviews.length) {
             setIndexOfPreview(Math.max(0, updatedPreviews.length - 1));
         }
-    }
-
-    function parseNumberOrFallback(formData, fieldName, fallback) {
-        if (!formData.has(fieldName)) return fallback;
-        const raw = formData.get(fieldName);
-        if (raw === '' || raw === null) return fallback;
-        const parsed = parseFloat(raw);
-        return isNaN(parsed) ? fallback : parsed;
     }
 
     async function handleCreateMenu(e) {
@@ -336,24 +336,30 @@ function Menu() {
             return;
         }
 
-        const formattedTags = selectedTagsForMenu.map(tag => {
-            const tagName = typeof tag === 'object' ? tag.name : tag;
+        try {
+            const uploadedUrls = [];
+            for (const file of imageFilesToUpload) {
+                const url = await uploadFile(file);
+                if (url) uploadedUrls.push(url);
+            }
+
+            const formattedTags = selectedTagsForMenu.map(tag => {
+                const tagName = typeof tag === 'object' ? tag.name : tag;
                 return { name: tagName };
-        });
+            });
 
-        const payload = {
-            name: String(formData.get('addDishesName')),
-            price: parseFloat(formData.get('addDishesPrice')),
-            description: String(formData.get('addDishesDesc')),
-            category: String(formData.get('addDishesCategory')),
-            img: preview,
-            allergens: selectedAllergensForMenu || null,
-            tags: formattedTags || null,
-            available: true,
-            unitId: user?.storeUnitId
-        }
+            const payload = {
+                name: String(formData.get('addDishesName')),
+                price: parseFloat(formData.get('addDishesPrice')),
+                description: String(formData.get('addDishesDesc')),
+                category: String(formData.get('addDishesCategory')),
+                img: uploadedUrls,
+                allergens: selectedAllergensForMenu || null,
+                tags: formattedTags || null,
+                available: true,
+                unitId: user?.storeUnitId
+            };
 
-        try{
             await createMenu(payload);
             await get_menus();
             setAddMenuModalIsOpen(false);
@@ -362,10 +368,10 @@ function Menu() {
             setFormSuccess("Prato criado com sucesso!");
             setAlertType('success');
             setAlertModalIsOpen(true);
+            emptyPreviewBeforeSaving();
             e.target.reset();
-        }catch (error){
-            setFormError(error.message);
-            console.log(error.message);
+        } catch (error) {
+            setFormError(error.message || "Erro ao criar prato.");
             setAlertType('error');
             setAlertModalIsOpen(true);
         }
@@ -386,61 +392,83 @@ function Menu() {
             return;
         }
 
-        const formattedTags = selectedTagsForMenu.map(tag => {
-            const tagName = typeof tag === 'object' ? tag.name : tag;
+        try {
+            const finalImageUrls = [];
+            for (const item of preview) {
+                if (item.startsWith('blob:')) {
+                    const fileObj = imageFilesToUpload.find(f => URL.createObjectURL(f) === item);
+                    if (fileObj) {
+                        const uploadedUrl = await uploadFile(fileObj);
+                        if (uploadedUrl) finalImageUrls.push(uploadedUrl);
+                    }
+                } else {
+                    const cleanUrl = item.replace('http://localhost:3000/', '');
+                    finalImageUrls.push(cleanUrl);
+                }
+            }
+
+            const formattedTags = selectedTagsForMenu.map(tag => {
+                const tagName = typeof tag === 'object' ? tag.name : tag;
                 return { name: tagName };
-        });
+            });
 
-        const payload = {
-            name: String(formData.get('addDishesName')) || selectedMenu.name,
-            price: parseFloat(formData.get('addDishesPrice')) || selectedMenu.price,
-            description: String(formData.get('addDishesDesc')) || selectedMenu.description,
-            category: String(formData.get('addDishesCategory')) || selectedMenu.category,
-            img: newPreview || selectedMenu.img,
-            allergens: selectedAllergensForMenu || null,
-            tags: selectedTagsForMenu || null,
-            available: true,
-            unitId: user?.storeUnitId
-        }
+            const payload = {
+                name: String(formData.get('addDishesName')) || selectedMenu.name,
+                price: parseFloat(formData.get('addDishesPrice')) || selectedMenu.price,
+                description: String(formData.get('addDishesDesc')) || selectedMenu.description,
+                category: String(formData.get('addDishesCategory')) || selectedMenu.category,
+                img: finalImageUrls.length > 0 ? finalImageUrls : selectedMenu.img,
+                allergens: selectedAllergensForMenu || null,
+                tags: formattedTags || null,
+                available: true,
+                unitId: user?.storeUnitId
+            };
 
-        try{
-            await editMenu(payload,selectedMenu.id);
+            await editMenu(payload, selectedMenu.id);
             await get_menus();
-            setAddMenuModalIsOpen(false);//trocar para modal de edição
+            setEditMenuModalIsOpen(false);
+            setEditMenuStatus(false);
             setSelectedAllergensForMenu([]);
             setSelectedTagsForMenu([]);
             setFormSuccess(`${selectedMenu.name} editado com sucesso!`);
             setAlertType('success');
             setAlertModalIsOpen(true);
-            e.target.reset();
-        }catch (error){
-            setFormError(error.message);
-            console.log(error.message);
+            emptyPreviewBeforeSaving();
+        } catch (error) {
+            setFormError(error.message || "Erro ao editar prato.");
             setAlertType('error');
             setAlertModalIsOpen(true);
         }
     }
 
-    async function handleDeleteMenu(e) {
-        e.preventDefault();
+    async function handleDeleteMenu() {
+        if (!selectedMenu || !selectedMenu.id) {
+            setFormError('Nenhum prato selecionado para exclusão.');
+            setAlertType('error');
+            setAlertModalIsOpen(true);
+            return;
+        }
+
         setFormError('');
         setFormSuccess('');
         setAlertType('');
 
-        try{
+        try {
+            // Certifique-se de que passa selectedMenu.id aqui:
             await deleteMenu(selectedMenu.id);
             await get_menus();
-            setAddMenuModalIsOpen(false);//trocar para modal de edição
+            setEditMenuModalIsOpen(false);
+            setEditMenuStatus(false);
             setSelectedAllergensForMenu([]);
             setSelectedTagsForMenu([]);
             setFormSuccess(`${selectedMenu.name} deletado com sucesso!`);
             setAlertType('success');
             setAlertModalIsOpen(true);
-            e.target.reset();
-        }catch (error){
-            setFormError(error.message);
-            console.log(error.message);
+            emptyPreviewBeforeSaving();
+        } catch (error) {
+            setFormError(error.message || "Erro ao deletar prato.");
             setAlertType('error');
+            console.error(error.message,selectedMenu.id)
             setAlertModalIsOpen(true);
         }
     }
@@ -463,6 +491,7 @@ function Menu() {
         const payload = {
             name: String(formData.get('addTagName')),
             color: String(formData.get('addTagColor')),
+            unitId: user?.storeUnitId,
         };
 
         if (!ALLOWED_COLORS.includes(payload.color)) {
@@ -549,6 +578,17 @@ function Menu() {
         setTagsModalIsOpen(true);
     }
 
+    // Lógica para filtrar os pratos conforme os filtros selecionados
+    const filteredMenu = menu.filter((item) => {
+        const selectedCategory = selectedModalFilters["Categorias"];
+        const selectedTagFilter = selectedModalFilters["Etiquetas"];
+
+        const matchesCategory = !selectedCategory || item.category === selectedCategory;
+        const matchesTag = !selectedTagFilter || (item.tags && item.tags.some(t => t.name === selectedTagFilter.name));
+
+        return matchesCategory && matchesTag;
+    });
+
     return (
         <>
             <Header expanded={expanded} setExpand={setExpand} setHasInteracted={setHasInteracted} />
@@ -572,24 +612,38 @@ function Menu() {
                         </div>
                         <p style={{ color: '#777171ff' }}>Visualize e edite seu cardápio.</p>
                     </div>
-                    <div>
-                        {menu.length <= 0 ? (
-                            'Nenhum prato cadastrado.'
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', marginTop: '20px', justifyContent: 'space-between' }}>
+                        {filteredMenu.length <= 0 ? (
+                            <p>Nenhum prato encontrado com os filtros selecionados.</p>
                         ) : (
-                            menu.map((item, i) => (
-                                <div key={i}>
-                                    <p>{item.name}</p>
-                                </div>
+                            filteredMenu.map((item, i) => (
+                                <MenuCard 
+                                    key={item.id || i} 
+                                    item={item} 
+                                    onClick={() => {
+                                        setSelectedMenu(item);
+                                        const formattedImages = (item.img || []).map(img => 
+                                            img.startsWith('http') || img.startsWith('blob') ? img : `http://localhost:3000/${img}`
+                                        );
+                                        setPreview(formattedImages);
+                                        setIndexOfPreview(0);
+                                        setSelectedAllergensForMenu(item.allergens || []);
+                                        setSelectedTagsForMenu(item.tags || []);
+                                        setEditMenuStatus(false);
+                                        setEditMenuModalIsOpen(true);
+                                    }} 
+                                />
                             ))
                         )}
                     </div>
                 </div>
 
+                {/* Modal de Adicionar Prato */}
                 <Modal
                     isOpen={addMenuModalIsOpen}
                     onRequestClose={() => {
-                        setAddMenuModalIsOpen(!addMenuModalIsOpen)
-                        emptyPreviewBeforeSaving()
+                        setAddMenuModalIsOpen(false);
+                        emptyPreviewBeforeSaving();
                     }}
                     shouldCloseOnOverlayClick={true}
                     contentLabel="Modal de Adicionar Prato"
@@ -597,15 +651,15 @@ function Menu() {
                 >
                     <div className="top-container" 
                         onClick={()=>{
-                            setAddAllergensToListModal(false)
-                            setAddTagsToListModal(false)
+                            setAddAllergensToListModal(false);
+                            setAddTagsToListModal(false);
                         }}>
                         <div className="group-one-top-container">
                             <h2>Novo prato</h2>
                             <button
                                 onClick={() => {
-                                    setAddMenuModalIsOpen(!addMenuModalIsOpen)
-                                    emptyPreviewBeforeSaving()
+                                    setAddMenuModalIsOpen(false);
+                                    emptyPreviewBeforeSaving();
                                 }}
                                 style={{ fontSize: 30 }}
                             >&times;</button>
@@ -615,8 +669,8 @@ function Menu() {
 
                     <form className="form-add-menu" 
                         onClick={()=>{
-                            addAllergensToListModal? setAddAllergensToListModal(false) : ('')
-                            addTagsToListModal? setAddTagsToListModal(false) : ('')
+                            addAllergensToListModal ? setAddAllergensToListModal(false) : ('');
+                            addTagsToListModal ? setAddTagsToListModal(false) : ('');
                         }}
                         onSubmit={handleCreateMenu}
                         >
@@ -660,6 +714,7 @@ function Menu() {
                                 <input
                                     type="file"
                                     accept="image/*"
+                                    multiple
                                     style={{ display: "none" }}
                                     ref={imgRef}
                                     onChange={handleImageChange}
@@ -674,7 +729,7 @@ function Menu() {
                                     {item.mode === "input" ? (
                                         <div className="fields">
                                             <label>{item.label}</label>
-                                            <input step={item.step} className="input-select-model" type={item.type} name={item.name} placeholder={item.placeholder} />
+                                            <input step={item.step} className="input-select-model" type={item.type} name={item.name} placeholder={item.placeholder} required />
                                         </div>
                                     ) : item.mode === 'textarea' ? (
                                         <div className="fields">
@@ -690,11 +745,8 @@ function Menu() {
                                                         <p>Nenhum alergênico selecionado.</p>
                                                     ) : (
                                                         selectedAllergensForMenu.map((allergen, i) => (
-                                                            <li
-                                                                key={i}
-                                                                className="li-style-model"
-                                                            >
-                                                                {allergen.replaceAll('_', ' ')}
+                                                            <li key={i} className="li-style-model">
+                                                                {typeof allergen === 'string' ? allergen.replaceAll('_', ' ') : allergen}
                                                                 <button
                                                                     type="button"
                                                                     onClick={() => setSelectedAllergensForMenu(prev => prev.filter(a => a !== allergen))}
@@ -737,14 +789,11 @@ function Menu() {
                                                         <p>Nenhuma etiqueta selecionada.</p>
                                                     ) : (
                                                         selectedTagsForMenu.map((tag, i) => (
-                                                            <li
-                                                                key={i}
-                                                                className="li-style-model"
-                                                            >
+                                                            <li key={i} className="li-style-model">
                                                                 {tag.name}
                                                                 <button
                                                                     type="button"
-                                                                    onClick={() => setSelectedTagsForMenu(prev => prev.filter(a => a !== tag))}
+                                                                    onClick={() => setSelectedTagsForMenu(prev => prev.filter(a => (a.id ? a.id !== tag.id : a.name !== tag.name)))}
                                                                 >&times;</button>
                                                             </li>
                                                         ))
@@ -761,7 +810,7 @@ function Menu() {
 
                                             {addTagsToListModal && (
                                                 <ul className="add-allergen-select">
-                                                    {tags.length <=0 ? (
+                                                    {tags.length <= 0 ? (
                                                         <li>Ainda não existem etiquetas</li>
                                                     ) : 
                                                         tags.map((tag, i) => (
@@ -770,7 +819,7 @@ function Menu() {
                                                                     type="button"
                                                                     onClick={() => {
                                                                         setSelectedTagsForMenu(prev =>
-                                                                        prev.includes(tag) ? prev : [...prev, tag])
+                                                                        prev.some(t => (t.id ? t.id === tag.id : t.name === tag.name)) ? prev : [...prev, tag])
                                                                     }}
                                                                 >{tag.name}</button>
                                                             </li>
@@ -787,7 +836,7 @@ function Menu() {
                                                 ))}
                                             </select>
                                         </div>
-                                    ) :(
+                                    ) : (
                                         <div className="fields">
                                             <label style={{ color: 'white' }}>{item.label}</label>
                                             <button className="btn-modal-submit menu" type={item.type}>{item.text}</button>
@@ -799,6 +848,284 @@ function Menu() {
                     </form>
                 </Modal>
 
+                {/* Modal de Edição de Prato (Design Original Mantido) */}
+                <Modal
+                    isOpen={editMenuModalIsOpen}
+                    onRequestClose={() => {
+                        setEditMenuModalIsOpen(false);
+                        setEditMenuStatus(false);
+                        emptyPreviewBeforeSaving();
+                    }}
+                    shouldCloseOnOverlayClick={true}
+                    contentLabel="Modal de Editar Prato"
+                    style={modalStyle}
+                >
+                    {(() => {
+                        const text_enable_edit = editMenuStatus ? 'Desabilitar Edição' : 'Habilitar Edição';
+                        const subtitle_top_container = editMenuStatus 
+                            ? `Edite e altere informações de ${selectedMenu?.name}` 
+                            : `Dados de ${selectedMenu?.name}`;
+
+                        return (
+                            <>
+                                <div className="top-container" 
+                                    onClick={()=>{
+                                        setAddAllergensToListModal(false);
+                                        setAddTagsToListModal(false);
+                                    }}>
+                                    <div className="group-one-top-container" style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                                        <h2>{selectedMenu?.name}</h2>
+                                        <button 
+                                            type="button"
+                                            style={{display:'flex',flexDirection:'row',alignItems:'center',gap:'10px',fontSize:'18px'}} 
+                                            onClick={() => setEditMenuStatus(!editMenuStatus)}
+                                        >
+                                            {text_enable_edit} <SquarePen />
+                                        </button>
+                                        <div style={{display: 'flex', gap: '15px', alignItems: 'center'}}>
+                                            <button
+                                                onClick={() => {
+                                                    setEditMenuModalIsOpen(false);
+                                                    setEditMenuStatus(false);
+                                                    emptyPreviewBeforeSaving();
+                                                }}
+                                                style={{ fontSize: 30, background: 'none', border: 'none', cursor: 'pointer' }}
+                                            >&times;</button>
+                                        </div>
+                                    </div>
+                                    <p style={{'fontSize': 15,'color': '#777171ff'}}>{subtitle_top_container}</p>
+                                </div>
+
+                                <form className="form-add-menu" 
+                                    onClick={()=>{
+                                        addAllergensToListModal ? setAddAllergensToListModal(false) : ('');
+                                        addTagsToListModal ? setAddTagsToListModal(false) : ('');
+                                    }}
+                                    onSubmit={handleEditMenu}
+                                >
+                                    <div className="container-add-img">
+                                        <div
+                                            onDrop={editMenuStatus ? handleDrop : undefined}
+                                            onDragOver={handleDragOver}
+                                        >
+                                            {preview.length > 0 ? (
+                                                <div className="container-exibe-image">
+                                                    <img 
+                                                        src={
+                                                            preview[indexOfPreview]?.startsWith('http') || preview[indexOfPreview]?.startsWith('blob') 
+                                                                ? preview[indexOfPreview] 
+                                                                : `http://localhost:3000/${preview[indexOfPreview]}`
+                                                        } 
+                                                        className="card-full-image" 
+                                                        alt="Preview" 
+                                                    />
+                                                    {preview.length > 1 ? (
+                                                        <div className="container-buttons-change-image">
+                                                            <button
+                                                                type="button"
+                                                                className="btn-change-image-bg"
+                                                                onClick={handleChangeImageLeft}><ChevronLeft color="white" />
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                className="btn-change-image-bg"
+                                                                onClick={handleChangeImageRight}><ChevronRight color="white" />
+                                                            </button>
+                                                        </div>
+                                                    ) : ('')}
+                                                    {editMenuStatus && (
+                                                        <div className="container-buttons-delete-image">
+                                                            <button type="button" className="btn-change-image-bg delete" onClick={handleDeleteCurrentImage}>
+                                                                <Trash color="white"></Trash>
+                                                            </button>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            ) : (
+                                                <div className="container-add-image">
+                                                    <label style={{fontSize:18, color: 'grey',textAlign:'center'}}>Sem imagens</label>
+                                                    <Camera color="grey" size={50} strokeWidth={1} />
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {editMenuStatus && (
+                                            <button type="button" className="btn-add-img" onClick={handleButtonClickFile}>
+                                                <input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    multiple
+                                                    style={{ display: "none" }}
+                                                    ref={imgRef}
+                                                    onChange={handleImageChange}
+                                                />
+                                                <label>Adicione imagens</label>
+                                            </button>
+                                        )}
+                                    </div>
+
+                                    <div className="container-form">
+                                        {inputValues.map((item, index) => {
+                                            let defaultValue = '';
+                                            if (item.name === 'addDishesName') defaultValue = selectedMenu?.name || '';
+                                            if (item.name === 'addDishesPrice') defaultValue = selectedMenu?.price || '';
+                                            if (item.name === 'addDishesDesc') defaultValue = selectedMenu?.description || '';
+
+                                            return (
+                                                <div key={index}>
+                                                    {item.mode === "input" ? (
+                                                        <div className="fields">
+                                                            <label>{item.label}</label>
+                                                            <input 
+                                                                readOnly={!editMenuStatus}
+                                                                step={item.step} 
+                                                                className="input-select-model" 
+                                                                type={item.type} 
+                                                                name={item.name} 
+                                                                defaultValue={defaultValue} 
+                                                                placeholder={item.placeholder} 
+                                                            />
+                                                        </div>
+                                                    ) : item.mode === 'textarea' ? (
+                                                        <div className="fields">
+                                                            <label>{item.label}</label>
+                                                            <textarea 
+                                                                readOnly={!editMenuStatus}
+                                                                className="input-select-model" 
+                                                                name={item.name} 
+                                                                defaultValue={defaultValue} 
+                                                                placeholder={item.placeholder} 
+                                                            ></textarea>
+                                                        </div>
+                                                    ) : item.mode === 'select' && item.allergen ? (
+                                                        <div className="fields allergens">
+                                                            <label>{item.label}</label>
+                                                            <div style={{display:'flex',flexDirection:'row',gap: '10px',alignItems:'center'}}>
+                                                                <ul className="input-select-model ul-list">
+                                                                    {selectedAllergensForMenu.length <= 0 ? (
+                                                                        <p>Nenhum alergênico selecionado.</p>
+                                                                    ) : (
+                                                                        selectedAllergensForMenu.map((allergen, i) => (
+                                                                            <li key={i} className="li-style-model">
+                                                                                {typeof allergen === 'string' ? allergen.replaceAll('_', ' ') : allergen}
+                                                                                {editMenuStatus && (
+                                                                                    <button
+                                                                                        type="button"
+                                                                                        onClick={() => setSelectedAllergensForMenu(prev => prev.filter(a => a !== allergen))}
+                                                                                    >&times;</button>
+                                                                                )}
+                                                                            </li>
+                                                                        ))
+                                                                    )}
+                                                                </ul>
+                                                                {editMenuStatus && (
+                                                                    <button 
+                                                                        className="add-category-ul-list"
+                                                                        type="button"
+                                                                        onClick={()=>setAddAllergensToListModal(!addAllergensToListModal)}
+                                                                    >
+                                                                        <Plus></Plus>
+                                                                    </button>
+                                                                )}
+                                                            </div>
+
+                                                            {addAllergensToListModal && editMenuStatus ? (
+                                                                <ul className="add-allergen-select">
+                                                                    {item.menu_enum?.map((all, i) => (
+                                                                        <li key={i} value={all}>
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() => {
+                                                                                    setSelectedAllergensForMenu(prev =>
+                                                                                    prev.includes(all) ? prev : [...prev, all])
+                                                                                }}
+                                                                            >{all.replaceAll('_', ' ')}</button>
+                                                                        </li>
+                                                                    ))}
+                                                                </ul>
+                                                            ) : ('')}
+                                                        </div>
+                                                    ) : item.mode === 'select' && item.tag ? (
+                                                        <div className="fields allergens">
+                                                            <label>{item.label}</label>
+                                                            <div style={{display:'flex',flexDirection:'row',gap: '10px',alignItems:'center'}}>
+                                                                <ul className="input-select-model ul-list">
+                                                                    {selectedTagsForMenu.length <= 0 ? (
+                                                                        <p>Nenhuma etiqueta selecionada.</p>
+                                                                    ) : (
+                                                                        selectedTagsForMenu.map((tag, i) => (
+                                                                            <li key={i} className="li-style-model">
+                                                                                {tag.name}
+                                                                                {editMenuStatus && (
+                                                                                    <button
+                                                                                        type="button"
+                                                                                        onClick={() => setSelectedTagsForMenu(prev => prev.filter(a => (a.id ? a.id !== tag.id : a.name !== tag.name)))}
+                                                                                    >&times;</button>
+                                                                                )}
+                                                                            </li>
+                                                                        ))
+                                                                    )}
+                                                                </ul>
+                                                                {editMenuStatus && (
+                                                                    <button 
+                                                                        className="add-category-ul-list"
+                                                                        type="button"
+                                                                        onClick={()=>setAddTagsToListModal(!addTagsToListModal)}
+                                                                    >
+                                                                        <Plus></Plus>
+                                                                    </button>
+                                                                )}
+                                                            </div>
+
+                                                            {addTagsToListModal && editMenuStatus && (
+                                                                <ul className="add-allergen-select">
+                                                                    {tags.length <= 0 ? (
+                                                                        <li>Ainda não existem etiquetas</li>
+                                                                    ) : 
+                                                                        tags.map((tag, i) => (
+                                                                            <li key={i} value={tag}>
+                                                                                <button
+                                                                                    type="button"
+                                                                                    onClick={() => {
+                                                                                        setSelectedTagsForMenu(prev =>
+                                                                                        prev.some(t => (t.id ? t.id === tag.id : t.name === tag.name)) ? prev : [...prev, tag])
+                                                                                    }}
+                                                                                >{tag.name}</button>
+                                                                            </li>
+                                                                        ))}
+                                                                </ul>
+                                                            )}
+                                                        </div>
+                                                    ) : item.mode === 'select' && item.enum ? (
+                                                        <div className="fields">
+                                                            <label>{item.label}</label>
+                                                            <select disabled={!editMenuStatus} className="input-select-model" name={item.name} defaultValue={selectedMenu?.category}>
+                                                                {(menuEnums.category ?? []).map((cat,i)=>(
+                                                                    <option value={cat} key={i}>{String(cat.replaceAll('_',' '))}</option>
+                                                                ))}
+                                                            </select>
+                                                        </div>
+                                                    ) : (
+                                                        editMenuStatus ? (
+                                                            <div className="fields" key={index} style={{display: 'flex', flexDirection: 'row', gap: '10px'}}>
+                                                                <button className="btn-modal-submit menu" type={item.type}>Salvar Alterações</button>
+                                                                <button className="btn-modal-submit delete" type="button" onClick={handleDeleteMenu}>
+                                                                    <Trash color="black" size={18} />
+                                                                </button>
+                                                            </div>
+                                                        ) : null
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </form>
+                            </>
+                        );
+                    })()}
+                </Modal>
+
+                {/* Modal de Gerenciar Etiquetas */}
                 <Modal
                     isOpen={tagsModalIsOpen}
                     onRequestClose={() => {
@@ -887,6 +1214,7 @@ function Menu() {
                     </div>
                 </Modal>
 
+                {/* Modal de Editar Etiqueta */}
                 <Modal
                     isOpen={editTagsModalIsOpen}
                     onRequestClose={closeEditTagModal}
