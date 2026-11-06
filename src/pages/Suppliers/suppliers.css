@@ -274,6 +274,18 @@ li button{
         align-items: flex-start;
     }
 
+    main:has(> #sidebar):has(.container-suppliers) .top-container-users > div:first-child > div:first-child{
+        flex-wrap: nowrap;
+        gap: 10px !important;
+        white-space: nowrap;
+    }
+
+    main:has(> #sidebar):has(.container-suppliers) .top-container-users > div:first-child > div:first-child h1{
+        flex-shrink: 0;
+        font-size: clamp(18px, 5vw, 24px);
+        white-space: nowrap;
+    }
+
     main:has(> #sidebar):has(.container-suppliers) .top-container-users > div:last-child{
         flex: 1 1 100%;
     }

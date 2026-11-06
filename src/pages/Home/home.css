@@ -252,12 +252,13 @@ button:hover {
     }
 
     .home-page .principal-btn {
-        flex: 1 1 250px;
+        flex: 1 1 220px;
         width: auto;
-        max-width: 350px;
+        max-width: 320px;
         min-width: 0;
         height: auto;
-        min-height: 230px;
+        min-height: 200px;
+        padding: 28px;
         box-sizing: border-box;
     }
 
@@ -324,9 +325,18 @@ button:hover {
 
     .home-page .principal-btn {
         flex-basis: 100%;
-        max-width: 420px;
-        min-height: 210px;
-        padding: 28px;
+        max-width: 380px;
+        min-height: 180px;
+        padding: 22px;
+        gap: 12px;
+    }
+
+    .home-page .principal-btn h2 {
+        font-size: 18px;
+    }
+
+    .home-page .principal-btn p {
+        font-size: 14px;
     }
 
     .home-page #tables-group {

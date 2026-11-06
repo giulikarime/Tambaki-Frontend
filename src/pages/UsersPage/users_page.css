@@ -186,6 +186,7 @@ form{
   font-weight: 700;
   border: none;
   text-align: center;
+  font-size: 1rem;
 }
 
 
@@ -308,6 +309,18 @@ background-color: #ffe0b2;
     main:has(> #sidebar):has(.container-users) .principal-menu-users{
         padding: 32px 16px 40px;
         gap: 24px;
+    }
+
+    main:has(> #sidebar):has(.container-users) .top-container-users > div:first-child > div:first-child{
+        flex-wrap: nowrap;
+        gap: 10px !important;
+        white-space: nowrap;
+    }
+
+    main:has(> #sidebar):has(.container-users) .top-container-users > div:first-child > div:first-child h1{
+        flex-shrink: 0;
+        font-size: clamp(18px, 5vw, 24px);
+        white-space: nowrap;
     }
 
     main:has(> #sidebar):has(.container-users) .top-container-users{
