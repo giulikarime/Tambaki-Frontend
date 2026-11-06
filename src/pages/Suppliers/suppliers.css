@@ -146,4 +146,162 @@ li button{
     cursor: pointer;
 }
 
+@media (max-width: 1200px){
+    body:has(.container-suppliers) header #group-one > button{
+        display: none;
+    }
 
+    main:has(> #sidebar):has(.container-suppliers){
+        display: block;
+        width: 100%;
+        height: auto;
+        min-height: 93vh;
+        padding-bottom: 64px;
+        box-sizing: border-box;
+    }
+
+    main:has(> #sidebar):has(.container-suppliers) #sidebar.sidebar,
+    main:has(> #sidebar):has(.container-suppliers) #sidebar.sidebar.expanded{
+        position: fixed;
+        z-index: 20;
+        top: auto;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 64px;
+        max-height: 64px;
+        min-height: 0;
+    }
+
+    main:has(> #sidebar):has(.container-suppliers) #sidebar-menu{
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-around;
+        gap: 4px;
+        height: 100%;
+        padding: 6px 8px;
+        box-sizing: border-box;
+    }
+
+    main:has(> #sidebar):has(.container-suppliers) .sidebar-item{
+        flex: 1;
+        width: auto;
+        justify-content: center;
+        padding: 10px 4px;
+    }
+
+    main:has(> #sidebar):has(.container-suppliers) #sidebar .sidebar-label{
+        display: none;
+    }
+
+    main:has(> #sidebar):has(.container-suppliers) .principal-menu-users{
+        position: relative;
+        top: auto;
+        left: auto;
+        width: 100%;
+        min-width: 0;
+        margin: 0;
+        padding: 40px 24px;
+        box-sizing: border-box;
+        transform: none;
+        gap: 32px;
+    }
+
+    main:has(> #sidebar):has(.container-suppliers) .top-container-users{
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+
+    main:has(> #sidebar):has(.container-suppliers) .top-container-users > div:last-child{
+        flex: 1 1 100%;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .container-suppliers{
+        overflow-x: auto;
+        justify-content: flex-start;
+    }
+
+    .container-suppliers table{
+        min-width: 760px;
+    }
+}
+
+@media (max-width: 768px){
+    body:has(.container-suppliers) header{
+        display: flex;
+        width: 100%;
+        height: auto;
+        min-height: 64px;
+        flex-wrap: wrap;
+        gap: 12px;
+        padding: 12px 16px;
+    }
+
+    body:has(.container-suppliers) #group-one{
+        flex: 1;
+        min-width: 0;
+        gap: 10px;
+    }
+
+    body:has(.container-suppliers) #group-one h1{
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    body:has(.container-suppliers) header > div:nth-child(2){
+        order: 3;
+        width: 100% !important;
+    }
+
+    body:has(.container-suppliers) #group-two{
+        gap: 8px;
+    }
+
+    main:has(> #sidebar):has(.container-suppliers){
+        min-height: 93vh;
+    }
+
+    main:has(> #sidebar):has(.container-suppliers) .principal-menu-users{
+        padding: 32px 16px 40px;
+        gap: 24px;
+    }
+
+    main:has(> #sidebar):has(.container-suppliers) .top-container-users{
+        align-items: flex-start;
+    }
+
+    main:has(> #sidebar):has(.container-suppliers) .top-container-users > div:last-child{
+        flex: 1 1 100%;
+    }
+
+    main:has(> #sidebar):has(.container-suppliers) .top-container-users > div:last-child > div{
+        flex: 1 1 220px;
+        min-width: 0;
+    }
+
+    .container-suppliers table{
+        min-width: 700px;
+    }
+
+    body:has(.container-suppliers) .container-form{
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 480px){
+    main:has(> #sidebar):has(.container-suppliers) .top-container-users > div:last-child{
+        align-items: center;
+    }
+
+    main:has(> #sidebar):has(.container-suppliers) .top-container-users > div:last-child > div{
+        flex-basis: 100%;
+    }
+
+    body:has(.container-suppliers) .container-form{
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

@@ -18,13 +18,6 @@ button:hover {
     cursor: pointer;
 }
 
-.search-input {
-    background-image: url('../../assets/header/search_icon.svg');
-    background-repeat: no-repeat;
-    background-position: 10px center;
-    background-size: 40px 25px;
-}
-
 #principal-menu {
     width: 70%;
     position: absolute;
