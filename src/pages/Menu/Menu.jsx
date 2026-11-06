@@ -183,7 +183,7 @@ function Menu() {
 
     const inputValues = [
         { label: "Nome do Prato", mode: "input", type: "text", name: "addDishesName", placeholder: 'Digite um nome...' },
-        { label: "Preço", mode: "input", type: "number", name: "addDishesPrice", placeholder: 'Exemplo.: 25,99', step: 0.1 },
+        { label: "Preço", mode: "input", type: "number", name: "addDishesPrice", placeholder: 'Exemplo.: 25,99', step: 0.01 },
         { label: "Descrição", mode: "textarea", name: "addDishesDesc", placeholder: 'Descreva o prato..' },
         { label: "Alergênicos", mode: "select", name: "addDishesAllergens", allergen: true, menu_enum: itensEnums.allergens },
         { label: "Etiquetas", mode: "select", name: "addDishesTag", tag: true },
@@ -360,7 +360,6 @@ function Menu() {
                 available: true,
                 unitId: user?.storeUnitId
             };
-            
             await createMenu(payload);
             await get_menus();
             setAddMenuModalIsOpen(false);
@@ -430,7 +429,6 @@ function Menu() {
                 allergens: selectedAllergensForMenu || null,
                 tags: formattedTags || null,
                 available: true,
-                unitId: user?.storeUnitId
             };
 
             await editMenu(payload, selectedMenu.id);
@@ -500,7 +498,6 @@ function Menu() {
         const payload = {
             name: String(tagName),
             color: String(tagColor),
-            unitId: user?.storeUnitId,
         };
 
         if (!ALLOWED_COLORS.includes(payload.color)) {
