@@ -2,14 +2,15 @@ import { useEffect, useState } from "react";
 import Header from "../../components/HeaderAndSidebar/Header";
 import Sidebar from "../../components/HeaderAndSidebar/Sidebar";
 import './financial.css'
-import { BanknoteArrowDown, Carrot, ChevronDown, ChevronLeft, ChevronRight, Funnel, PackagePlus, Plus, Snowflake, Van } from "lucide-react";
+import { ChevronLeft, Funnel, Plus} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import CMV from "../../components/CMV/CMV";
 import Costs from "../../components/Costs/Costs";
 import ClientsCosts from "../../components/ClientsCosts/ClientsCosts";
 import ProfitPoint from "../../components/ProfitPoint/ProfitPoint";
 import Modal from 'react-modal'
-import React, { Fragment } from 'react';
+import { getCosts, getCostsEnums, createCosts, editCosts } from '../../services/costs'
+import AlertModals from "../../components/SucessModals/AlertModals";
 
 function Financial(){
 
@@ -17,19 +18,63 @@ function Financial(){
     const [expanded, setExpand] = useState(false);
     const [hasInteracted, setHasInteracted] = useState(false);
 
+    const [formError, setFormError] = useState('');
+    const [formSuccess, setFormSuccess] = useState('');
+    const [alertType, setAlertType] = useState('');
+    const [alertModalIsOpen, setAlertModalIsOpen] = useState(false);
+
     const presentDate = new Date();
 
     const month = new Date().toLocaleString('pt-BR', { month: 'long' });
     const year = presentDate.getFullYear();
 
     const cardsData = [
-        {label: 'Custo de Mercadoria Vendida', value: 'R$ 38,2 k', subtitle: '4% vs. mês anterior', button: true, id: 'yellow', selected: 'CMV', action: ()=>setAddCMVModalIsOpen(!addCMVModalIsOpen)},
+        {label: 'Custo de Mercadoria Vendida', value: 'R$ 38,2 k', subtitle: '4% vs. mês anterior', button: false, id: 'yellow', selected: 'CMV', action: ()=>setAddCMVModalIsOpen(!addCMVModalIsOpen)},
         {label: 'Custos Fixos e Variáveis', value: 'R$ 21,6 k', subtitle: '2% vs. mês anterior', button: true, id: 'orange', selected: 'Custos', action: ()=>setAddCostModalIsOpen(!addCostModalIsOpen)},
         {label: 'Lucro e Ponto de Equilíbrio', value: 'R$ 17,9 k', subtitle: 'Equilíbrio em 18 dias', button: true, id: 'blue', selected: 'Lucro', action: ()=>setAddProfitPointModalIsOpen(!addProfitPointModalIsOpen)},
         {label: 'Maiores Gastos dos Clientes', value: 'Rodízio', subtitle: '42% do faturamento', button: false, id: 'dark-blue', selected: 'Clientes', action: ()=>setAddClientCostModalIsOpen(!addClientCostModalIsOpen)}
     ];
 
-    const [addCMVModalIsOpen, setAddCMVModalIsOpen] = useState(false);
+    const costsLabelData = [
+        {label: 'Custo', mode: 'input', type: 'text', placeholder: 'Ex.: Aluguel', placeholderEdit: 'name'},
+        {label: 'Categoria', mode: 'select', placeholderEdit: 'costCategory'},
+        {label: 'Valor', mode: 'input', type: 'number', placeholder: 'Ex.: 3500,00', placeholderEdit: 'amount', step: 0.01},
+        {label: 'Tipo de Custo', mode: 'select', placeholderEdit: 'costType'},
+    ]
+
+    const [costEnums, setCostsEnums] = useState({
+        costCategory: [],
+        costType: []
+    });
+
+    const [myCosts,setMyCosts] = useState([]);
+    const [selectedCost,setSelectedCost] = useState('');
+
+    async function handleGetCosts() {
+        try {
+            const cost_value = await getCosts();
+            setMyCosts(cost_value);
+        } catch (error) {
+            console.error("Não foi possível carregar os custos.", error);
+        }
+    }
+
+    useEffect(()=>{
+        handleGetCosts();
+    },[])
+
+    useEffect(() => {
+        async function get_enums() {
+            try {
+                const enums_costs = await getCostsEnums();
+                setCostsEnums(enums_costs);
+            } catch (error) {
+                console.error("Erro ao carregar os dados dos formulários.", error);
+            }
+        }
+        get_enums();
+    }, []);
+
     const [addCostModalIsOpen, setAddCostModalIsOpen] = useState(false);
     const [addProfitPointModalIsOpen, setAddProfitPointModalIsOpen] = useState(false);
     const [addClientCostModalIsOpen, setAddClientCostModalIsOpen] = useState(false);
@@ -37,30 +82,80 @@ function Financial(){
     const [selectCard,setSelectedCard] = useState('CMV');
 
     const [filterModalIsOpen,setFilterModalIsOpen] = useState(false);
-    const [filterIsClicked, setFilterIsClicked] = useState(null);
 
-    const modalFilterStyle = {
-        overlay: {
-            backgroundColor: '#191444be',
-            position: 'fixed',
-            zIndex: 100,
-            inset: 0
-        },
-        content: {
-            position: 'fixed',
-            top: '0',
-            right: '0',
-            left: 'auto',
-            bottom: '0',
-            width: '300px',
-            maxHeight: '100vh',
-            padding: '20px',
-            border: 'none',
-            boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
-            backgroundColor: '#fff',
-            margin: '0'
+    async function handleCreateCost(event) {
+        event.preventDefault();
+        setFormError('');
+        setFormSuccess('');
+        setAlertType('');
+
+        const formData = new FormData(event.target);
+        const payload = {
+            name: formData.get('name'),
+            costCategory: formData.get('costCategory'),
+            amount: Number(formData.get('amount')),
+            costType: formData.get('costType'),
+            date: new Date()
+        };
+
+        try {
+            await createCosts(payload);
+            setAddCostModalIsOpen(false);
+            event.target.reset();
+            setFormSuccess("Custo criado com sucesso!");
+            setAlertType('success');
+            setAlertModalIsOpen(true);
+        } catch (error) {
+            setFormError(error.message || "Erro ao cadastrar o custo.");
+            setAlertType('error');
+            setAlertModalIsOpen(true);
         }
+    }
 
+    async function handleEditCost(e) {
+        e.preventDefault();
+        setFormError('');
+        setFormSuccess('');
+        setAlertType('');
+
+        const formData = new FormData(e.target);
+        const payload = {
+            name: formData.get('name') || selectedCost.name,
+            costCategory: formData.get('costCategory') || selectedCost.costCategory,
+            amount: Number(formData.get('amount')) || selectedCost.amount,
+            costType: formData.get('costType') || selectedCost.costType,
+            date: new Date()
+        };
+
+        try {
+            await editCosts(payload,selectedCost.id);
+            setEditCostModalIsOpen(false);
+            e.target.reset();
+            setFormSuccess("Custo editado com sucesso!");
+            setAlertType('success');
+            setAlertModalIsOpen(true);
+        } catch (error) {
+            setFormError(error.message || "Erro ao editar o custo.");
+            setAlertType('error');
+            setAlertModalIsOpen(true);
+        }
+    }
+
+    async function handleDeleteCosts(selectedCost) {
+        setFormError('');
+        setFormSuccess('');
+        setAlertType('');
+        try {
+            await deleteCosts(selectedCost.id);
+            await handleGetCosts();
+            setFormSuccess(`${selectedCost.name} deletado(a) com sucesso.`);
+            setAlertType('success');
+            setAlertModalIsOpen(true);
+        } catch (error) {
+            setFormError(error.message);
+            setAlertType('error');
+            setAlertModalIsOpen(true);
+        }
     }
 
     const modalStyle = {
@@ -91,38 +186,6 @@ function Financial(){
         }
     }
 
-    const [selectedModalFilters, setSelectedModalFilters] = useState({
-        "Categoria": null,
-        "Prazo": null,
-    });
-
-    const filtersModal = ["Categoria","Prazo"];
-
-    const filtersData = {
-        "Categoria": ["Carnes_e_Pescados", "Hortifrúti", "Laticínios", "Embutidos", "Secos"],
-        "Prazo": ["1 a 3 dias", "4 a 6 dias", "7 a 10 dias", "+10 dias"],
-    };
-
-    const handleSelectModalFilter = (category, option) => {
-        setSelectedModalFilters(prev => ({
-            ...prev,
-            [category]: prev[category] === option ? null : option
-        }));
-    };
-
-    const cmvItems = [
-        { icon: Carrot, label: 'Produtos' },
-        { icon: Van, label: 'Fretes e Logística' },
-        { icon: BanknoteArrowDown, label: 'Impostos sob insumos' },
-        { icon: Snowflake, label: 'Insumo de Conservação' },
-        { icon: PackagePlus, label: 'Embalagens' },
-    ];
-
-    const [activeModalCategory, setActiveModalCategory] = useState(false);
-  
-    const [optionCMVSelected, setOptionCMVSelected] = useState(null);
-
-
     return(
         <>
             <Header expanded={expanded} setExpand={setExpand} setHasInteracted={setHasInteracted} ></Header>
@@ -137,7 +200,7 @@ function Financial(){
                             </div>
                             <div className="groups-top-container">
                                 <button
-                                    className="btn-stock-base">Definir Metas
+                                    className="btn-stock-base">Gerenciar Custos e Lucro
                                 </button>
                                 <button
                                     onClick={()=>setFilterModalIsOpen(!filterModalIsOpen)}
@@ -177,131 +240,77 @@ function Financial(){
                 </div>
 
                 <Modal
-                    isOpen={filterModalIsOpen}
-                    onRequestClose={() => setFilterModalIsOpen(false)}
-                    contentLabel="Modal de Filtros"
+                    isOpen={addCostModalIsOpen}
                     shouldCloseOnOverlayClick={true}
-                    style={modalFilterStyle}
-                    >
-                    <div className="container-filters">
-                        <div className="top-container-filters">
-                        <h1>Filtrar Por</h1>
-                        <button onClick={() => setFilterModalIsOpen(false)}>&times;</button>
+                    onRequestClose={()=>setAddCostModalIsOpen(!addCostModalIsOpen)}
+                    contentLabel="Adicionar custo"
+                    style={modalStyle}
+                >
+                    <div className="top-container">
+                        <div className="group-one-top-container">
+                            <h2>Adicionar Custo</h2>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setAddCostModalIsOpen(false)
+                                }}
+                                style={{ fontSize: 30 }}
+                            >&times;</button>
                         </div>
-
-                        {filtersModal.map((filters_item, index) => {
-                            const isExpanded = filterIsClicked === index;
-
-                            return (
-                                <React.Fragment key={filters_item}>
-                                    <button 
-                                        type="button"
-                                        onClick={() => setFilterIsClicked(isExpanded ? null : index)} 
-                                        className="btn_filters_modal"
-                                    >
-                                        {filters_item} 
-                                        {isExpanded ? <ChevronDown /> : <ChevronRight />}
-                                    </button>
-
-                                    {isExpanded && (
-                                        <ul className="container-filters-options-users">
-                                            {(filtersData[filters_item] || []).map((option) => {
-                                                const isSelected = selectedModalFilters[filters_item] === option;
-
-                                                return (
-                                                    <li key={option}>
-                                                        <button 
-                                                            type="button"
-                                                            onClick={() => handleSelectModalFilter(filters_item, option)}
-                                                            className={isSelected ? "filter-option-active" : ""}
-                                                        >
-                                                            {option.replaceAll('_',' ')} {isSelected && "✓"}
-                                                        </button>
-                                                    </li>
-                                                );
-                                            })}
-                                        </ul>
-                                    )}
-                                </React.Fragment>
-                            );
-                        })}
-
-                        <button 
-                        className="btn-clear-filters"
-                        onClick={() => setSelectedModalFilters({
-                                "Categoria": null,
-                                "Prazo": null,
-                            })}
-                        >Limpar Filtros do Modal</button>
+                        <p style={{'fontSize': 15,'color': '#777171ff'}}>Adicione os seus custos fixos e variáveis.</p>
                     </div>
-                    </Modal>
-
-                    <Modal
-                        isOpen={addCMVModalIsOpen}
-                        contentLabel="Registro CMV"
-                        shouldCloseOnOverlayClick={true}
-                        onRequestClose={()=>setAddCMVModalIsOpen(!addCMVModalIsOpen)}
-                        style={modalStyle}
-                    >
-                        <div className="top-container">
-                            <div className="group-one-top-container">
-                                <h2>Baixa de Gastos CMV</h2>
-                                <button onClick={()=>{
-                                    setAddCMVModalIsOpen(!addCMVModalIsOpen)
-                                    }}>&times;</button>
+                    <form className="form-add-costs" onSubmit={handleCreateCost}>
+                        <div className="container-form">
+                            {costsLabelData.map((item, index) => (
+                                <div key={index}>
+                                    {item.mode === "input" ? (
+                                        <div className="fields">
+                                            <label>{item.label}</label>
+                                            <input step={item.step} className="input-select-model" type={item.type} name={item.placeholderEdit} placeholder={item.placeholder} required />
+                                        </div>
+                                    ) : item.mode === 'textarea' ? (
+                                        <div className="fields">
+                                            <label>{item.label}</label>
+                                            <textarea className="input-select-model" name={item.placeholderEdit} placeholder={item.placeholder} ></textarea>
+                                        </div>
+                                    ) : item.mode === 'select' && item.placeholderEdit === 'costCategory' ? (
+                                        <div className="fields">
+                                            <label>{item.label}</label>
+                                            <select className="input-select-model" name={item.placeholderEdit}>
+                                                {(costEnums?.costCategory ?? []).map((cat, i) => (
+                                                    <option value={cat} key={i}>{String(cat.replaceAll('_', ' '))}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    ) : item.mode === 'select' && item.placeholderEdit === 'costType' ? (
+                                        <div className="fields">
+                                            <label>{item.label}</label>
+                                            <select className="input-select-model" name={item.placeholderEdit}>
+                                                {(costEnums?.costType ?? []).map((type, i) => (
+                                                    <option value={type} key={i}>{String(type.replaceAll('_', ' '))}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    ) : null}
+                                </div>
+                            ))}
+                            <div className="fields">
+                                <label style={{color: 'white'}} htmlFor="">.</label>
+                                <button className="btn-modal-submit menu" type="submit">Salvar</button>
                             </div>
-                            <p style={{'fontSize': 16,'color': 'rgb(51, 51, 51)'}}>Registre seus gastos e calculamos seu CMV.</p>
                         </div>
-                        <div className="mid-container">
-                            <h3 style={{fontSize: 20}}>Selecione uma opção.</h3>
-                            <ul className="container-btn-cmv">
-                               {cmvItems.map((item, index) => {
-                                    const Icon = item.icon;
-                                    return (
-                                        <li key={index}>
-                                            <button
-                                             type="button"
-                                             onClick={()=>{
-                                                setOptionCMVSelected(item.label)
-                                                setActiveModalCategory(!activeModalCategory)
-                                                setAddCMVModalIsOpen(false)
-                                            }}
-                                             >
-                                                <Icon size={35}></Icon>
-                                                {item.label}
-                                            </button>
-                                        </li>
-                                    );
-                                })}
-                            </ul>
-                        </div>
-                    </Modal>
+                    </form>
+                </Modal>
 
-                    <Modal
-                        isOpen={activeModalCategory}
-                        contentLabel="Registro Valor Financeiro"
-                        shouldCloseOnOverlayClick={true}
-                        onRequestClose={()=>{
-                            setActiveModalCategory(!activeModalCategory)
-                            setAddCMVModalIsOpen(true)
-                        }}
-                        style={modalStyle}
-                    >
-                        <div className="top-container">
-                            <div className="group-one-top-container">
-                                <h2>{optionCMVSelected}</h2>
-                                <button onClick={()=>{
-                                    setActiveModalCategory(!activeModalCategory)
-                                    setAddCMVModalIsOpen(true)
-                                    }}>&times;</button>
-                            </div>
-                            <p style={{'fontSize': 16,'color': 'rgb(51, 51, 51)'}}>Registre seus gastos com {optionCMVSelected?.toLowerCase()}.</p>
-                        </div>
-                    </Modal>
+                <AlertModals
+                    phrase={formSuccess ? formSuccess : formError}
+                    isOpen={alertModalIsOpen}
+                    type={alertType}
+                    setIsOpen={setAlertModalIsOpen}
+                />
             </main>
         </>
     );
 }
 
-
-export default Financial
+export default Financial;

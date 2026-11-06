@@ -329,6 +329,7 @@ function Menu() {
 
         const formData = new FormData(e.target);
 
+        // Opcional: Apenas verificação visual rápida se a imagem existe, se necessário
         if (!preview || preview.length <= 0) {
             setFormError('A imagem do cardápio não pode ser vazia');
             setAlertType('error');
@@ -359,7 +360,7 @@ function Menu() {
                 available: true,
                 unitId: user?.storeUnitId
             };
-
+            
             await createMenu(payload);
             await get_menus();
             setAddMenuModalIsOpen(false);
@@ -371,7 +372,7 @@ function Menu() {
             emptyPreviewBeforeSaving();
             e.target.reset();
         } catch (error) {
-            setFormError(error.message || "Erro ao criar prato.");
+            setFormError(error.message || "Erro ao processar a requisição no servidor.");
             setAlertType('error');
             setAlertModalIsOpen(true);
         }
@@ -384,6 +385,14 @@ function Menu() {
         setAlertType('');
 
         const formData = new FormData(e.target);
+        const priceValue = formData.get('addDishesPrice');
+
+        if (!priceValue || isNaN(priceValue) || Number(priceValue) <= 0) {
+            setFormError('Por favor, informe um preço válido.');
+            setAlertType('error');
+            setAlertModalIsOpen(true);
+            return;
+        }
 
         if (!preview || preview.length <= 0) {
             setFormError('A imagem do cardápio não pode ser vazia');
@@ -414,7 +423,7 @@ function Menu() {
 
             const payload = {
                 name: String(formData.get('addDishesName')) || selectedMenu.name,
-                price: parseFloat(formData.get('addDishesPrice')) || selectedMenu.price,
+                price: parseFloat(priceValue) || selectedMenu.price,
                 description: String(formData.get('addDishesDesc')) || selectedMenu.description,
                 category: String(formData.get('addDishesCategory')) || selectedMenu.category,
                 img: finalImageUrls.length > 0 ? finalImageUrls : selectedMenu.img,
@@ -454,7 +463,6 @@ function Menu() {
         setAlertType('');
 
         try {
-            // Certifique-se de que passa selectedMenu.id aqui:
             await deleteMenu(selectedMenu.id);
             await get_menus();
             setEditMenuModalIsOpen(false);
@@ -468,7 +476,6 @@ function Menu() {
         } catch (error) {
             setFormError(error.message || "Erro ao deletar prato.");
             setAlertType('error');
-            console.error(error.message,selectedMenu.id)
             setAlertModalIsOpen(true);
         }
     }
@@ -480,22 +487,24 @@ function Menu() {
         setAlertType('');
 
         const formData = new FormData(e.target);
+        const tagName = formData.get('addTagName');
+        const tagColor = formData.get('addTagColor');
 
-        if (String(formData.get('addTagName')).trim() === '' || String(formData.get('addTagColor')).trim() === '') {
-            setFormError("Preencha os campos para criar uma etiqueta.");
+        if (!tagName || String(tagName).trim() === '' || !tagColor || String(tagColor).trim() === '') {
+            setFormError("Preencha o nome e selecione uma cor para criar uma etiqueta.");
             setAlertType('error');
             setAlertModalIsOpen(true);
             return;
         }
 
         const payload = {
-            name: String(formData.get('addTagName')),
-            color: String(formData.get('addTagColor')),
+            name: String(tagName),
+            color: String(tagColor),
             unitId: user?.storeUnitId,
         };
 
         if (!ALLOWED_COLORS.includes(payload.color)) {
-            setFormError("Escolha uma cor da paleta.");
+            setFormError("Escolha uma cor válida da paleta.");
             setAlertType('error');
             setAlertModalIsOpen(true);
             return;
@@ -509,7 +518,7 @@ function Menu() {
             setAlertModalIsOpen(true);
             e.target.reset();
         } catch (error) {
-            setFormError(error.message);
+            setFormError(error.message || "Erro ao criar etiqueta.");
             setAlertType('error');
             setAlertModalIsOpen(true);
         }
@@ -578,13 +587,23 @@ function Menu() {
         setTagsModalIsOpen(true);
     }
 
-    // Lógica para filtrar os pratos conforme os filtros selecionados
+    // Lógica para filtrar os pratos com tratamento robusto para etiquetas
     const filteredMenu = menu.filter((item) => {
         const selectedCategory = selectedModalFilters["Categorias"];
         const selectedTagFilter = selectedModalFilters["Etiquetas"];
 
         const matchesCategory = !selectedCategory || item.category === selectedCategory;
-        const matchesTag = !selectedTagFilter || (item.tags && item.tags.some(t => t.name === selectedTagFilter.name));
+        
+        // Correção do filtro de etiquetas comparando ID ou Nome
+        let matchesTag = true;
+        if (selectedTagFilter) {
+            matchesTag = item.tags && item.tags.some(t => {
+                if (selectedTagFilter.id && t.id) {
+                    return t.id === selectedTagFilter.id;
+                }
+                return t.name === selectedTagFilter.name;
+            });
+        }
 
         return matchesCategory && matchesTag;
     });
@@ -612,7 +631,8 @@ function Menu() {
                         </div>
                         <p style={{ color: '#777171ff' }}>Visualize e edite seu cardápio.</p>
                     </div>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', marginTop: '20px', justifyContent: 'space-between' }}>
+                    {/* Correção do espaçamento excessivo alterando justifyContent para flex-start com gap controlado */}
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '24px', marginTop: '20px', justifyContent: 'flex-start' }}>
                         {filteredMenu.length <= 0 ? (
                             <p>Nenhum prato encontrado com os filtros selecionados.</p>
                         ) : (
@@ -848,7 +868,7 @@ function Menu() {
                     </form>
                 </Modal>
 
-                {/* Modal de Edição de Prato (Design Original Mantido) */}
+                {/* Modal de Edição de Prato */}
                 <Modal
                     isOpen={editMenuModalIsOpen}
                     onRequestClose={() => {

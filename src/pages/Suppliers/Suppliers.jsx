@@ -40,14 +40,12 @@ function Suppliers(){
         {label: 'Categorias', model: 'input', type: 'text', list: true, name: 'categories_add_supplier', placeholder: 'Selecione categorias...', field: 'category'},
     ];
 
-    // Modais
     const [createSupModalIsOpen, setCreateSupModalIsOpen] = useState(false);
     const [editSupModalIsOpen, setEditSupModalIsOpen] = useState(false);
     const [enableEditMode, setEnableEditMode] = useState(false);
     const [selectedSupplier, setSelectedSupplier] = useState(null);
     const [editFormData, setEditFormData] = useState({});
 
-    // Garantir que categorias sejam sempre mantidas como Array
     const [selectCategoriesForSupplier, setSelectCategoriesForSupplier] = useState([]);
     const [filterModalIsOpen, setFilterModalIsOpen] = useState(false);
 
@@ -215,6 +213,17 @@ function Suppliers(){
         return true;
     });
 
+    // Função para converter strings de prazo selecionadas em um número inteiro compatível com o backend
+    function parseLeadTimeDays(prazoString) {
+        if (!prazoString) return 3;
+        if (prazoString.includes("1 a 3")) return 3;
+        if (prazoString.includes("4 a 6")) return 5;
+        if (prazoString.includes("7 a 10")) return 7;
+        if (prazoString.includes("+10")) return 12;
+        const parsed = parseInt(prazoString, 10);
+        return isNaN(parsed) ? 3 : parsed;
+    }
+
     async function handleCreateSupplier(e){
         e.preventDefault();
         setFormError('');
@@ -227,6 +236,8 @@ function Suppliers(){
             ? selectCategoriesForSupplier 
             : [selectCategoriesForSupplier];
 
+        const rawLeadTime = formData.get('lead_time_days_add_supplier');
+
         const payload = {
             company_name: formData.get('company_name_add_supplier'),
             trade_name: formData.get('trade_name_add_supplier'),
@@ -236,16 +247,9 @@ function Suppliers(){
             adress: formData.get('adress_add_supplier'),
             category: categoriesArray, 
             url_document: documentUrl || '',
-            lead_time_days: parseInt(formData.get('lead_time_days_add_supplier')) || 0,
+            lead_time_days: parseLeadTimeDays(rawLeadTime),
             resposible_name: formData.get('resposible_name_add_supplier'),
         };
-
-        if (!payload.company_name) {
-            setFormError('Preencha a Razão Social.');
-            setAlertType('error');
-            setAlertModalIsOpen(true);
-            return;
-        }
 
         try {
             await createSuppliers(payload);
@@ -279,7 +283,7 @@ function Suppliers(){
             adress: editFormData.adress || '',
             category: selectCategoriesForSupplier,
             url_document: documentUrl || selectedSupplier?.url_document || '',
-            lead_time_days: parseInt(editFormData.lead_time_days) || 0,
+            lead_time_days: parseLeadTimeDays(editFormData.lead_time_days),
             resposible_name: editFormData.resposible_name || '',
         };
 
