@@ -25,6 +25,7 @@ function Suppliers(){
 
     const [suppliersEnums, setSuppliersEnums] = useState({
         category: [],
+        lead_time_days: []
     });
 
     const inputValues = [
@@ -75,7 +76,7 @@ function Suppliers(){
     
     const filtersData = {
         "Categoria": suppliersEnums.category || [],
-        "Prazo": ["1 a 3 dias", "4 a 6 dias", "7 a 10 dias", "+10 dias"],
+        "Prazo": suppliersEnums.lead_time_days || [],
     };
 
     const [selectedModalFilters, setSelectedModalFilters] = useState({
@@ -193,36 +194,13 @@ function Suppliers(){
         }
 
         if(selectedModalFilters["Prazo"]){
-            const days = Number(supplier.lead_time_days);
-            const selectedPrazo = selectedModalFilters["Prazo"];
-            let matchesPrazo = false;
-
-            if (selectedPrazo === "1 a 3 dias") {
-                matchesPrazo = days >= 1 && days <= 3;
-            } else if (selectedPrazo === "4 a 6 dias") {
-                matchesPrazo = days >= 4 && days <= 6;
-            } else if (selectedPrazo === "7 a 10 dias") {
-                matchesPrazo = days >= 7 && days <= 10;
-            } else if (selectedPrazo === "+10 dias") {
-                matchesPrazo = days > 10;
+            if (supplier.lead_time_days !== selectedModalFilters["Prazo"]) {
+                return false;
             }
-
-            if (!matchesPrazo) return false;
         }
 
         return true;
     });
-
-    // Função para converter strings de prazo selecionadas em um número inteiro compatível com o backend
-    function parseLeadTimeDays(prazoString) {
-        if (!prazoString) return 3;
-        if (prazoString.includes("1 a 3")) return 3;
-        if (prazoString.includes("4 a 6")) return 5;
-        if (prazoString.includes("7 a 10")) return 7;
-        if (prazoString.includes("+10")) return 12;
-        const parsed = parseInt(prazoString, 10);
-        return isNaN(parsed) ? 3 : parsed;
-    }
 
     async function handleCreateSupplier(e){
         e.preventDefault();
@@ -234,21 +212,19 @@ function Suppliers(){
 
         const categoriesArray = Array.isArray(selectCategoriesForSupplier) 
             ? selectCategoriesForSupplier 
-            : [selectCategoriesForSupplier];
-
-        const rawLeadTime = formData.get('lead_time_days_add_supplier');
+            : (selectCategoriesForSupplier ? [selectCategoriesForSupplier] : []);
 
         const payload = {
-            company_name: formData.get('company_name_add_supplier'),
-            trade_name: formData.get('trade_name_add_supplier'),
-            cnpj: formData.get('cnpj_add_supplier'),
-            phone: formData.get('phone_add_supplier'),
-            email: formData.get('email_add_supplier'),
-            adress: formData.get('adress_add_supplier'),
+            company_name: String(formData.get('company_name_add_supplier') || '').trim(),
+            trade_name: String(formData.get('trade_name_add_supplier') || '').trim(),
+            cnpj: String(formData.get('cnpj_add_supplier') || '').trim(),
+            phone: String(formData.get('phone_add_supplier') || '').trim(),
+            email: String(formData.get('email_add_supplier') || '').trim(),
+            adress: String(formData.get('adress_add_supplier') || '').trim(),
             category: categoriesArray, 
             url_document: documentUrl || '',
-            lead_time_days: parseLeadTimeDays(rawLeadTime),
-            resposible_name: formData.get('resposible_name_add_supplier'),
+            lead_time_days: formData.get('lead_time_days_add_supplier'), // Enviado diretamente como Enum string
+            resposible_name: String(formData.get('resposible_name_add_supplier') || '').trim(),
         };
 
         try {
@@ -262,8 +238,9 @@ function Suppliers(){
             handleRemoveFile();
             e.target.reset();
         } catch(error) {
-            setFormError(error.message || 'Erro ao criar fornecedor.');
+            setFormError(error.message || 'Erro interno no servidor ao criar fornecedor.');
             setAlertType('error');
+            console.error(error.message);
             setAlertModalIsOpen(true);
         }
     }
@@ -283,7 +260,7 @@ function Suppliers(){
             adress: editFormData.adress || '',
             category: selectCategoriesForSupplier,
             url_document: documentUrl || selectedSupplier?.url_document || '',
-            lead_time_days: parseLeadTimeDays(editFormData.lead_time_days),
+            lead_time_days: editFormData.lead_time_days || '',
             resposible_name: editFormData.resposible_name || '',
         };
 
@@ -297,6 +274,7 @@ function Suppliers(){
             setAlertModalIsOpen(true);
         } catch(error) {
             setFormError(error.message || 'Erro ao editar fornecedor.');
+            console.error(error.message);
             setAlertType('error');
             setAlertModalIsOpen(true);
         }
@@ -317,6 +295,7 @@ function Suppliers(){
             setAlertModalIsOpen(true);
         } catch(error) {
             setFormError(error.message || 'Erro ao excluir fornecedor.');
+            console.error(error.message);
             setAlertType('error');
             setAlertModalIsOpen(true);
         }
@@ -366,11 +345,13 @@ function Suppliers(){
                                             ? sup.category.map(c => String(c).replaceAll('_', ' ')).join(', ')
                                             : String(sup.category || '').replaceAll('_', ' ');
 
+                                        const displayLeadTime = sup.lead_time_days ? String(sup.lead_time_days).replaceAll('_', ' ') : '-';
+
                                         return (
                                             <tr className="tr-th-group" key={i}>
                                                 <td>{sup.company_name}</td>
                                                 <td>{displayCategories || '-'}</td>
-                                                <td>{sup.lead_time_days} {sup.lead_time_days > 1 ? 'dias' : 'dia'}</td>
+                                                <td>{displayLeadTime}</td>
                                                 <td>{sup.phone}</td>
                                                 <td>{sup.email}</td>
                                                 <td>
@@ -495,7 +476,7 @@ function Suppliers(){
                                         <label>{item.label}</label>
                                         <select className="input-select-model" name={item.name}>
                                             {filtersData["Prazo"].map((prazo, index)=>(
-                                                <option key={index} value={prazo}>{prazo}</option>
+                                                <option key={index} value={prazo}>{String(prazo).replaceAll('_', ' ')}</option>
                                             ))}
                                         </select>
                                     </div>
@@ -649,7 +630,7 @@ function Suppliers(){
                                                         onChange={(e) => setEditFormData({ ...editFormData, [item.field]: e.target.value })}
                                                     >
                                                         {filtersData["Prazo"].map((prazo, idx)=>(
-                                                            <option key={idx} value={prazo}>{prazo}</option>
+                                                            <option key={idx} value={prazo}>{String(prazo).replaceAll('_', ' ')}</option>
                                                         ))}
                                                     </select>
                                                 </div>

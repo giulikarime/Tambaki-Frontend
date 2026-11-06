@@ -584,22 +584,38 @@ function Menu() {
         setTagsModalIsOpen(true);
     }
 
-    // Lógica para filtrar os pratos com tratamento robusto para etiquetas
+    // Lógica para filtrar os pratos com tratamento universal para etiquetas
     const filteredMenu = menu.filter((item) => {
         const selectedCategory = selectedModalFilters["Categorias"];
         const selectedTagFilter = selectedModalFilters["Etiquetas"];
 
         const matchesCategory = !selectedCategory || item.category === selectedCategory;
         
-        // Correção do filtro de etiquetas comparando ID ou Nome
         let matchesTag = true;
-        if (selectedTagFilter) {
-            matchesTag = item.tags && item.tags.some(t => {
-                if (selectedTagFilter.id && t.id) {
-                    return t.id === selectedTagFilter.id;
-                }
-                return t.name === selectedTagFilter.name;
-            });
+        if (selectedTagFilter !== null && selectedTagFilter !== undefined) {
+            if (!item.tags || item.tags.length === 0) {
+                matchesTag = false;
+            } else {
+                matchesTag = item.tags.some(t => {
+                    // Se selectedTagFilter for um objeto (ex: { id, name })
+                    if (typeof selectedTagFilter === 'object' && selectedTagFilter !== null) {
+                        const filterId = selectedTagFilter.id;
+                        const filterName = selectedTagFilter.name;
+                        
+                        if (filterId && t.id) return t.id === filterId;
+                        if (filterName && t.name) return t.name.toLowerCase() === filterName.toLowerCase();
+                        if (filterName && typeof t === 'string') return t.toLowerCase() === filterName.toLowerCase();
+                    } 
+                    // Se selectedTagFilter for apenas uma string (nome da etiqueta)
+                    else if (typeof selectedTagFilter === 'string') {
+                        if (typeof t === 'string') return t.toLowerCase() === selectedTagFilter.toLowerCase();
+                        if (typeof t === 'object' && t !== null && t.name) {
+                            return t.name.toLowerCase() === selectedTagFilter.toLowerCase();
+                        }
+                    }
+                    return false;
+                });
+            }
         }
 
         return matchesCategory && matchesTag;
