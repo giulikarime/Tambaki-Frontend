@@ -16,7 +16,7 @@ main{
     gap: 40px;
 }
 
-#container{
+.container-stock{
     display: flex;
     flex-direction: column;
     gap: 15px;
@@ -36,7 +36,7 @@ main{
     gap: 15px;
 }
 
-#btn-plus-stock{
+.btn-plus-stock{
     background-color: #cae2ff;
     border-radius: 10px;
     padding: 6px;
@@ -251,6 +251,10 @@ main{
     gap: 5px;
 }
 
+.fields.allergens{
+    position: relative;
+}
+
 .fields-double{
     display: flex;
     flex-direction: row;
@@ -453,9 +457,8 @@ main{
     padding: 15px 0 15px 0;
     z-index: 5;
     overflow-y: auto;
-    height: 200px;
+    max-height: 200px;
 }
-
 
 .add-allergen-select li{
     padding: 3px 15px 3px 15px
@@ -469,13 +472,12 @@ li button{
     font-size: 15px;
 }
 
-.input-select-model.ul-list{
+.input-select-model.ul-list {
     display: flex;
     flex-wrap: wrap;
-    max-height: 50px;
-    overflow-y: auto;
     align-items: center;
+    height: 40px;
+    box-sizing: border-box;
     padding: 10px;
-    width: 350px;
-    width: 400px;
+    overflow-y: auto;
 }

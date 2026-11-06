@@ -18,9 +18,8 @@ main{
 
 .top-container-users{
     display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
+    flex-direction: column;
+    gap: 15px;
 }
 
 
@@ -110,6 +109,33 @@ form{
     transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
 }
 
+.btn-plus-item{
+    background-color: transparent;
+    padding: 10px 20px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    width: inherit;
+    height: 35px;
+    font-size: 15px;
+    font-weight: bolder;
+    letter-spacing: 0.5px;
+    flex-direction: center;
+    gap: 10px
+}
+
+.btn-plus-item.menu{
+    background-color: #87b3f2;;
+}
+
+.btn-plus-item.sup{
+    background-color: rgb(179, 203, 255)
+}
+
+.btn-plus-item.blue-filter{
+    background-color: #87b3f2;
+}
+
 .btn-modal-file-users{
     width: 100%;
     padding: 12px 16px;
@@ -128,7 +154,7 @@ form{
 
 .btn-modal-submit{
     width: 32%;
-    height: auto;
+    height: 40px;
     padding: 5px 16px;
     font-size: 15px;
     font-family: inherit;
@@ -170,8 +196,8 @@ form{
 .container-users{
     background-color: #fffdf8;
     width: 100%;
-    border-radius: 10px;
-    box-shadow: 0 5px 30px 0 rgba(73, 64, 107, 0.2);
+    border-radius: 15px;
+    box-shadow: 0 5px 30px 0 rgba(141, 19, 19, 0.2);
     overflow: hidden;
 }
 
@@ -214,3 +240,10 @@ background-color: #ffe0b2;
 }
 
 
+.btn-plus-item.filter{
+    background-color: rgb(226, 165, 52);
+}
+
+.btn-plus-item.orange{
+    background-color: #f0b96eff;
+}

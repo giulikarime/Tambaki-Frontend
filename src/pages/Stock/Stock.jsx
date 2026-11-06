@@ -13,6 +13,7 @@ import { getLoggedUser } from "../../services/auth";
 import { uploadFile} from "../../services/upload";
 import AlertModals from "../../components/SucessModals/AlertModals";
 import ProductCard from "../../components/ProductCard/ProductCard";
+import FiltersModal from '../../components/FiltersModal/FiltersModal';
 
 function Stock() {
     // ===================== Navegação e layout padrão =====================
@@ -52,6 +53,10 @@ function Stock() {
     const [hasInteracted, setHasInteracted] = useState(false);
 
     // ===================== Filtro via modal (Categoria, Armazenamento, Alergênicos, Status) =====================
+    const [filterProductModalIsOpen, setFilterProductModalIsOpen] = useState(false);
+    const [filterProductIsClicked, setFilterProductIsClicked] = useState(null);
+    const [isCustomSelectMode, setIsCustomSelectMode] = useState(false);
+
     const filtersModal = ["Categoria", "Local de Armazenamento", "Alergênicos", "Status"];
 
     const filtersData = {
@@ -68,9 +73,6 @@ function Stock() {
         "Status": null
     });
 
-    const [filterProductModalIsOpen, setFilterProductModalIsOpen] = useState(false);
-    const [filterProductIsClicked, setFilterProductIsClicked] = useState(null);
-    const [isCustomSelectMode, setIsCustomSelectMode] = useState(false);
 
     const handleSelectModalFilter = (category, option) => {
         setSelectedModalFilters(prev => ({
@@ -201,75 +203,79 @@ function Stock() {
     }
     };
 
-    const modalFilterProductsStyle = {
-        overlay: {
-            backgroundColor: '#191444be',
-            position: 'fixed',
-            zIndex: 100,
-            inset: 0
-        },
-        content: {
-            position: 'fixed',
-            top: '0',
-            right: '0',
-            left: 'auto',
-            bottom: '0',
-            width: '300px',
-            maxHeight: '100vh',
-            padding: '20px',
-            border: 'none',
-            boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
-            backgroundColor: '#fff',
-            margin: '0'
-        }
-    };
-
     // ===================== Valores derivados (texto de status do estoque) =====================
-    const missingProducts = products.filter(product => product.stock_quantity === 0);
-    const midStockProducts = products.filter(product => product.stock_quantity <= product.min_stock && product.stock_quantity !== 0);
+    const missingProducts = products.filter(product => Number(product.stock_quantity) === 0);
+    const midStockProducts = products.filter(product => Number(product.stock_quantity) <= Number(product.min_stock) && Number(product.stock_quantity) !== 0);
 
     const missing_products_text = missingProducts.length > 0
-        ? `- ${String(missingProducts.length)} em falta`
+        ? `- ${missingProducts.length} em falta`
         : '';
 
     const product_running_low = midStockProducts.length > 0
         ? (midStockProducts.length === 1
-            ? `- ${String(midStockProducts.length)} próximo de acabar`
-            : `- ${String(midStockProducts.length)} próximos de acabar`)
+            ? `- ${midStockProducts.length} próximo de acabar`
+            : `- ${midStockProducts.length} próximos de acabar`)
         : '';
 
-    // Produtos com vencimento nos próximos 10 dias
-    const hoje = new Date();
-    const produtosProximosVencimento = products.filter((item) => {
-        const vencimento = new Date(item.expiration_date);
-        const diffDias = (vencimento - hoje) / (1000 * 60 * 60 * 24);
-        return diffDias <= 10;
+    // Normaliza a data de 'hoje' zerando as horas
+    const now = new Date();
+    const hoje = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    // Função auxiliar para calcular diferença em dias inteiros
+    const getDiffDias = (expirationDate) => {
+        if (!expirationDate) return null;
+        const exp = new Date(expirationDate);
+        const vencimento = new Date(exp.getFullYear(), exp.getMonth(), exp.getDate());
+        return Math.ceil((vencimento - hoje) / (1000 * 60 * 60 * 24));
+    };
+
+    // 1. Produtos JÁ VENCIDOS (dias menores que 0)
+    const produtosVencidos = products.filter((item) => {
+        const diff = getDiffDias(item.expiration_date);
+        return diff !== null && diff < 0;
     });
 
-    const qtdVencendo = produtosProximosVencimento.length;
+    // 2. Produtos PERTO DO VENCIMENTO (entre 0 e 10 dias)
+    const produtosProximosVencimento = products.filter((item) => {
+        const diff = getDiffDias(item.expiration_date);
+        return diff !== null && diff >= 0 && diff <= 10;
+    });
 
-    const text_vencidos = qtdVencendo.length > 0
-        ? ''
-        : `- ${String(qtdVencendo)} perto do vencimento`;
+    // Mensagem para vencidos (corrigido: sem usar .length em variável numérica)
+    const text_vencidos = produtosVencidos.length > 0
+        ? `- ${produtosVencidos.length} ${produtosVencidos.length === 1 ? 'vencido' : 'vencidos'}`
+        : '';
+
+    // Mensagem para perto do vencimento
+    const text_proximos_vencimento = produtosProximosVencimento.length > 0
+        ? `- ${produtosProximosVencimento.length} perto do vencimento`
+        : '';
 
     // ===================== Lista de produtos filtrada (botões + modal) =====================
     const today = new Date();
 
-    const filteredBatches = products.filter((item) => {
+   const filteredBatches = products.filter((item) => {
         let matchesBtn = true;
 
-        switch (filterBtnIsClicked) {
+        // Garante que o estado seja número
+        const selectedFilter = Number(filterBtnIsClicked);
+
+        // Garante conversão numérica e evita valores undefined/null
+        const stock = Number(item.stock_quantity ?? 0);
+        const minStock = Number(item.min_stock ?? 0);
+
+        switch (selectedFilter) {
             case 0: // Todos
                 matchesBtn = true;
                 break;
             case 1: // Estoque Saudável
-                matchesBtn = item.stock_quantity > item.min_stock;
+                matchesBtn = stock > minStock;
                 break;
             case 2: // Próximo de Acabar
-                matchesBtn = item.stock_quantity > 0 && item.stock_quantity <= item.min_stock;
+                matchesBtn = stock > 0 && stock <= minStock;
                 break;
             case 3: // Em Falta
-                matchesBtn = item.stock_quantity === 0;
+                matchesBtn = stock === 0;
                 break;
             case 4: { // Perto do Vencimento (entre 0 e 10 dias para vencer)
                 const vencimento = new Date(item.expiration_date);
@@ -460,7 +466,7 @@ function Stock() {
         if (!formData.has(fieldName)) return fallback;
         const raw = formData.get(fieldName);
         if (raw === '' || raw === null) return fallback;
-        const parsed = parseInt(raw);
+        const parsed = parseFloat(raw);
         return isNaN(parsed) ? fallback : parsed;
     }
 
@@ -477,7 +483,9 @@ function Stock() {
         setModalPhrase("");
         const formData = new FormData(e.target);
 
-        if(!documentUrl){
+        const finalDocumentUrl = documentUrl || newDocumentUrlProduct || selectedProduct?.document_url;
+
+        if(!finalDocumentUrl){
             setFormError("A URL do documento não pode ser vazia.");
             setAlertType('error');
             setAlertModalIsOpen(true);
@@ -676,7 +684,7 @@ function Stock() {
             <main>
                 <Sidebar expanded={expanded} hasInteracted={hasInteracted} ></Sidebar>
                 <div id="principal-menu-stock">
-                    <div id='container'>
+                    <div className='container-stock'>
                         <div id="top-container">
                             <div className="groups-top-container">
                                 <button onClick={() => navigate(-1)} className="btn-back-base"><ChevronLeft></ChevronLeft></button>
@@ -692,9 +700,9 @@ function Stock() {
                         </div>
                         <div>
                             {products.length === 1 ? (
-                                <p style={{ color: '#777171ff' }}>{watched_products} {missing_products_text} {product_running_low} {text_vencidos}</p>
+                                <p style={{ color: '#777171ff' }}>{watched_products} {missing_products_text} {product_running_low} {text_vencidos} {text_proximos_vencimento}</p>
                             ) : (
-                                <p style={{ color: '#777171ff' }}>{watched_products} {missing_products_text} {product_running_low} {text_vencidos}</p>
+                                <p style={{ color: '#777171ff' }}>{watched_products} {missing_products_text} {product_running_low} {text_vencidos} {text_proximos_vencimento}</p>
                             )}
                         </div>
                     </div>
@@ -762,22 +770,24 @@ function Stock() {
                                             mode.multiply ? (
                                                 <div className="fields-allergens">
                                                     <label>{mode.label}</label>
-                                                    <ul className="input-select-model ul-list">
-                                                        {selectAllergensForProducts.length <=0 ? (
-                                                            <p>Nenhum alergênico selecionado.</p>
-                                                        ) : (
-                                                            selectAllergensForProducts.map((allergen,i)=>(
-                                                                <li
-                                                                    key={i}
-                                                                    className="li-style-model"
-                                                                >{allergen.replaceAll('_',' ')}
-                                                                    <button
-                                                                        type="button"
-                                                                        onClick={()=>setSelectAllergensForProducts(prev => prev.filter(a => a !== allergen))}
-                                                                    >&times;</button>
-                                                                </li>
-                                                            ))
-                                                        )}
+                                                    <div style={{display:'flex',flexDirection:'row',gap: '10px',alignItems:'center'}}>
+                                                        <ul className="input-select-model ul-list">
+                                                            {selectAllergensForProducts.length <=0 ? (
+                                                                <p>Nenhum alergênico selecionado.</p>
+                                                            ) : (
+                                                                selectAllergensForProducts.map((allergen,i)=>(
+                                                                    <li
+                                                                        key={i}
+                                                                        className="li-style-model"
+                                                                    >{allergen.replaceAll('_',' ')}
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={()=>setSelectAllergensForProducts(prev => prev.filter(a => a !== allergen))}
+                                                                        >&times;</button>
+                                                                    </li>
+                                                                ))
+                                                            )}
+                                                        </ul>
                                                         <button 
                                                             className="add-category-ul-list"
                                                             type="button"
@@ -785,7 +795,7 @@ function Stock() {
                                                         >
                                                             <Plus></Plus>
                                                         </button>
-                                                    </ul>
+                                                    </div>
                                                     {addAllergensToListModal ? (
                                                         <ul className="add-allergen-select">
                                                             {mode.product_enum.map((all,i)=>(
@@ -806,8 +816,8 @@ function Stock() {
                                                     <label>{mode.label}</label>
                                                     <select className="input-modal-add-product" name={mode.name}>
                                                         {mode.enum ? 
-                                                        mode.product_enum.map((p_enum, ind)=>(
-                                                            <option value={p_enum} key={ind}>{p_enum.replaceAll('_',' ')}</option>
+                                                        mode.product_enum.map((p_enum, i)=>(
+                                                            <option value={p_enum} key={i}>{p_enum.replaceAll('_',' ')}</option>
                                                         ))
                                                         : suppliers.map((sup,i)=>(
                                                             <option value={sup.id} key={i}>{sup.company_name}</option>
@@ -1067,67 +1077,6 @@ function Stock() {
                 </Modal>
 
                 <Modal
-                    isOpen={filterProductModalIsOpen}
-                    onRequestClose={() => setFilterProductModalIsOpen(!filterProductModalIsOpen)}
-                    contentLabel="Modal de Filtros"
-                    shouldCloseOnOverlayClick={true}
-                    style={modalFilterProductsStyle}
-                >
-                    <div className="container-filters">
-                        <div className="top-container-filters">
-                            <h1>Filtrar Por</h1>
-                            <button onClick={() => setFilterProductModalIsOpen(!filterProductModalIsOpen)}>&times;</button>
-                        </div>
-                        
-                        {filtersModal.map((filters_item, index) => {
-                            const icon = filterProductIsClicked === index ? <ChevronDown /> : <ChevronRight />;
-
-                            return (
-                                <React.Fragment key={filters_item}>
-                                    <button 
-                                        onClick={() => setFilterProductIsClicked(filterProductIsClicked === index ? null : index)} 
-                                        className="btn_filters_modal"
-                                    >
-                                        {filters_item} {icon}
-                                    </button>
-
-                                    {filterProductIsClicked === index && (
-                                        <ul className="container-filters-options">
-                                            {filtersData[filters_item].map((option) => {
-                                                const isSelected = selectedModalFilters[filters_item] === option;
-
-                                                return (
-                                                    <button 
-                                                        key={option}
-                                                        onClick={() => handleSelectModalFilter(filters_item, option)}
-                                                        className={isSelected ? "filter-option-active" : ""}
-                                                    >
-                                                        {option.replaceAll('_'," ")} {isSelected && "✓"}
-                                                    </button>
-                                                );
-                                            })}
-                                        </ul>
-                                    )}
-                                </React.Fragment>
-                            );
-                        })}
-
-                        {/* Botão para limpar os filtros do modal de uma vez */}
-                        <button 
-                            className="btn-clear-filters"
-                            onClick={() => setSelectedModalFilters({
-                                "Categoria": null,
-                                "Local de Armazenamento": null,
-                                "Alergênicos": null,
-                                "Status": null
-                            })}
-                        >
-                            Limpar Filtros do Modal
-                        </button>
-                    </div>
-                </Modal>
-
-                <Modal
                     isOpen={editProductModalIsOpen}
                     onRequestClose={() => {
                         setEditProductModalIsOpen(!editProductModalIsOpen)
@@ -1330,6 +1279,15 @@ function Stock() {
                     setIsOpen={setAlertModalIsOpen}
                     type={alertType}
                 />
+
+                <FiltersModal
+                    isOpen={filterProductModalIsOpen}
+                    setIsOpen={setFilterProductModalIsOpen}
+                    filtersTitle={filtersModal}
+                    filtersData={filtersData}
+                    selectedFilters={selectedModalFilters}
+                    setSelectedFilters={setSelectedModalFilters}>
+                </FiltersModal>
 
             </main>
         </>
