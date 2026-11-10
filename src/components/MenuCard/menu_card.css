@@ -1,7 +1,7 @@
 .menu-card {
     background-color: #ffffff;
     border-radius: 20px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
     width: 250px;
     overflow: hidden;
     display: flex;
@@ -67,6 +67,7 @@
 .menu-card-title {
     font-size: 16px;
     font-weight: 700;
+    line-height: 1.2;
     color: #1a1a1a;
     margin: 0;
     flex: 1; /* Permite que o título ocupe o espaço disponível sem esmagar o preço */
@@ -76,15 +77,17 @@
 .menu-card-price {
     font-size: 14px;
     font-weight: 700;
+    line-height: 1.2;
     color: #1a1a1a;
-    background: #f0f0f0;
-    padding: 4px 8px;
+    background: #f3b45d;
+    padding: 2px 4px 3px 4px;
     border-radius: 8px;
     white-space: nowrap; /* Impede que o preço quebre a linha (ex: o R$ fique em cima e o valor em baixo) */
+    flex-shrink: 0;
 }
 
 .menu-card-description {
-    font-size: 12px;
+    font-size: 13px;
     color: #777;
     margin: 0;
     line-height: 1.4;
@@ -96,14 +99,17 @@
 
 .menu-card-tags {
     display: flex;
-    gap: 6px;
+    flex-direction: row; /* para uma por linha: column + align-items: flex-start */
     flex-wrap: wrap;
-    margin: 4px 0;
+    align-items: center;
+    gap: 6px;
+    margin: 10px 0 2px 0;
+
 }
 
 .menu-card-tag {
     font-size: 10px;
-    padding: 3px 8px;
+    padding: 3px 10px;
     border-radius: 6px;
     font-weight: 600;
 }
