@@ -98,10 +98,9 @@
 }
 
 .menu-card-tags {
-    display: flex;
-    flex-direction: row; /* para uma por linha: column + align-items: flex-start */
-    flex-wrap: wrap;
-    align-items: center;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: start;
     gap: 6px;
     margin: 10px 0 2px 0;
 
@@ -109,9 +108,14 @@
 
 .menu-card-tag {
     font-size: 10px;
-    padding: 3px 10px;
+    min-width: 0;
+    padding: 4px 3px;
     border-radius: 6px;
-    font-weight: 600;
+    font-weight: 700;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .menu-card-btn {
@@ -151,4 +155,90 @@
 .menu-card.menu-card-button:hover {
     transform: translateY(-4px);
     box-shadow: 0 14px 28px rgba(0, 0, 0, 0.12);
+}
+
+@media (max-width: 1200px) {
+    .menu-card.menu-card-button {
+        flex: 0 1 270px;
+        width: min(270px, 100%);
+        min-width: 0;
+    }
+
+    .menu-card-image-container {
+        height: auto;
+        aspect-ratio: 4 / 3;
+    }
+}
+
+@media (max-width: 768px) {
+    .principal-menu-users > div:last-child {
+        gap: 12px !important;
+    }
+
+    .menu-card.menu-card-button {
+        flex: 0 0 calc((100% - 12px) / 2);
+        width: calc((100% - 12px) / 2);
+        max-width: none;
+        min-width: 0;
+        padding: 10px;
+    }
+
+    .menu-card-content {
+        gap: 7px;
+    }
+
+    .menu-card-header {
+        flex-wrap: wrap;
+        gap: 6px 10px;
+    }
+
+    .menu-card-title {
+        min-width: 0;
+    }
+
+    .menu-card-tags {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        margin-top: 6px;
+    }
+}
+
+@media (max-width: 480px) {
+    .menu-card.menu-card-button {
+        flex-basis: calc((100% - 12px) / 2);
+        width: calc((100% - 12px) / 2);
+        max-width: none;
+        min-width: 0;
+        border-radius: 14px;
+        padding: 8px;
+    }
+
+    .menu-card-image-container {
+        border-radius: 12px;
+    }
+
+    .menu-card-content {
+        padding: 10px 2px 2px;
+    }
+
+    .menu-card-header {
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .menu-card-price {
+        align-self: flex-start;
+    }
+
+    .menu-card-tags {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 4px;
+    }
+
+    .menu-card-tag {
+        padding: 4px 3px;
+    }
+
+    .menu-card-price {
+        font-size: 13px;
+    }
 }
