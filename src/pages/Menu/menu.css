@@ -251,6 +251,17 @@ body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Editar
     gap: 16px;
 }
 
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicionar Prato"] .container-form > div:has(textarea[name="addDishesDesc"]),
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Editar Prato"] .container-form > div:has(textarea[name="addDishesDesc"]),
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicionar Prato"] .container-form > div:has(.fields.allergens),
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Editar Prato"] .container-form > div:has(.fields.allergens),
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicionar Prato"] .container-form > div:has(select[name="addDishesCategory"]),
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Editar Prato"] .container-form > div:has(select[name="addDishesCategory"]),
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicionar Prato"] .container-form > div:has(.btn-modal-submit.menu),
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Editar Prato"] .container-form > div:has(.btn-modal-submit.menu) {
+    grid-column: 1 / -1;
+}
+
 body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicionar Prato"] .fields,
 body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicionar Prato"] .input-select-model,
 body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Editar Prato"] .fields,
@@ -263,6 +274,12 @@ body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicio
 body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Editar Prato"] .input-select-model {
     width: 100%;
     box-sizing: border-box;
+}
+
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicionar Prato"] textarea[name="addDishesDesc"],
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Editar Prato"] textarea[name="addDishesDesc"] {
+    min-height: 100px;
+    resize: vertical;
 }
 
 .btn-change-image-bg {
@@ -635,9 +652,10 @@ body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Editar
 
     .principal-menu-users .container > div:last-child .btn-stock-base,
     .principal-menu-users .container > div:last-child .btn-plus-item {
-        min-height: 44px;
+        min-height: 40px;
         box-sizing: border-box;
         justify-content: center;
+        font-weight: 700;
     }
 
     .principal-menu-users .container > div:last-child .btn-stock-base {
@@ -727,9 +745,10 @@ body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Editar
     .principal-menu-users .container > div:last-child .btn-plus-item {
         width: 100%;
         min-width: 0;
-        min-height: 44px;
-        padding: 6px 4px;
-        font-size: 12px;
+        min-height: 38px;
+        padding: 4px 3px;
+        font-size: 11px;
+        font-weight: 700;
         line-height: 1.1;
         text-align: center;
     }
@@ -826,8 +845,9 @@ body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Editar
 
     .principal-menu-users .container > div:last-child .btn-stock-base,
     .principal-menu-users .container > div:last-child .btn-plus-item {
-        font-size: 11px;
-        padding-inline: 2px;
+        min-height: 36px;
+        font-size: 10px;
+        padding: 3px 2px;
     }
 
     .tags-scroll {
