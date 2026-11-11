@@ -46,7 +46,7 @@ function Login() {
     }
 
     return (
-        <main>
+        <main className="login-page">
             <section id="form-format">
 
                 <div id='formulario'>
