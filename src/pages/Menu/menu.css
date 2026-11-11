@@ -282,6 +282,173 @@ body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Editar
     resize: vertical;
 }
 
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicionar Prato"] {
+    width: min(1120px, calc(100vw - 48px)) !important;
+    max-width: calc(100vw - 48px) !important;
+    box-sizing: border-box;
+    padding: 22px 22px 24px !important;
+    gap: 12px !important;
+}
+
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicionar Prato"] .top-container {
+    margin-bottom: 0;
+}
+
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicionar Prato"] .group-one-top-container {
+    align-items: center;
+}
+
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicionar Prato"] .group-one-top-container h2 {
+    margin: 0;
+    font-size: 22px;
+}
+
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicionar Prato"] .group-one-top-container button {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    line-height: 1;
+    cursor: pointer;
+}
+
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicionar Prato"] .top-container > p {
+    margin: 0;
+    font-size: 12px !important;
+}
+
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicionar Prato"] .form-add-menu {
+    display: grid;
+    grid-template-columns: minmax(215px, 255px) minmax(0, 1fr);
+    align-items: start;
+    gap: 16px;
+}
+
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicionar Prato"] .container-add-img {
+    width: 100%;
+    align-items: stretch;
+    gap: 8px;
+}
+
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicionar Prato"] .container-add-img > div,
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicionar Prato"] .container-add-image,
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicionar Prato"] .container-exibe-image {
+    width: 100%;
+    min-width: 0;
+    height: 205px;
+    min-height: 0;
+    aspect-ratio: auto;
+    box-sizing: border-box;
+}
+
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicionar Prato"] .container-add-image,
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicionar Prato"] .container-exibe-image {
+    border-radius: 15px;
+}
+
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicionar Prato"] .container-add-image label {
+    font-size: 13px !important;
+}
+
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicionar Prato"] .container-add-image svg {
+    width: 34px;
+    height: 34px;
+}
+
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicionar Prato"] .btn-add-img {
+    height: 36px;
+    min-height: 36px;
+    padding: 0 10px;
+    border: 0;
+    border-radius: 11px;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicionar Prato"] .container-form {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 19px 18px;
+}
+
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicionar Prato"] .container-form > div {
+    min-width: 0;
+    grid-column: auto !important;
+}
+
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicionar Prato"] .fields {
+    min-width: 0;
+    gap: 4px;
+}
+
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicionar Prato"] .fields > label {
+    font-size: 14px;
+    font-weight: 700;
+}
+
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicionar Prato"] .input-select-model {
+    min-width: 0;
+    height: 41px;
+    padding: 9px 14px;
+    border: 0;
+    border-radius: 7px;
+    font-size: 14px;
+}
+
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicionar Prato"] textarea[name="addDishesDesc"] {
+    height: 60px;
+    min-height: 60px;
+    resize: vertical;
+}
+
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicionar Prato"] .fields.allergens > div {
+    min-width: 0;
+    gap: 7px !important;
+}
+
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicionar Prato"] .input-select-model.ul-list {
+    flex: 1;
+    width: 0;
+    min-width: 0;
+    min-height: 32px;
+    max-height: 60px;
+    height: auto;
+    margin: 0;
+    padding: 4px 8px;
+    overflow: auto;
+    align-items: center;
+    box-sizing: border-box;
+}
+
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicionar Prato"] .input-select-model.ul-list p {
+    margin: 0;
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicionar Prato"] .add-category-ul-list {
+    flex: 0 0 26px;
+    width: 26px;
+    height: 26px;
+    padding: 3px;
+}
+
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicionar Prato"] .container-form > div:has(.btn-modal-submit.menu) {
+    width: 100%;
+    grid-column: 1;
+    margin-top: 0;
+}
+
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicionar Prato"] .container-form > div:has(.btn-modal-submit.menu) > div {
+    align-items: stretch;
+}
+
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicionar Prato"] .btn-modal-submit.menu {
+    width: 100%;
+    height: 38px;
+    min-height: 38px;
+    padding: 4px 12px;
+    font-size: 14px;
+}
+
 .btn-change-image-bg {
     background-color: rgba(0, 0, 0, 0.514);
     border: none;
@@ -667,6 +834,20 @@ body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Editar
         grid-auto-flow: row;
     }
 
+    body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicionar Prato"] .form-add-menu {
+        display: flex;
+        flex-direction: column;
+    }
+
+    body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicionar Prato"] .container-add-img {
+        width: min(100%, 420px);
+        align-self: center;
+    }
+
+    body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicionar Prato"] .container-form {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
     .principal-menu-users .fields,
     .principal-menu-users .input-select-model {
         min-width: 0;
@@ -701,7 +882,7 @@ body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Editar
     body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicionar Prato"],
     body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Editar Prato"],
     body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Gerenciar Etiquetas"] {
-        width: min(900px, calc(100vw - 48px)) !important;
+        width: min(1120px, calc(100vw - 48px)) !important;
         max-width: calc(100vw - 48px) !important;
         max-height: calc(100vh - 48px) !important;
         box-sizing: border-box;
@@ -758,6 +939,10 @@ body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Editar
         gap: 14px;
     }
 
+    body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicionar Prato"] .container-form {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
     .form-add-menu {
         flex-direction: column;
         gap: 20px;
@@ -775,6 +960,17 @@ body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Editar
     .container-add-image,
     .container-exibe-image {
         width: 100%;
+        height: auto;
+        min-height: 180px;
+        aspect-ratio: 5 / 4;
+    }
+
+    body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicionar Prato"] .container-add-img > div {
+        height: auto;
+    }
+
+    body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicionar Prato"] .container-add-image,
+    body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicionar Prato"] .container-exibe-image {
         height: auto;
         min-height: 180px;
         aspect-ratio: 5 / 4;
