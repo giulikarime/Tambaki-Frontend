@@ -220,3 +220,132 @@ button:hover {
     flex-direction: row;
     gap:10px
 }
+
+@media (max-width: 1200px) {
+    .home-page main {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        align-items: stretch;
+        width: 100%;
+        height: auto;
+        min-height: 93vh;
+        box-sizing: border-box;
+    }
+
+    .home-page #sidebar {
+        height: auto;
+        min-height: 100%;
+        align-self: stretch;
+    }
+
+    .home-page #principal-menu {
+        position: relative;
+        top: auto;
+        left: auto;
+        width: 100%;
+        min-width: 0;
+        margin: 0;
+        padding: 40px 24px;
+        box-sizing: border-box;
+        transform: none;
+        gap: 56px;
+    }
+
+    .home-page #btn-group {
+        width: 100%;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 24px;
+    }
+
+    .home-page .principal-btn {
+        flex: 1 1 250px;
+        width: auto;
+        max-width: 350px;
+        min-width: 0;
+        height: auto;
+        min-height: 230px;
+        box-sizing: border-box;
+    }
+
+    .home-page #tables-group {
+        width: 100%;
+        box-sizing: border-box;
+        gap: 32px;
+    }
+
+    .home-page #tables-list {
+        box-sizing: border-box;
+    }
+}
+
+@media (max-width: 768px) {
+    .home-page main {
+        background-color: #fff8e9;
+    }
+
+    .home-page header {
+        display: flex;
+        height: auto;
+        min-height: 64px;
+        flex-wrap: wrap;
+        gap: 12px;
+        padding: 12px 16px;
+    }
+
+    .home-page #group-one {
+        flex: 1;
+        min-width: 0;
+        gap: 10px;
+    }
+
+    .home-page #group-one h1 {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .home-page header > div:nth-child(2) {
+        order: 3;
+        width: 100% !important;
+    }
+
+    .home-page #group-two {
+        gap: 8px;
+    }
+
+    .home-page main {
+        display: block;
+    }
+
+    .home-page #principal-menu {
+        padding: 32px 16px;
+        padding-bottom: 40px;
+        margin: 0 auto;
+        gap: 40px;
+    }
+
+    .home-page #btn-group {
+        gap: 16px;
+    }
+
+    .home-page .principal-btn {
+        flex-basis: 100%;
+        max-width: 420px;
+        min-height: 210px;
+        padding: 28px;
+    }
+
+    .home-page #tables-group {
+        gap: 24px;
+    }
+
+    .home-page .edit-table-field {
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .home-page #container-delete-btn {
+        flex-wrap: wrap;
+    }
+}

@@ -50,7 +50,7 @@ function Home() {
             left:'50%',
             transform: 'translate(-50%,-50%)',
             bottom: 'auto',
-            width: '500px',
+            width: 'min(500px, calc(100vw - 72px))',
             padding: '20px',
             borderRadius: '16px',
             border: 'none',
@@ -214,7 +214,7 @@ function Home() {
 
 
     return (
-        <>
+        <div className="home-page">
             <Header expanded={expanded} setExpand={setExpand} setHasInteracted={setHasInteracted} />
             <main>
                 <Sidebar expanded={expanded} hasInteracted={hasInteracted} />
@@ -235,7 +235,7 @@ function Home() {
                             )}
                         </button>
                         <button onClick={()=>redirect('/book_table')} style={{ backgroundColor: '#7eb5f8', color: 'black' }} className="principal-btn">
-                            <ClipboardCheck color="black" size={50} style={{backgroundColor:'#a4c8fd', borderRadius:'16px', padding:'8px'}}></ClipboardCheck>
+                            <ClipboardCheck color="black" size={30} style={{backgroundColor:'#a4c8fd', borderRadius:'16px', padding:'8px'}}></ClipboardCheck>
                             <h2>Reservar Mesa</h2>
                             <p>Reservar uma mesa para um cliente.</p>
                         </button>
@@ -371,7 +371,7 @@ function Home() {
                     ></AlertModals>
                 </div>
             </main>
-        </>
+        </div>
     );
 }
 
