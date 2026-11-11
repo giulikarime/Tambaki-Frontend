@@ -1,4 +1,4 @@
-main {
+main:has(.principal-menu-users) {
     width: 100vw;
     height: 93vh;
     background-color: #fff8e9;
@@ -220,6 +220,68 @@ main {
     flex-direction: row;
 }
 
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicionar Prato"] .form-add-menu,
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Editar Prato"] .form-add-menu {
+    flex-direction: column;
+}
+
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicionar Prato"] .container-add-img,
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Editar Prato"] .container-add-img {
+    width: 100%;
+    align-items: center;
+}
+
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicionar Prato"] .container-add-image,
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicionar Prato"] .container-exibe-image,
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Editar Prato"] .container-add-image,
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Editar Prato"] .container-exibe-image {
+    width: min(100%, 420px);
+    height: auto;
+    min-height: 180px;
+    aspect-ratio: 5 / 4;
+}
+
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicionar Prato"] .container-form,
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Editar Prato"] .container-form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-flow: row;
+    width: 100%;
+    min-width: 0;
+    gap: 16px;
+}
+
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicionar Prato"] .container-form > div:has(textarea[name="addDishesDesc"]),
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Editar Prato"] .container-form > div:has(textarea[name="addDishesDesc"]),
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicionar Prato"] .container-form > div:has(.fields.allergens),
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Editar Prato"] .container-form > div:has(.fields.allergens),
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicionar Prato"] .container-form > div:has(select[name="addDishesCategory"]),
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Editar Prato"] .container-form > div:has(select[name="addDishesCategory"]),
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicionar Prato"] .container-form > div:has(.btn-modal-submit.menu),
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Editar Prato"] .container-form > div:has(.btn-modal-submit.menu) {
+    grid-column: 1 / -1;
+}
+
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicionar Prato"] .fields,
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicionar Prato"] .input-select-model,
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Editar Prato"] .fields,
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Editar Prato"] .input-select-model {
+    min-width: 0;
+    max-width: 100%;
+}
+
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicionar Prato"] .input-select-model,
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Editar Prato"] .input-select-model {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicionar Prato"] textarea[name="addDishesDesc"],
+body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Editar Prato"] textarea[name="addDishesDesc"] {
+    min-height: 100px;
+    resize: vertical;
+}
+
 .btn-change-image-bg {
     background-color: rgba(0, 0, 0, 0.514);
     border: none;
@@ -274,7 +336,7 @@ main {
     font-size: 14px;
     font-weight: 700;
     border-radius: 8px;
-    width: 170px;
+    width: min(100%, 360px);
     height: 30px;
     display: flex;
     flex-direction: row;
@@ -282,6 +344,9 @@ main {
     align-items: center;
     cursor: pointer;
     text-align: center;
+    white-space: nowrap;
+    align-self: center;
+    box-sizing: border-box;
 }
 
 #submit-label:hover {
@@ -309,8 +374,11 @@ main {
     align-items: center;
     cursor: pointer;
     text-align: center;
-    width: 180px;
+    width: min(100%, 360px);
     height: 30px;
+    white-space: nowrap;
+    align-self: center;
+    box-sizing: border-box;
 }
 
 #save-changes:hover {
@@ -446,5 +514,359 @@ main {
 }
 
 .btn-modal-submit.menu{
+    width: min(100%, 420px);
+    min-width: 0;
+    justify-self: center;
+    white-space: nowrap;
+    box-sizing: border-box;
+}
+
+.principal-menu-users .container-form > div:has(.btn-modal-submit.menu) {
+    grid-column: 1 / -1;
     width: 100%;
+}
+
+.principal-menu-users .container-form > div:has(.btn-modal-submit.menu) > div {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.form-tags #submit-label,
+.form-tags-edit #save-changes {
+    width: min(100%, 360px);
+}
+
+.btn-modal-submit.delete {
+    white-space: nowrap;
+}
+
+@media (max-width: 1200px) {
+    body:has(.principal-menu-users) header {
+        width: 100%;
+        height: auto;
+        min-height: 64px;
+        flex-wrap: wrap;
+        gap: 12px;
+        padding: 12px 16px;
+    }
+
+    body:has(.principal-menu-users) header #group-one {
+        flex: 1;
+        min-width: 0;
+        gap: 10px;
+    }
+
+    body:has(.principal-menu-users) header #group-one h1 {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    body:has(.principal-menu-users) header #group-one > button {
+        display: none;
+    }
+
+    body:has(.principal-menu-users) header > div:nth-child(2) {
+        order: 3;
+        width: 100% !important;
+    }
+
+    body:has(.principal-menu-users) header > div:nth-child(2) input {
+        box-sizing: border-box;
+    }
+
+    body:has(.principal-menu-users) header #group-two {
+        flex-shrink: 0;
+        gap: 8px;
+    }
+
+    main:has(> #sidebar):has(.principal-menu-users) {
+        display: block;
+        width: 100%;
+        height: auto;
+        min-height: 93vh;
+        padding-bottom: 64px;
+        box-sizing: border-box;
+    }
+
+    main:has(> #sidebar):has(.principal-menu-users) #sidebar.sidebar,
+    main:has(> #sidebar):has(.principal-menu-users) #sidebar.sidebar.expanded {
+        position: fixed;
+        z-index: 20;
+        top: auto;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 64px;
+        max-height: 64px;
+        min-height: 0;
+    }
+
+    main:has(> #sidebar):has(.principal-menu-users) #sidebar-menu {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-around;
+        gap: 4px;
+        height: 100%;
+        padding: 6px 8px;
+        box-sizing: border-box;
+    }
+
+    main:has(> #sidebar):has(.principal-menu-users) .sidebar-item {
+        flex: 1;
+        width: auto;
+        justify-content: center;
+        padding: 10px 4px;
+    }
+
+    main:has(> #sidebar):has(.principal-menu-users) #sidebar .sidebar-label {
+        display: none;
+    }
+
+    main:has(> #sidebar):has(.principal-menu-users) .principal-menu-users {
+        position: relative;
+        top: auto;
+        left: auto;
+        width: 100%;
+        min-width: 0;
+        margin: 0;
+        padding: 40px 24px;
+        box-sizing: border-box;
+        transform: none;
+        gap: 32px;
+    }
+
+    .principal-menu-users .container {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .principal-menu-users .container > div:last-child {
+        flex-wrap: wrap;
+        gap: 8px !important;
+    }
+
+    .principal-menu-users .container > div:last-child .btn-stock-base,
+    .principal-menu-users .container > div:last-child .btn-plus-item {
+        min-height: 40px;
+        box-sizing: border-box;
+        justify-content: center;
+        font-weight: 700;
+    }
+
+    .principal-menu-users .container > div:last-child .btn-stock-base {
+        min-width: 100px;
+    }
+
+    .principal-menu-users .container-form {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-auto-flow: row;
+    }
+
+    .principal-menu-users .fields,
+    .principal-menu-users .input-select-model {
+        min-width: 0;
+        max-width: 100%;
+    }
+
+    .principal-menu-users .input-select-model.ul-list {
+        width: 100%;
+    }
+
+    .container-add-img,
+    .container-add-image,
+    .container-exibe-image {
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    .container-add-image,
+    .container-exibe-image {
+        width: min(250px, 100%);
+    }
+
+    .tags-scroll {
+        width: min(262px, 100%);
+    }
+
+    .add-allergen-select {
+        max-width: calc(100vw - 48px);
+        box-sizing: border-box;
+    }
+
+    body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicionar Prato"],
+    body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Editar Prato"],
+    body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Gerenciar Etiquetas"] {
+        width: min(900px, calc(100vw - 48px)) !important;
+        max-width: calc(100vw - 48px) !important;
+        max-height: calc(100vh - 48px) !important;
+        box-sizing: border-box;
+    }
+
+    body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Editar Etiqueta"] {
+        width: min(480px, calc(100vw - 48px)) !important;
+        max-width: calc(100vw - 48px) !important;
+        max-height: calc(100vh - 48px) !important;
+        box-sizing: border-box;
+    }
+
+    body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Filtros"] {
+        width: min(300px, calc(100vw - 48px)) !important;
+        box-sizing: border-box;
+    }
+
+    body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Editar Prato"] {
+        width: min(760px, calc(100vw - 48px)) !important;
+        max-width: calc(100vw - 48px) !important;
+    }
+}
+
+@media (max-width: 768px) {
+    main:has(> #sidebar):has(.principal-menu-users) .principal-menu-users {
+        padding: 32px 12px 40px;
+        gap: 24px;
+    }
+
+    .principal-menu-users .container > div:first-child h1 {
+        font-size: 22px;
+    }
+
+    .principal-menu-users .container > div:last-child {
+        display: grid !important;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        width: 100%;
+    }
+
+    .principal-menu-users .container > div:last-child .btn-stock-base,
+    .principal-menu-users .container > div:last-child .btn-plus-item {
+        width: 100%;
+        min-width: 0;
+        min-height: 38px;
+        padding: 4px 3px;
+        font-size: 11px;
+        font-weight: 700;
+        line-height: 1.1;
+        text-align: center;
+    }
+
+    .principal-menu-users .container-form {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 14px;
+    }
+
+    .form-add-menu {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .form-add-menu > .container-add-img,
+    .form-add-menu > .container-form {
+        width: 100%;
+    }
+
+    .container-add-img {
+        align-items: stretch;
+    }
+
+    .container-add-image,
+    .container-exibe-image {
+        width: 100%;
+        height: auto;
+        min-height: 180px;
+        aspect-ratio: 5 / 4;
+    }
+
+    .container-buttons-delete-image {
+        top: 8px;
+        right: 8px;
+        transform: none;
+    }
+
+    .container-tags-modal {
+        flex-direction: column;
+        gap: 24px;
+        padding: 0;
+    }
+
+    .container-tags-modal > div,
+    #container-create-label,
+    .tags-scroll {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .color-picker {
+        grid-template-columns: repeat(2, minmax(0, max-content));
+        gap: 8px 12px;
+    }
+
+    .add-allergen-select {
+        right: auto;
+        left: 0;
+        transform: translateY(5px);
+    }
+
+    body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicionar Prato"],
+    body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Editar Prato"],
+    body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Gerenciar Etiquetas"],
+    body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Editar Etiqueta"] {
+        width: calc(100vw - 24px) !important;
+        max-width: calc(100vw - 24px) !important;
+        max-height: calc(100vh - 24px) !important;
+        padding: 16px !important;
+    }
+
+    body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Filtros"] {
+        width: min(300px, calc(100vw - 24px)) !important;
+    }
+
+    body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Editar Prato"] {
+        width: min(560px, calc(100vw - 32px)) !important;
+        max-width: calc(100vw - 32px) !important;
+    }
+}
+
+@media (max-width: 480px) {
+    main:has(> #sidebar):has(.principal-menu-users) .principal-menu-users {
+        padding: 24px 8px 32px;
+    }
+
+    .principal-menu-users .container > div:first-child h1 {
+        font-size: 20px;
+    }
+
+    .principal-menu-users .container > div:last-child {
+        gap: 4px !important;
+    }
+
+    .principal-menu-users .container > div:last-child .btn-stock-base,
+    .principal-menu-users .container > div:last-child .btn-plus-item {
+        min-height: 36px;
+        font-size: 10px;
+        padding: 3px 2px;
+    }
+
+    .tags-scroll {
+        max-height: 240px;
+    }
+
+    body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicionar Prato"],
+    body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Editar Prato"],
+    body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Gerenciar Etiquetas"],
+    body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Editar Etiqueta"] {
+        width: calc(100vw - 16px) !important;
+        max-width: calc(100vw - 16px) !important;
+        max-height: calc(100vh - 16px) !important;
+        padding: 12px !important;
+    }
+
+    body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Editar Prato"] {
+        width: min(420px, calc(100vw - 24px)) !important;
+        max-width: calc(100vw - 24px) !important;
+        padding: 12px !important;
+    }
 }
