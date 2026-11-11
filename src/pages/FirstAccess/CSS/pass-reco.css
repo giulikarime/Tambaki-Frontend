@@ -186,3 +186,80 @@ form p {
 .toggle-icon:hover {
   color: #f5ae47;
 }
+
+@media (max-width: 900px) {
+  .recovery-page #form-format-reco {
+    gap: 10%;
+    padding: 8% 24px 0;
+  }
+}
+
+@media (max-width: 700px) {
+  .recovery-page {
+    position: relative;
+    width: 100%;
+    min-height: 100vh;
+    min-height: 100svh;
+    height: auto;
+    overflow: hidden;
+  }
+
+  .recovery-page #formulario-reco {
+    width: 100%;
+  }
+
+  .recovery-page #form-format-reco {
+    flex-direction: column-reverse;
+    gap: 18px;
+    padding: 5vh 20px 32px;
+  }
+
+  .recovery-page #top-container-reco {
+    width: 100%;
+    gap: 18px;
+  }
+
+  .recovery-page #formulario-reco h1 {
+    color: #fcf5bb;
+    font-size: clamp(30px, 7vw, 40px);
+  }
+
+  .recovery-page #formulario-reco form {
+    width: min(100%, 340px);
+  }
+
+  .recovery-page #formulario-reco form .p-yellow {
+    line-height: 1.4;
+  }
+
+  .recovery-page #logo-reco #group-logo img {
+    width: 180px;
+    height: 180px;
+    margin-bottom: 4px;
+  }
+
+  .recovery-page #logo-reco #group-texts {
+    align-items: center;
+  }
+
+  .recovery-page #logo-reco #group-texts h2 {
+    font-size: 25px;
+  }
+
+  .recovery-page #logo-reco #group-texts p {
+    font-size: 15px;
+  }
+
+  .recovery-page #waves {
+    position: absolute;
+  }
+
+  .recovery-page .wave-track {
+    bottom: 32%;
+    height: 45%;
+  }
+
+  .recovery-page .wave-bottom-fill {
+    height: calc(32% + 24px);
+  }
+}
