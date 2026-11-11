@@ -16,7 +16,7 @@ export async function getProducts() {
 }
 
 export async function getProductEnums() {
-    const response = await fetch('http://localhost:3000/products/enums');
+    const response = await fetch(`${API_URL}/products/enums`);
     if (!response.ok) throw new Error('Erro ao buscar enums de produto');
     return response.json();
 }

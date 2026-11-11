@@ -9,8 +9,8 @@ function LogoRestaurant() {
                 alt="Logo Tambaki"
             />
             <div id="group-texts">
-                <h2>Unidade X</h2>
-                <p>Restaurante</p>
+                <h2>Sabor & Cia</h2>
+                <p>Doce Sabor LTDA</p>
             </div>
         </div>
     );

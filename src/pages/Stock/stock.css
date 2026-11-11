@@ -16,7 +16,7 @@ main{
     gap: 40px;
 }
 
-#container{
+.container-stock{
     display: flex;
     flex-direction: column;
     gap: 15px;
@@ -36,7 +36,7 @@ main{
     gap: 15px;
 }
 
-#btn-plus-stock{
+.btn-plus-stock{
     background-color: #cae2ff;
     border-radius: 10px;
     padding: 6px;
@@ -251,6 +251,10 @@ main{
     gap: 5px;
 }
 
+.fields.allergens{
+    position: relative;
+}
+
 .fields-double{
     display: flex;
     flex-direction: row;
@@ -453,9 +457,8 @@ main{
     padding: 15px 0 15px 0;
     z-index: 5;
     overflow-y: auto;
-    height: 200px;
+    max-height: 200px;
 }
-
 
 .add-allergen-select li{
     padding: 3px 15px 3px 15px
@@ -469,13 +472,392 @@ li button{
     font-size: 15px;
 }
 
-.input-select-model.ul-list{
+.input-select-model.ul-list {
     display: flex;
     flex-wrap: wrap;
-    max-height: 50px;
-    overflow-y: auto;
     align-items: center;
+    height: 40px;
+    box-sizing: border-box;
     padding: 10px;
     width: 350px;
     width: 400px;
+}
+
+@media (max-width: 1200px){
+    body:has(#principal-menu-stock) header{
+        width: 100%;
+        height: auto;
+        min-height: 64px;
+        flex-wrap: wrap;
+        gap: 12px;
+        padding: 12px 16px;
+    }
+
+    body:has(#principal-menu-stock) header #group-one{
+        flex: 1;
+        min-width: 0;
+        gap: 10px;
+    }
+
+    body:has(#principal-menu-stock) header #group-one h1{
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    body:has(#principal-menu-stock) header #group-one > button{
+        display: none;
+    }
+
+    body:has(#principal-menu-stock) header > div:nth-child(2){
+        order: 3;
+        width: 100% !important;
+    }
+
+    body:has(#principal-menu-stock) header > div:nth-child(2) input{
+        box-sizing: border-box;
+    }
+
+    body:has(#principal-menu-stock) header #group-two{
+        flex-shrink: 0;
+        gap: 8px;
+    }
+
+    main:has(> #sidebar):has(#principal-menu-stock){
+        display: block;
+        width: 100%;
+        height: auto;
+        min-height: 93vh;
+        padding-bottom: 64px;
+        box-sizing: border-box;
+    }
+
+    main:has(> #sidebar):has(#principal-menu-stock) #sidebar.sidebar,
+    main:has(> #sidebar):has(#principal-menu-stock) #sidebar.sidebar.expanded{
+        position: fixed;
+        z-index: 20;
+        top: auto;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 64px;
+        max-height: 64px;
+        min-height: 0;
+    }
+
+    main:has(> #sidebar):has(#principal-menu-stock) #sidebar-menu{
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-around;
+        gap: 4px;
+        height: 100%;
+        padding: 6px 8px;
+        box-sizing: border-box;
+    }
+
+    main:has(> #sidebar):has(#principal-menu-stock) .sidebar-item{
+        flex: 1;
+        width: auto;
+        justify-content: center;
+        padding: 10px 4px;
+    }
+
+    main:has(> #sidebar):has(#principal-menu-stock) #sidebar .sidebar-label{
+        display: none;
+    }
+
+    main:has(> #sidebar):has(#principal-menu-stock) #principal-menu-stock{
+        position: relative;
+        top: auto;
+        left: auto;
+        width: 100%;
+        min-width: 0;
+        margin: 0;
+        padding: 40px 24px;
+        box-sizing: border-box;
+        transform: none;
+        gap: 32px;
+    }
+
+    main:has(#principal-menu-stock) #top-container{
+        flex-wrap: nowrap;
+        align-items: center;
+        gap: 12px;
+    }
+
+    main:has(#principal-menu-stock) #top-container .groups-top-container:last-child{
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        flex: 1;
+        min-width: 0;
+        gap: 6px;
+    }
+
+    main:has(#principal-menu-stock) #top-container > .groups-top-container:first-child{
+        flex: 0 0 auto;
+        gap: 10px;
+        white-space: nowrap;
+    }
+
+    main:has(#principal-menu-stock) #top-container > .groups-top-container:first-child h1{
+        font-size: clamp(18px, 3vw, 26px);
+        white-space: nowrap;
+    }
+
+    main:has(#principal-menu-stock) #top-container .groups-top-container:last-child .btn-stock-base{
+        width: 100%;
+        min-width: 0;
+        height: 44px;
+        aspect-ratio: auto;
+        flex-direction: column;
+        justify-content: center;
+        gap: 1px;
+        padding: 4px;
+        font-size: clamp(12px, 1.3vw, 14px);
+        line-height: 1.1;
+        letter-spacing: 0;
+        text-align: center;
+        white-space: normal;
+    }
+
+    main:has(#principal-menu-stock) #top-container .groups-top-container:last-child .btn-stock-base p{
+        text-align: center;
+    }
+
+    main:has(#principal-menu-stock) #top-container .groups-top-container:last-child .btn-stock-base svg{
+        width: 16px;
+        height: 16px;
+        flex-shrink: 0;
+    }
+
+    #filters-container{
+        justify-content: flex-start;
+        gap: 10px;
+        overflow-x: auto;
+        padding: 4px 2px 10px;
+    }
+
+    .btn-filters{
+        flex: 0 0 auto;
+        width: auto;
+        min-width: 145px;
+        padding: 8px 12px;
+    }
+
+    #products-list{
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        max-height: none;
+        overflow: visible;
+        gap: 20px;
+    }
+
+    .card-products{
+        min-width: 0;
+        white-space: normal;
+        padding: 16px;
+    }
+
+    .inside-container-card > div:first-child{
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .inside-container-card > div:first-child p{
+        min-width: 0;
+        overflow-wrap: anywhere;
+        font-size: 17px !important;
+    }
+
+    .bottom-container-card{
+        flex-wrap: wrap;
+        gap: 6px 12px;
+    }
+
+    .modal-products-form,
+    .modal-products-form-entrance,
+    .modal-products-form-remove{
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-rows: none;
+        grid-auto-flow: row;
+    }
+
+    .input-select-model.ul-list{
+        width: 100%;
+        min-width: 0;
+    }
+
+    body:has(#principal-menu-stock) .ReactModal__Content[aria-label="Adicionar Produtos"],
+    body:has(#principal-menu-stock) .ReactModal__Content[aria-label="Dar Entrada"],
+    body:has(#principal-menu-stock) .ReactModal__Content[aria-label="Editar Produto"]{
+        width: min(900px, calc(100vw - 48px)) !important;
+        min-width: 0 !important;
+        max-width: calc(100vw - 48px) !important;
+        max-height: calc(100vh - 48px) !important;
+        box-sizing: border-box;
+    }
+
+    body:has(#principal-menu-stock) .ReactModal__Content[aria-label="Dar Baixa"]{
+        width: min(600px, calc(100vw - 48px)) !important;
+        min-width: 0 !important;
+        max-width: calc(100vw - 48px) !important;
+        max-height: calc(100vh - 48px) !important;
+        box-sizing: border-box;
+    }
+}
+
+@media (max-width: 768px){
+    main:has(> #sidebar):has(#principal-menu-stock) #principal-menu-stock{
+        padding: 32px 16px 40px;
+        gap: 24px;
+    }
+
+    main:has(#principal-menu-stock) #top-container{
+        flex-wrap: nowrap;
+        align-items: center;
+        gap: 8px;
+    }
+
+    main:has(#principal-menu-stock) #top-container .groups-top-container:last-child{
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        flex: 1 1 0;
+        gap: 4px;
+    }
+
+    main:has(#principal-menu-stock) #top-container .groups-top-container:last-child .btn-stock-base{
+        height: 44px;
+        min-height: 44px;
+        box-sizing: border-box;
+        flex-direction: column;
+        align-items: center;
+        gap: 1px;
+        padding: 4px 2px;
+        font-size: 12px;
+        line-height: 1;
+        text-align: center;
+    }
+
+    main:has(#principal-menu-stock) #top-container .groups-top-container:last-child .btn-stock-base p{
+        text-align: center;
+    }
+
+    main:has(#principal-menu-stock) #top-container .groups-top-container:last-child .btn-stock-base svg{
+        width: 14px;
+        height: 14px;
+    }
+
+    main:has(#principal-menu-stock) #top-container .groups-top-container:last-child .btn-stock-base.plus,
+    main:has(#principal-menu-stock) #top-container .groups-top-container:last-child .btn-stock-base.funnel{
+        width: 100%;
+        height: 44px;
+        min-height: 44px;
+        justify-self: stretch;
+        padding: 4px 2px;
+    }
+
+    main:has(#principal-menu-stock) #top-container .groups-top-container:last-child .btn-stock-base.plus p{
+        display: none;
+    }
+
+    main:has(#principal-menu-stock) #top-container .groups-top-container:last-child .btn-stock-base.check-in,
+    main:has(#principal-menu-stock) #top-container .groups-top-container:last-child .btn-stock-base.write-off{
+        font-size: 0;
+    }
+
+    main:has(#principal-menu-stock) #top-container .groups-top-container:last-child .btn-stock-base.check-in::after{
+        content: "Entrada";
+        font-size: 12px;
+    }
+
+    main:has(#principal-menu-stock) #top-container .groups-top-container:last-child .btn-stock-base.write-off::after{
+        content: "Baixa";
+        font-size: 12px;
+    }
+
+    main:has(#principal-menu-stock) #top-container .groups-top-container:last-child .btn-stock-base.funnel{
+        font-size: 0;
+    }
+
+    main:has(#principal-menu-stock) #top-container .groups-top-container:last-child .btn-stock-base.plus svg,
+    main:has(#principal-menu-stock) #top-container .groups-top-container:last-child .btn-stock-base.funnel svg{
+        width: 20px;
+        height: 20px;
+    }
+
+    #filters-container{
+        margin-right: -4px;
+    }
+
+    #products-list{
+        grid-template-columns: minmax(0, 1fr);
+        gap: 14px;
+        padding: 0;
+    }
+
+    .align-items-card{
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .modal-products-form,
+    .modal-products-form-entrance,
+    .modal-products-form-remove{
+        grid-template-columns: minmax(0, 1fr);
+        gap: 14px;
+    }
+
+    body:has(#principal-menu-stock) .fields-double{
+        flex-wrap: wrap;
+    }
+
+    body:has(#principal-menu-stock) .ReactModal__Content[aria-label="Adicionar Produtos"],
+    body:has(#principal-menu-stock) .ReactModal__Content[aria-label="Editar Produto"],
+    body:has(#principal-menu-stock) .ReactModal__Content[aria-label="Dar Baixa"],
+    body:has(#principal-menu-stock) .ReactModal__Content[aria-label="Dar Entrada"]{
+        width: calc(100vw - 24px) !important;
+        max-width: calc(100vw - 24px) !important;
+        max-height: calc(100vh - 24px) !important;
+        padding: 16px !important;
+    }
+
+    body:has(#principal-menu-stock) .ReactModal__Content[aria-label="Modal de Filtros"]{
+        width: min(300px, calc(100vw - 24px)) !important;
+        box-sizing: border-box;
+    }
+}
+
+@media (max-width: 480px){
+    .card-products{
+        padding: 14px;
+        font-size: 14px;
+    }
+
+    .inside-container-card > div:first-child p{
+        font-size: 15px !important;
+    }
+
+    .text-stock{
+        padding: 4px 8px;
+        font-size: 12px;
+    }
+
+    .bottom-container-card{
+        flex-direction: column;
+    }
+
+    .group-title-edit{
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .group-buttons-modal{
+        flex-wrap: wrap;
+    }
+
+    .add-allergen-select{
+        right: auto;
+        left: 0;
+        max-width: calc(100vw - 48px);
+        transform: translateY(5px);
+    }
 }
