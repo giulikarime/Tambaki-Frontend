@@ -18,18 +18,24 @@ function AlertModals({phrase,isOpen,setIsOpen,type = 'success'}){
             position: 'absolute',
             top: '10%',
             left: '50%',
-            width: 'auto',
-            padding: '10px 15px',
-            borderRadius: '50px',
+            transform: 'translateX(-50%)',
+            width: 'min(90vw, 520px)',
+            maxWidth: '90vw',
+            padding: '10px 18px',
+            borderRadius: '18px',
             border: 'none',
             boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
-            backgroundColor: isError? `rgba(255, 191, 191, 1)` : `rgb(226, 255, 226)`,
-            whiteSpace: 'nowrap',
-            color: isError ? `rgba(48, 2, 2, 1)` : `rgba(5, 32, 5, 1)`,
+            backgroundColor: isError ? 'rgba(255, 191, 191, 1)' : 'rgb(226, 255, 226)',
+            color: isError ? 'rgba(48, 2, 2, 1)' : 'rgba(5, 32, 5, 1)',
             fontSize: 18,
+            lineHeight: 1.4,
+            whiteSpace: 'normal',
+            wordBreak: 'break-word',
+            overflowWrap: 'anywhere',
+            textAlign: 'center',
+            boxSizing: 'border-box',
         }
-
-};
+    };
 
 useEffect(() => {
         if (!isOpen) return;
