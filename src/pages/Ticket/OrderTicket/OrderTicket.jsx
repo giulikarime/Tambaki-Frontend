@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import Header from "../../../components/HeaderAndSidebar/Header";
 import Sidebar from "../../../components/HeaderAndSidebar/Sidebar";
-import './order_ticket.css'
-import "../../../App.css"
+import './order_ticket.css';
+import "../../../App.css";
 import { ChevronLeft } from "lucide-react";
 import { getTables } from "../../../services/tables";
 import { useNavigate } from "react-router-dom";
@@ -16,6 +16,10 @@ function OpenTicket(){
     const [selectedTable,setSelectedTable] = useState(null);
 
     const [clientsTable,setClientsTable] = useState([]);
+
+    const [clientName, setClientName] = useState("");
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [modalClientName, setModalClientName] = useState("");
 
     const tablesListRef = useRef(null);
     const isDragging = useRef(false);
@@ -62,6 +66,30 @@ function OpenTicket(){
         const walk = x - startX.current;
         el.scrollLeft = scrollLeftStart.current - walk;
     }
+
+    function handleAddCommand(e) {
+    e.preventDefault();
+
+    if (selectedTable === null) {
+        alert("Selecione uma mesa primeiro!");
+        return;
+    }
+
+    if (!modalClientName.trim()) {
+        alert("Insira o nome do cliente!");
+        return;
+    }
+
+    const tableObj = orderTables[selectedTable];
+    const formattedTable = String(tableObj.table_number).padStart(2, "0");
+
+    const newCommand = `${modalClientName.trim()} - Mesa ${formattedTable}`;
+
+    setClientsTable((prev) => [...prev, newCommand]);
+    setModalClientName("");
+    setIsModalOpen(false);
+}
+
 
     return(
         <>
@@ -121,9 +149,57 @@ function OpenTicket(){
                             )}
                         </div>
                     </div>
-                    <button onClick={()=>redirect('/menu_ordering')} id='btn-select-table'>Selecionar Mesa</button>
+                    <div className="actions-buttons" style={{ display: 'flex', gap: '16px' }}>
+                        <button onClick={()=>redirect('/menu_ordering')} id='btn-select-table'>
+                            Selecionar Mesa
+                        </button>
+                        <button 
+                            type="button"
+                            id='btn-add-command'
+                            onClick={() => {
+                                if (selectedTable === null) {
+                                    alert("Selecione uma mesa primeiro!");
+                                    return;
+                                }
+                                setIsModalOpen(true);
+                            }}
+                        >
+                            Adicionar Comanda
+                        </button>
+                    </div>
                 </div>
             </main>
+
+            {/* Modal de Adicionar Comanda */}
+            {isModalOpen && (
+                <div className="modal-overlay">
+                    <div className="modal-content">
+                        <button 
+                            className="modal-close" 
+                            onClick={() => setIsModalOpen(false)}
+                        >
+                            ✕
+                        </button>
+                        <h2>Adicionar comanda</h2>
+                        <form onSubmit={handleAddCommand}>
+                            <label htmlFor="modal-name">Nome</label>
+                            <div className="modal-input-group">
+                                <input
+                                    id="modal-name"
+                                    type="text"
+                                    placeholder="Insira um nome..."
+                                    value={modalClientName}
+                                    onChange={(e) => setModalClientName(e.target.value)}
+                                    autoFocus
+                                />
+                                <button type="submit" className="btn-start-command">
+                                    Iniciar comanda
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </>
     );
 }
