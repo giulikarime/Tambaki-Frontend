@@ -22,6 +22,11 @@
     transform: translateY(-5px);
 }
 
+.card-value.selected{
+    outline: 2px solid #3553b5;
+    outline-offset: 2px;
+}
+
 .card-value.yellow{
     background-color: #ffdf98;
 }

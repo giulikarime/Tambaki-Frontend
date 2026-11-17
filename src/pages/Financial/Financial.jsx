@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import Header from "../../components/HeaderAndSidebar/Header";
 import Sidebar from "../../components/HeaderAndSidebar/Sidebar";
 import './financial.css'
@@ -7,10 +7,11 @@ import { useNavigate } from "react-router-dom";
 import CMV from "../../components/CMV/CMV";
 import Costs from "../../components/Costs/Costs";
 import ClientsCosts from "../../components/ClientsCosts/ClientsCosts";
-import ProfitPoint from "../../components/ProfitPoint/ProfitPoint";
 import Modal from 'react-modal'
 import { getCosts, getCostsEnums, createCosts, editCosts } from '../../services/costs'
 import AlertModals from "../../components/SucessModals/AlertModals";
+
+const ProfitPoint = lazy(() => import("../../components/ProfitPoint/ProfitPoint"));
 
 function Financial(){
 
@@ -217,7 +218,7 @@ function Financial(){
                                 tabIndex={0}
                                 onClick={()=>setSelectedCard(card.selected)}
                                 key={index} 
-                                className={`card-value ${card.id}`}>
+                                className={`card-value ${card.id} ${selectCard === card.selected ? 'selected' : ''}`}>
                                 <h2>{card.label}</h2>
                                 <div className="card-value-container">
                                     <p className="subtitle-card">{card.value}</p>
@@ -235,7 +236,11 @@ function Financial(){
                         ))}
                     </div>
                     <div>
-                        {selectCard === 'CMV' ? (<CMV/>) : selectCard === 'Custos' ? (<Costs/>) : selectCard === 'Lucro' ? (<ProfitPoint/>) : selectCard === 'Clientes' ? (<ClientsCosts/>) : null}
+                        {selectCard === 'CMV' ? (<CMV/>) : selectCard === 'Custos' ? (<Costs/>) : selectCard === 'Lucro' ? (
+                            <Suspense fallback={<div role="status">Carregando gráficos...</div>}>
+                                <ProfitPoint />
+                            </Suspense>
+                        ) : selectCard === 'Clientes' ? (<ClientsCosts/>) : null}
                     </div>
                 </div>
 

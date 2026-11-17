@@ -1,10 +1,14 @@
 #sidebar {
+    position: fixed;
+    top: 7vh;
+    left: 0;
     height: 93vh;
     width: 80px;
     background-color: #191444;
     overflow: hidden;
     flex-shrink: 0;
     transition: none;
+    z-index: 50;
 }
 
 #sidebar.animate {

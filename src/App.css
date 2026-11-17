@@ -7,6 +7,19 @@
     font-family: 'Montserrat', sans-serif;
 }
 
+html,
+body,
+#root {
+    min-height: 100vh;
+    background-color: #fff8e9;
+    overflow-x: clip;
+}
+
+main {
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
 .btn-back-base{
     background-color: rgb(27, 27, 27);
     color: white;
