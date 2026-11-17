@@ -90,7 +90,8 @@ function OpenTicket(){
                         >
                             {orderTables.length > 0 ? (
                                 orderTables.map((table,index)=>{
-                                    const isOccupied = table.status === "Ocupado";
+                                    const isOccupied = table.status === "Ocupado" || table.status === "Reservado";
+                                    const tableStatus = table.status === "Reservado" ? "Ocupado" : table.status;
                                     const isSelected = selectedTable === index;
 
                                     return(
@@ -101,7 +102,7 @@ function OpenTicket(){
                                             key={index}
                                         >
                                             <p><b>{String(table.table_number).padStart(2,"0")}</b></p>
-                                            <p>{table.status}</p>
+                                            <p>{tableStatus}</p>
                                         </button>
                                     )
                                 })

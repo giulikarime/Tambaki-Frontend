@@ -14,3 +14,22 @@ export async function getReservations() {
 
     return data;
 }
+
+export async function createReservation(payload) {
+    const response = await fetch(`${API_URL}/reservations`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        const message = Array.isArray(data.message)
+            ? data.message.join(", ")
+            : data.message;
+        throw new Error(message || "Erro ao criar reserva");
+    }
+
+    return data;
+}
