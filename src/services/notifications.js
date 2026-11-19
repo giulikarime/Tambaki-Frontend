@@ -1,7 +1,6 @@
-const API_URL = "http://localhost:3000";
-
+const apiUrl = process.env.API_URL;
 export async function getNotifications() {
-    const response = await fetch(`${API_URL}/notifications`, {
+    const response = await fetch(`${apiUrl}}/notifications`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
     });

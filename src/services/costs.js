@@ -1,7 +1,6 @@
-const API_URL = 'http://localhost:3000';
-
+const apiUrl = process.env.API_URL;
 export async function getCosts() {
-    const response = await fetch(`${API_URL}/costs`, {
+    const response = await fetch(`${apiUrl}/costs`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
     });
@@ -16,7 +15,7 @@ export async function getCosts() {
 }
 
 export async function createCosts(payload) {
-    const response = await fetch(`${API_URL}/costs`, {
+    const response = await fetch(`${apiUrl}/costs`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
@@ -32,7 +31,7 @@ export async function createCosts(payload) {
 }
 
 export async function editCosts(payload,id) {
-    const response = await fetch(`${API_URL}/costs/${id}`, {
+    const response = await fetch(`${apiUrl}/costs/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
@@ -48,7 +47,7 @@ export async function editCosts(payload,id) {
 }
 
 export async function deleteCosts(id) {
-    const response = await fetch(`${API_URL}/costs/${id}`, {
+    const response = await fetch(`${apiUrl}/costs/${id}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
     });
@@ -63,7 +62,7 @@ export async function deleteCosts(id) {
 }
 
 export async function getCostsEnums() {
-    const response = await fetch(`${API_URL}/costs/enums`);
+    const response = await fetch(`${apiUrl}/costs/enums`);
     if (!response.ok) throw new Error('Erro ao buscar enums de custo');
     return response.json();
 }

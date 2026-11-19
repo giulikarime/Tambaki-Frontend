@@ -1,4 +1,4 @@
-const API_URL = 'https://tambaki-backend.onrender.com';
+const apiUrl = process.env.API_URL;
 
 export interface LoginPayload {
   email: string;
@@ -12,7 +12,7 @@ export interface LoginResponse {
 }
 
 export async function login(payload: LoginPayload): Promise<LoginResponse> {
-  const response = await fetch(`${API_URL}/auth/login`, {
+  const response = await fetch(`${apiUrl}/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -38,7 +38,7 @@ export function getLoggedUser() {
 export async function logout(): Promise<{ message: string }> {
   const token = localStorage.getItem('accessToken');
 
-  const response = await fetch(`${API_URL}/auth/logout`, {
+  const response = await fetch(`${apiUrl}/auth/logout`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
