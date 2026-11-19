@@ -1,11 +1,10 @@
 
-const API_URL = 'http://localhost:3000';
-
+const apiUrl = process.env.API_URL;
 export async function uploadFile(file) {
   const formData = new FormData();
   formData.append('file', file);
 
-  const response = await fetch(`${API_URL}/uploads`, {
+  const response = await fetch(`${apiUrl}/uploads`, {
     method: 'POST',
     body: formData,
   });

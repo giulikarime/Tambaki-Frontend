@@ -1,7 +1,6 @@
-const API_URL = "http://localhost:3000";
-
+const apiUrl = process.env.API_URL;
 export async function getReservations() {
-    const response = await fetch(`${API_URL}/reservations`, {
+    const response = await fetch(`${apiUrl}/reservations`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
     });
