@@ -1,4 +1,4 @@
-const apiUrl = process.env.API_URL;
+const apiUrl = process.env.REACT_APP_API_URL;
 export async function getSuppliers() {
     const response = await fetch(`${apiUrl}/suppliers`, {
         method: "GET",
