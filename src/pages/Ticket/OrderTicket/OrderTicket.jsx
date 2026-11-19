@@ -7,15 +7,15 @@ import { ChevronLeft } from "lucide-react";
 import { getTables } from "../../../services/tables";
 import { useNavigate } from "react-router-dom";
 
-function OpenTicket(){
+function OpenTicket() {
 
     const [expanded, setExpand] = useState(false);
     const [hasInteracted, setHasInteracted] = useState(false);
 
-    const [orderTables,setOrderTables] = useState([]);
-    const [selectedTable,setSelectedTable] = useState(null);
+    const [orderTables, setOrderTables] = useState([]);
+    const [selectedTable, setSelectedTable] = useState(null);
 
-    const [clientsTable,setClientsTable] = useState([]);
+    const [clientsTable, setClientsTable] = useState([]);
 
     const [clientName, setClientName] = useState("");
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -28,23 +28,23 @@ function OpenTicket(){
 
     const navigate = useNavigate();
 
-    function redirect(url){
+    function redirect(url) {
         navigate(url);
     }
 
-    useEffect(()=>{
-        async function loadTables(){
-            try{
+    useEffect(() => {
+        async function loadTables() {
+            try {
                 const tables = await getTables();
                 setOrderTables(tables);
-            }catch(error){
-                console.error("Nenhuma mesa encontrada no servidor. ",error);
+            } catch (error) {
+                console.error("Nenhuma mesa encontrada no servidor. ", error);
             }
         }
         loadTables();
-    },[])
+    }, [])
 
-    function handleMouseDown(e){
+    function handleMouseDown(e) {
         const el = tablesListRef.current;
         isDragging.current = true;
         el.classList.add('grabbing');
@@ -52,13 +52,13 @@ function OpenTicket(){
         scrollLeftStart.current = el.scrollLeft;
     }
 
-    function handleMouseLeaveOrUp(){
+    function handleMouseLeaveOrUp() {
         const el = tablesListRef.current;
         isDragging.current = false;
         el.classList.remove('grabbing');
     }
 
-    function handleMouseMove(e){
+    function handleMouseMove(e) {
         if (!isDragging.current) return;
         e.preventDefault();
         const el = tablesListRef.current;
@@ -68,30 +68,38 @@ function OpenTicket(){
     }
 
     function handleAddCommand(e) {
-    e.preventDefault();
+        e.preventDefault();
 
-    if (selectedTable === null) {
-        alert("Selecione uma mesa primeiro!");
-        return;
+        if (selectedTable === null) {
+            alert("Selecione uma mesa primeiro!");
+            return;
+        }
+
+        if (!modalClientName.trim()) {
+            alert("Insira o nome do cliente!");
+            return;
+        }
+
+        const tableObj = orderTables[selectedTable];
+        const formattedTable = String(tableObj.table_number).padStart(2, "0");
+
+        const newCommand = {
+            id: Date.now(),
+            clientName: modalClientName.trim(),
+            table_number: formattedTable,
+            label: `${modalClientName.trim()} - Mesa ${formattedTable}`
+        }
+
+        setClientsTable((prev) => [...prev, newCommand]);
+        setModalClientName("");
+        setIsModalOpen(false);
+    }
+    function handleSelectCommand(command) {
+        navigate('/menu_ordering', { state: { command } });
     }
 
-    if (!modalClientName.trim()) {
-        alert("Insira o nome do cliente!");
-        return;
-    }
 
-    const tableObj = orderTables[selectedTable];
-    const formattedTable = String(tableObj.table_number).padStart(2, "0");
-
-    const newCommand = `${modalClientName.trim()} - Mesa ${formattedTable}`;
-
-    setClientsTable((prev) => [...prev, newCommand]);
-    setModalClientName("");
-    setIsModalOpen(false);
-}
-
-
-    return(
+    return (
         <>
             <Header expanded={expanded} setExpand={setExpand} setHasInteracted={setHasInteracted} ></Header>
             <main>
@@ -100,15 +108,15 @@ function OpenTicket(){
                     <div id='container'>
                         <div id="top-container">
                             <div className="groups-top-container">
-                                <button onClick={()=>navigate(-1)} className="btn-back-base"><ChevronLeft></ChevronLeft></button>
+                                <button onClick={() => navigate(-1)} className="btn-back-base"><ChevronLeft></ChevronLeft></button>
                                 <h1>Abrir Comanda</h1>
                             </div>
                         </div>
                         <input id='input-client-order' type="text" placeholder="Insira o nome do cliente..." />
-                        <p style={{color:'#777171ff'}}>Selecione a mesa do cliente e monte seu pedido.</p>
+                        <p style={{ color: '#777171ff' }}>Selecione a mesa do cliente e monte seu pedido.</p>
                     </div>
                     <div id="sec-container">
-                        <div 
+                        <div
                             id="tables-list-order"
                             ref={tablesListRef}
                             onMouseDown={handleMouseDown}
@@ -117,19 +125,19 @@ function OpenTicket(){
                             onMouseMove={handleMouseMove}
                         >
                             {orderTables.length > 0 ? (
-                                orderTables.map((table,index)=>{
+                                orderTables.map((table, index) => {
                                     const isOccupied = table.status === "Ocupado" || table.status === "Reservado";
                                     const tableStatus = table.status === "Reservado" ? "Ocupado" : table.status;
                                     const isSelected = selectedTable === index;
 
-                                    return(
-                                        <button 
-                                            onClick={()=> !isOccupied && setSelectedTable(index)}
+                                    return (
+                                        <button
+                                            onClick={() => !isOccupied && setSelectedTable(index)}
                                             disabled={isOccupied}
-                                            className={`selected-table ${isOccupied ? 'occupied' : (isSelected ? 'select' : 'not-select')}`} 
+                                            className={`selected-table ${isOccupied ? 'occupied' : (isSelected ? 'select' : 'not-select')}`}
                                             key={index}
                                         >
-                                            <p><b>{String(table.table_number).padStart(2,"0")}</b></p>
+                                            <p><b>{String(table.table_number).padStart(2, "0")}</b></p>
                                             <p>{tableStatus}</p>
                                         </button>
                                     )
@@ -141,8 +149,10 @@ function OpenTicket(){
                         <div id="clients-list">
                             <div id='post-it-fix'></div>
                             {clientsTable.length > 0 ? (
-                                clientsTable.map((client, idx)=>(
-                                    <p key={idx}>{client}</p>
+                                clientsTable.map((client) => (
+                                    <p key={client.id} onClick={() => handleSelectCommand(client)} style={{ cursor: 'pointer', textDecoration: 'underline' }}
+                                        title="Clique para montar o pedido"
+                                    >{client.label}</p>
                                 ))
                             ) : (
                                 <p>Nenhuma comanda na mesa.</p>
@@ -150,10 +160,10 @@ function OpenTicket(){
                         </div>
                     </div>
                     <div className="actions-buttons" style={{ display: 'flex', gap: '16px' }}>
-                        <button onClick={()=>redirect('/menu_ordering')} id='btn-select-table'>
+                        <button onClick={() => redirect('/menu_ordering')} id='btn-select-table'>
                             Selecionar Mesa
                         </button>
-                        <button 
+                        <button
                             type="button"
                             id='btn-add-command'
                             onClick={() => {
@@ -174,8 +184,8 @@ function OpenTicket(){
             {isModalOpen && (
                 <div className="modal-overlay">
                     <div className="modal-content">
-                        <button 
-                            className="modal-close" 
+                        <button
+                            className="modal-close"
                             onClick={() => setIsModalOpen(false)}
                         >
                             ✕
