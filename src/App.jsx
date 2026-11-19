@@ -14,6 +14,8 @@ import Tables from './pages/Tables/Tables';
 import MenuOrdering from './pages/MenuOrdering/MenuOrdering';
 import PasswordRecovery from './pages/FirstAccess/PasswordRecovery';
 import Suppliers from './pages/Suppliers/Suppliers';
+import PasswordReset from './pages/FirstAccess/PasswordReset';
+
 
 function hasValidAccessToken() {
   const token = localStorage.getItem('accessToken');

@@ -6,7 +6,7 @@ import { m, LazyMotion, domAnimation } from "framer-motion";
 import { Eye, EyeOff } from 'lucide-react';
 import "./CSS/login.css";
 
-function Login() {
+function Login() { 
     const [form, setForm] = useState({ email: "", password: "" });
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -17,7 +17,7 @@ function Login() {
         setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
     };
 
-    const handleToggle = () => {                     
+    const handleToggle = () => {
         setType((prev) => (prev === 'password' ? 'text' : 'password'));
     };
 

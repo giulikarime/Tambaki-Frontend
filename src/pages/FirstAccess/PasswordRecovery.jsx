@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import LogoRestaurant from "../../components/LogoRestaurant/LogoRestaurant";
-import { login } from "../../services/auth";
 import { m, LazyMotion, domAnimation } from "framer-motion";
 import './CSS/pass-reco.css'
 import Modal from 'react-modal'
@@ -113,7 +112,7 @@ function PasswordRecovery() {
                                 type="submit"
                                 disabled={loading}
                             >
-                                {loading ? "Voltando..." : "Voltar"}
+                                {loading ? "Voltando..." : "Voltar ao Login"}
                             </button>
 
                         </form>
