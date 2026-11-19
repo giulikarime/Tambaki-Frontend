@@ -8,6 +8,8 @@ import { getOrders } from "../../services/orders";
 import { getReservations } from "../../services/reserves";
 import { useNavigate } from "react-router-dom";
 import Modal from 'react-modal'
+import { getLoggedUser } from "../../services/auth";
+import AlertModals from '../../components/SucessModals/AlertModals';
 
 function Home() {
     const [tablesList,setTablesList] = useState([]);
@@ -24,11 +26,16 @@ function Home() {
     const [editTableStatus,setEditTableStatus] = useState(false);
     const [selectedTable, setSelectedTable] = useState(null);
     const [formError, setFormError] = useState("");
+    const [successPhrase,setSuccessPhrase] = useState("");
+    const [alertType,setAlertType] = useState('');
+    const [alertModalIsOpen,setAlertModalIsOpen] = useState(false);
 
     const tablesListRef = useRef(null);
     const isDragging = useRef(false);
     const startX = useRef(0);
     const scrollLeftStart = useRef(0);
+
+    const user = getLoggedUser();
 
     const modalCreateTableStyle = {
         overlay:{
@@ -113,28 +120,47 @@ function Home() {
     async function handleCreateTable(e){
         e.preventDefault();
         setFormError("");
+        setAlertType("");
+        setSuccessPhrase("");
         const formData = new FormData(e.target);
+
+        const max_quant = Number(formData.get('table_max'));
+
+        if(max_quant >= 50){
+            setFormError("A capacidade de pessoas na mesa ultrapassa os limites disponíveis.");
+            setAlertType('error');
+            setAlertModalIsOpen(true);
+            return;
+        }
+
         const payload = {
             table_number: Number(formData.get('table_number')),
             capacity: Number(formData.get('table_max')),
             status: "Livre",
-            unitId: 1
+            unitId: user.storeUnitId,
         };
 
         try{
             await createTable(payload);
             await refreshTables();
             setCreateTableModalIsOpen(false);
+            setSuccessPhrase("Mesa criada com sucesso!");
+            setAlertType('success');
+            setAlertModalIsOpen(true);
             e.target.reset();
         } catch(error){
             console.error("Erro ao criar mesa: ", error);
-            setFormError("Não foi possível criar a mesa. Verifique os dados e tente novamente.");
+            setFormError(error.message);
+            setAlertType('error');
+            setAlertModalIsOpen(true);
         }
     }
 
     async function handleUpdateTable(e){
         e.preventDefault();
         setFormError("");
+        setAlertType("");
+        setSuccessPhrase("");
         const formData = new FormData(e.target);
         const payload = {
             table_number: Number(formData.get('table_number')),
@@ -146,9 +172,14 @@ function Home() {
             await refreshTables();
             setEditTableModalIsOpen(false);
             setEditTableStatus(false);
+            setSuccessPhrase(`Mesa ${selectedTable.table_number} editada com sucesso!`);
+            setAlertType('success');
+            setAlertModalIsOpen(true);
         } catch(error){
             console.error("Erro ao atualizar mesa: ", error);
-            setFormError("Não foi possível atualizar a mesa. Verifique os dados e tente novamente.");
+            setFormError(error.message);
+            setAlertType('error');
+            setAlertModalIsOpen(true);
         }
     }
 
@@ -159,6 +190,9 @@ function Home() {
         }
 
     async function confirmDeleteTable() {
+        setFormError("");
+        setAlertType("");
+        setSuccessPhrase("");
     try {
         await deleteTable(selectedTable.id);
         await refreshTables();
@@ -166,9 +200,15 @@ function Home() {
         setEditTableStatus(false);
         setSelectedTable(null);
         setConfirmDeleteModalIsOpen(false);
+        setSuccessPhrase(`Mesa ${selectedTable.table_number} deletada com sucesso!`);
+        setAlertType('success');
+        setAlertModalIsOpen(true);
     } catch (error) {
         console.error("Erro ao excluir mesa: ", error);
-        setFormError("Não foi possível excluir a mesa.");
+        setFormError(error.message);
+        setAlertType('error');
+        setConfirmDeleteModalIsOpen(false);
+        setAlertModalIsOpen(true);
     }
     }
 
@@ -186,7 +226,7 @@ function Home() {
                             <p>Selecione a mesa e os itens do cardápio para abrir uma comanda.</p>
                         </button>
                         <button onClick={()=>redirect('/open_all_tickets')} style={{ backgroundColor: '#f3b45c', color: 'black'}} className="principal-btn">
-                            <CalendarFold color="black" size={30} style={{backgroundColor:'#dda761', borderRadius:'16px', padding:'8px'}}></CalendarFold>
+                            <CalendarFold color="black" size={50} style={{backgroundColor:'#dda761', borderRadius:'16px', padding:'8px'}}></CalendarFold>
                             <h2>Comandas e Reservas Abertas</h2>
                             {orderList.length === 0 && bookTableList.length === 0 ? (
                                 <p>Nenhuma comanda ou reserva aberta.</p>
@@ -256,7 +296,6 @@ function Home() {
                                 <label htmlFor='table_max'>Capacidade da Mesa</label>
                                 <input className="input-modal-table" type="number" name="table_max" placeholder="Digite a capacidade de pessoas da mesa..." required />
                             </div>
-                            {formError && <p style={{color:'#c0392b'}}>{formError}</p>}
                             <button className='btn-modal-table' type='submit'>Salvar</button>
                         </form>
                     </Modal>
@@ -291,7 +330,6 @@ function Home() {
                                     <label htmlFor='table_max'>Capacidade da Mesa</label>
                                     <input className="input-modal-table" type="number" name="table_max" defaultValue={selectedTable?.capacity} required />
                                 </div>
-                                {formError && <p style={{color:'#c0392b'}}>{formError}</p>}
                                 <div className="delete-modal-table">
                                     <button className='btn-modal-table' type='submit'>Salvar</button>
                                     <button className='delete-btn-modal-table' type='button' onClick={handleDeleteTable}><Trash2></Trash2></button>
@@ -301,11 +339,11 @@ function Home() {
                             <div className="container-fields">
                                 <div className='fields'>
                                     <label htmlFor='table_number'>Número da Mesa</label>
-                                    <input readOnly className="input-modal-table" type="number" name="table_number" value={selectedTable?.table_number ?? ""} />
+                                    <input readOnly className="input-modal-table" type="number" name="table_number" defaultValue={selectedTable?.table_number ?? ""} />
                                 </div>
                                 <div className='fields'>
                                     <label htmlFor='table_max'>Capacidade da Mesa</label>
-                                    <input readOnly className="input-modal-table" type="number" name="table_max" value={selectedTable?.capacity ?? ""} />
+                                    <input readOnly className="input-modal-table" type="number" name="table_max" defaultValue={selectedTable?.capacity ?? ""} />
                                 </div>
                             </div>
                             )}
@@ -325,6 +363,12 @@ function Home() {
                             <button className='btn-modal-table' onClick={()=>{setConfirmDeleteModalIsOpen(!confirmDeleteModalIsOpen); setEditTableModalIsOpen(true)}}>Não</button>
                         </div>
                     </Modal>
+                    <AlertModals
+                        phrase={successPhrase ? successPhrase : formError}
+                        isOpen={alertModalIsOpen}
+                        setIsOpen={setAlertModalIsOpen}
+                        type={alertType}
+                    ></AlertModals>
                 </div>
             </main>
         </>
