@@ -1,5 +1,6 @@
 
-const apiUrl = process.env.REACT_APP_API_URL;
+const apiUrl = import.meta.env.VITE_API_URL;
+
 export async function uploadFile(file) {
   const formData = new FormData();
   formData.append('file', file);
