@@ -178,3 +178,72 @@ form p {
 .toggle-icon:hover {
   color: #f5ae47;
 }
+
+@media (max-width: 900px) {
+  .login-page #form-format {
+    gap: 10%;
+    padding: 8% 24px 0;
+  }
+}
+
+@media (max-width: 700px) {
+  .login-page {
+    position: relative;
+    width: 100%;
+    min-height: 100vh;
+    min-height: 100svh;
+    height: auto;
+    overflow: hidden;
+  }
+
+  .login-page #form-format {
+    flex-direction: column-reverse;
+    gap: 18px;
+    padding: 8vh 20px 32px;
+  }
+
+  .login-page #formulario {
+    gap: 18px;
+    width: 100%;
+  }
+
+  .login-page #formulario h1 {
+    color: #fcf5bb;
+    font-size: clamp(32px, 8vw, 42px);
+  }
+
+  .login-page #formulario form {
+    width: min(100%, 340px);
+  }
+
+  .login-page #logo #group-logo img {
+    width: 180px;
+    height: 180px;
+    margin-bottom: 4px;
+  }
+
+  .login-page #logo #group-texts {
+    align-items: center;
+  }
+
+  .login-page #logo #group-texts h2 {
+    font-size: 25px;
+  }
+
+  .login-page #logo #group-texts p {
+    font-size: 15px;
+  }
+
+  .login-page #waves {
+    position: absolute;
+  }
+
+  .login-page .wave-track {
+    bottom: 32%;
+    height: 45%;
+  }
+
+  .login-page .wave-bottom-fill {
+    height: calc(32% + 24px);
+  }
+}

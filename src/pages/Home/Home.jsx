@@ -50,7 +50,7 @@ function Home() {
             left:'50%',
             transform: 'translate(-50%,-50%)',
             bottom: 'auto',
-            width: '500px',
+            width: 'min(500px, calc(100vw - 72px))',
             padding: '20px',
             borderRadius: '16px',
             border: 'none',
@@ -214,7 +214,7 @@ function Home() {
 
 
     return (
-        <>
+        <div className="home-page">
             <Header expanded={expanded} setExpand={setExpand} setHasInteracted={setHasInteracted} />
             <main>
                 <Sidebar expanded={expanded} hasInteracted={hasInteracted} />
@@ -371,7 +371,7 @@ function Home() {
                     ></AlertModals>
                 </div>
             </main>
-        </>
+        </div>
     );
 }
 
