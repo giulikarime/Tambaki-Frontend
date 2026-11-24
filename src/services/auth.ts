@@ -1,3 +1,8 @@
+/* Carrega os tipos do Vite neste arquivo.
+ Sem isso, o TypeScript não reconhece o `import.meta.env` e mostra erro no editor.
+ Isso afeta só o editor; o app roda normalmente com ou sem essa linha. */
+/// <reference types="vite/client" />
+
 const apiUrl = import.meta.env.VITE_API_URL;
 
 export interface LoginPayload {
