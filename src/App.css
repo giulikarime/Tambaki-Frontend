@@ -15,3 +15,12 @@
     display: flex;
     align-items: center;
 }
+
+html,
+body,
+#root {
+    width: 100%;
+    min-width: 0;
+    min-height: 100%;
+    overflow-x: hidden;
+}

@@ -9,7 +9,7 @@ import Costs from "../../components/Costs/Costs";
 import ClientsCosts from "../../components/ClientsCosts/ClientsCosts";
 import ProfitPoint from "../../components/ProfitPoint/ProfitPoint";
 import Modal from 'react-modal'
-import { getCosts, getCostsEnums, createCosts, editCosts } from '../../services/costs'
+import { getCosts, getCostsEnums, createCosts, editCosts, deleteCosts } from '../../services/costs'
 import AlertModals from "../../components/SucessModals/AlertModals";
 
 function Financial(){
@@ -79,7 +79,7 @@ function Financial(){
     const [addProfitPointModalIsOpen, setAddProfitPointModalIsOpen] = useState(false);
     const [addClientCostModalIsOpen, setAddClientCostModalIsOpen] = useState(false);
 
-    const [selectCard,setSelectedCard] = useState('CMV');
+    const [selectCard,setSelectedCard] = useState('Lucro');
 
     const [filterModalIsOpen,setFilterModalIsOpen] = useState(false);
 
@@ -200,6 +200,7 @@ function Financial(){
                             </div>
                             <div className="groups-top-container">
                                 <button
+                                    onClick={()=>setSelectedCard('Lucro')}
                                     className="btn-stock-base">Gerenciar Custos e Lucro
                                 </button>
                                 <button

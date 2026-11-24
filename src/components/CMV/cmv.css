@@ -1,0 +1,145 @@
+.financial-dashboard {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.dashboard-charts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.dashboard-chart-card,
+.summary-card,
+.projection-card {
+    background: #fff;
+    border: 1px solid #d8d8dc;
+    box-shadow: 0 3px 8px rgba(30, 25, 68, 0.10);
+}
+
+.dashboard-chart-card {
+    height: 238px;
+    padding: 14px 12px 8px;
+    box-sizing: border-box;
+    border-radius: 8px;
+}
+
+.dashboard-chart-card h3 {
+    font-size: 15px;
+    margin: 0 0 6px 4px;
+}
+
+.dashboard-chart-card svg {
+    display: block;
+    width: 100%;
+    height: 196px;
+}
+
+.chart-grid {
+    stroke: #dfe3eb;
+    stroke-width: 1;
+}
+
+.chart-line {
+    stroke: #3d79ef;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.chart-dot {
+    fill: #3d79ef;
+}
+
+.chart-label,
+.chart-month {
+    fill: #555;
+    font-size: 11px;
+}
+
+.dashboard-summary {
+    display: grid;
+    grid-template-columns: repeat(3, 180px);
+    gap: 18px;
+}
+
+.summary-card {
+    height: 112px;
+    padding: 16px 18px;
+    box-sizing: border-box;
+    border-radius: 8px;
+}
+
+.summary-card h3 {
+    font-size: 12px;
+    margin-bottom: 22px;
+}
+
+.summary-card strong {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 22px;
+    font-weight: 500;
+}
+
+.trend-up {
+    color: #333;
+    font-size: 26px;
+    line-height: 1;
+}
+
+.projection-card {
+    border-radius: 8px;
+    padding: 14px 18px 12px;
+}
+
+.projection-heading h3 {
+    font-size: 14px;
+    margin-bottom: 3px;
+}
+
+.projection-heading p {
+    font-size: 11px;
+    color: #666;
+    margin-bottom: 10px;
+}
+
+.table-scroll {
+    overflow-x: visible;
+}
+
+.projection-card table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-size: 12px;
+}
+
+.projection-card th,
+.projection-card td {
+    text-align: left;
+    padding: 8px 10px;
+}
+
+.projection-card th {
+    border-bottom: 1px solid #ececec;
+    color: #444;
+    font-weight: 600;
+}
+
+.projection-card td {
+    height: 18px;
+}
+
+@media (max-width: 900px) {
+    .dashboard-charts {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-summary {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
