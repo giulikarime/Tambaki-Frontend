@@ -6,6 +6,8 @@ import "../../../App.css";
 import { ChevronLeft } from "lucide-react";
 import { getTables } from "../../../services/tables";
 import { useNavigate } from "react-router-dom";
+import { createOrder, getOrders } from "../../../services/orders";
+import AlertModal from "../../../components/AlertModal";
 
 function OpenTicket() {
 
@@ -15,7 +17,11 @@ function OpenTicket() {
     const [orderTables, setOrderTables] = useState([]);
     const [selectedTable, setSelectedTable] = useState(null);
 
-    const [clientsTable, setClientsTable] = useState([]);
+    const [openOrders, setOpenOrders] = useState([]);
+    const [isSaving, setIsSaving] = useState(false);
+    const [alertPhrase, setAlertPhrase] = useState("");
+    const [alertType, setAlertType] = useState("success");
+    const [alertModalIsOpen, setAlertModalIsOpen] = useState(false);
 
     const [clientName, setClientName] = useState("");
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -32,17 +38,34 @@ function OpenTicket() {
         navigate(url);
     }
 
-    useEffect(() => {
-        async function loadTables() {
-            try {
-                const tables = await getTables();
-                setOrderTables(tables);
-            } catch (error) {
-                console.error("Nenhuma mesa encontrada no servidor. ", error);
-            }
+    function showAlert(phrase, type) {
+        setAlertPhrase(phrase);
+        setAlertType(type);
+        setAlertModalIsOpen(true);
+    }
+
+    async function loadData() {
+        try {
+            const [tables, orders] = await Promise.all([getTables(), getOrders()]);
+            setOrderTables(
+                [...tables].sort((a, b) => Number(a.table_number) - Number(b.table_number))
+            );
+            setOpenOrders(orders.filter((order) => order.status === "Aberta"));
+        } catch (error) {
+            console.error("Erro ao carregar mesas e comandas:", error);
+            showAlert(error.message || "Erro ao carregar mesas e comandas.", "error");
         }
-        loadTables();
+    }
+
+    useEffect(() => {
+        loadData();
     }, [])
+
+    function orderLabel(order) {
+        const number = order.table?.table_number
+            ?? orderTables.find((table) => table.id === order.tableId)?.table_number;
+        return `${order.nameClient} - Mesa ${String(number).padStart(2, "0")}`;
+    }
 
     function handleMouseDown(e) {
         const el = tablesListRef.current;
@@ -67,7 +90,7 @@ function OpenTicket() {
         el.scrollLeft = scrollLeftStart.current - walk;
     }
 
-    function handleAddCommand(e) {
+    async function handleAddCommand(e) {
         e.preventDefault();
 
         if (selectedTable === null) {
@@ -75,34 +98,42 @@ function OpenTicket() {
             return;
         }
 
-        if (!modalClientName.trim()) {
+        const clientNameTrimmed = modalClientName.trim();
+        if (!clientNameTrimmed) {
             alert("Insira o nome do cliente!");
             return;
         }
 
         const tableObj = orderTables[selectedTable];
-        const formattedTable = String(tableObj.table_number).padStart(2, "0");
 
-        const newCommand = {
-            id: Date.now(),
-            clientName: modalClientName.trim(),
-            table_number: formattedTable,
-            label: `${modalClientName.trim()} - Mesa ${formattedTable}`
+        setIsSaving(true);
+        try {
+            await createOrder({
+                nameClient: clientNameTrimmed,
+                tableId: tableObj.id,
+                service_type: "Mesa",
+            });
+            setModalClientName("");
+            setIsModalOpen(false);
+            setSelectedTable(null);
+            await loadData();
+        } catch (error) {
+            console.error("Erro ao abrir comanda:", error);
+            showAlert(error.message || "Erro ao abrir comanda.", "error");
+        } finally {
+            setIsSaving(false);
         }
-
-        setClientsTable((prev) => [...prev, newCommand]);
-        setModalClientName("");
-        setIsModalOpen(false);
     }
-    function handleSelectCommand(command) {
-        navigate('/menu_ordering', { state: { command } });
+
+    function handleSelectCommand(order) {
+        navigate('/menu_ordering', { state: { orderId: order.id } });
     }
 
 
     return (
         <>
             <Header expanded={expanded} setExpand={setExpand} setHasInteracted={setHasInteracted} ></Header>
-            <main>
+            <main id="order-ticket-page">
                 <Sidebar expanded={expanded} hasInteracted={hasInteracted} ></Sidebar>
                 <div id="principal-menu-order">
                     <div id='container'>
@@ -126,15 +157,16 @@ function OpenTicket() {
                         >
                             {orderTables.length > 0 ? (
                                 orderTables.map((table, index) => {
-                                    const isOccupied = table.status === "Ocupado" || table.status === "Reservado";
-                                    const tableStatus = table.status === "Reservado" ? "Ocupado" : table.status;
+                                    const isReserved = table.status === "Reservado";
+                                    const isBusy = table.status === "Ocupado";
+                                    const tableStatus = isReserved ? "Ocupado" : table.status;
                                     const isSelected = selectedTable === index;
 
                                     return (
                                         <button
-                                            onClick={() => !isOccupied && setSelectedTable(index)}
-                                            disabled={isOccupied}
-                                            className={`selected-table ${isOccupied ? 'occupied' : (isSelected ? 'select' : 'not-select')}`}
+                                            onClick={() => !isReserved && setSelectedTable(index)}
+                                            disabled={isReserved}
+                                            className={`selected-table ${isReserved ? 'occupied' : (isSelected ? 'select' : (isBusy ? 'busy' : 'not-select'))}`}
                                             key={index}
                                         >
                                             <p><b>{String(table.table_number).padStart(2, "0")}</b></p>
@@ -148,14 +180,19 @@ function OpenTicket() {
                         </div>
                         <div id="clients-list">
                             <div id='post-it-fix'></div>
-                            {clientsTable.length > 0 ? (
-                                clientsTable.map((client) => (
-                                    <p key={client.id} onClick={() => handleSelectCommand(client)} style={{ cursor: 'pointer', textDecoration: 'underline' }}
+                            {openOrders.length > 0 ? (
+                                openOrders.map((order) => (
+                                    <p
+                                        key={order.id}
+                                        onClick={() => handleSelectCommand(order)}
+                                        style={{ cursor: 'pointer', textDecoration: 'underline' }}
                                         title="Clique para montar o pedido"
-                                    >{client.label}</p>
+                                    >
+                                        {orderLabel(order)}
+                                    </p>
                                 ))
                             ) : (
-                                <p>Nenhuma comanda na mesa.</p>
+                                <p>Nenhuma comanda aberta.</p>
                             )}
                         </div>
                     </div>
@@ -202,7 +239,7 @@ function OpenTicket() {
                                     onChange={(e) => setModalClientName(e.target.value)}
                                     autoFocus
                                 />
-                                <button type="submit" className="btn-start-command">
+                                <button type="submit" className="btn-start-command" disabled={isSaving}>
                                     Iniciar comanda
                                 </button>
                             </div>
@@ -210,6 +247,12 @@ function OpenTicket() {
                     </div>
                 </div>
             )}
+            <AlertModal
+                phrase={alertPhrase}
+                isOpen={alertModalIsOpen}
+                setIsOpen={setAlertModalIsOpen}
+                type={alertType}
+            />
         </>
     );
 }
