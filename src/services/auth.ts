@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:3000';
+const apiUrl = process.env.REACT_APP_API_URL;
 
 export interface LoginPayload {
   email: string;
@@ -12,7 +12,7 @@ export interface LoginResponse {
 }
 
 export async function login(payload: LoginPayload): Promise<LoginResponse> {
-  const response = await fetch(`${API_URL}/auth/login`, {
+  const response = await fetch(`${apiUrl}/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -24,13 +24,21 @@ export async function login(payload: LoginPayload): Promise<LoginResponse> {
     throw new Error(data.message || 'Erro ao fazer login');
   }
 
+  localStorage.setItem('accessToken', data.accessToken);
+  localStorage.setItem('account', JSON.stringify(data.account));
+
   return data as LoginResponse;
+}
+
+export function getLoggedUser() {
+  const account = localStorage.getItem('account');
+  return account ? JSON.parse(account) : null;
 }
 
 export async function logout(): Promise<{ message: string }> {
   const token = localStorage.getItem('accessToken');
 
-  const response = await fetch(`${API_URL}/auth/logout`, {
+  const response = await fetch(`${apiUrl}/auth/logout`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

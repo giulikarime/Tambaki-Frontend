@@ -1,0 +1,154 @@
+.ul-list{
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    list-style-type: none;
+    position: relative;
+    min-height: 50px;
+    gap: 5px;
+}
+
+.ul-list p{
+    font-size: 15px;
+    color: #747474;
+}
+
+.container{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.li-style-model{
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+    background-color: rgb(255, 212, 131);
+    padding: 5px 5px;
+    border-radius: 50px;
+    align-items: center;
+}
+
+.li-style-model button{
+    font-size: 20px;
+}
+
+.add-category-ul-list{
+    position: relative;
+    display: flex;
+    align-items: center;
+    bottom: 0;
+    right: 0;
+    background-color: #333333;
+    color: white;
+    border-radius: 50px;
+    padding: 5px;
+    width: 40px;
+    height: 37px;
+    justify-content: center;
+}
+
+.add-categorie-select-sup{
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    transform: translate(220px,10px);
+    list-style-type: none;
+    background-color: #f7f2f2;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    filter: drop-shadow(-7px 7px 3px rgba(85, 35, 35, 0.2));
+    padding: 15px 0 15px 0;
+    z-index: 5;
+    width: 200px;
+}
+
+.add-categorie-select-sup::after{
+    content: '';
+    position: relative;
+    bottom: 15px;
+    left: -15px;
+    width: 0;
+    height: 0;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    border-right: 15px solid #f7f2f2;
+}
+
+.add-categorie-select-sup li{
+    padding: 3px 15px 3px 15px
+}
+
+.add-categorie-select-sup li:hover{
+    background-color: rgb(122, 154, 223);
+}
+
+.container-suppliers{
+    background-color: #fffdf8;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    border-radius: 15px;
+    box-shadow: 0 5px 30px 0 rgba(141, 19, 19, 0.2);
+    overflow: hidden;
+}
+
+.container-suppliers table{
+    width: 100%;
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+.table th{
+  padding: 20px 16px;         
+  font-weight: 700;
+  border: none;
+  text-align: center;
+}
+
+li button{
+    font-size: 15px;
+}
+
+
+.entreprise{
+    background-color: #1a3573;
+    color: white;
+}
+
+.category{
+    background-color: #264a9f;
+    color: white;
+}
+
+.deadline{
+    background-color: #3b74fa;
+    color: white;
+}
+
+.phone{
+    background-color: #7ca6fc;
+    color: #203371;
+}
+
+.email{
+    background-color: #a1c0fc;
+    color: #2e479c;
+}
+
+.info{
+    background-color: #deeaff;
+    color: #203371;
+}
+
+.see-more-sup{
+    background-color: #3a74fa;
+    width: 100%;
+    border-radius: 50px;
+    padding: 6px 5px;
+    color: white;
+    font-weight: 700;
+}
+
+

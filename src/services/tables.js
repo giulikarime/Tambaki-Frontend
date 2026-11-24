@@ -1,7 +1,6 @@
-const API_URL = "http://localhost:3000";
-
+const apiUrl = process.env.REACT_APP_API_URL;
 export async function getTables() {
-    const response = await fetch(`${API_URL}/tables`, {
+    const response = await fetch(`${apiUrl}/tables`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
     });
@@ -16,7 +15,7 @@ export async function getTables() {
 }
 
 export async function createTable(payload) {
-    const response = await fetch(`${API_URL}/tables`, {
+    const response = await fetch(`${apiUrl}/tables`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -32,7 +31,7 @@ export async function createTable(payload) {
 }
 
 export async function updateTable(id, payload) {
-    const response = await fetch(`${API_URL}/tables/${id}`, {
+    const response = await fetch(`${apiUrl}/tables/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -48,7 +47,7 @@ export async function updateTable(id, payload) {
 }
 
 export async function deleteTable(id) {
-    const response = await fetch(`${API_URL}/tables/${id}`, {
+    const response = await fetch(`${apiUrl}/tables/${id}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
     });

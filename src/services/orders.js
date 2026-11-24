@@ -1,7 +1,6 @@
-const API_URL = "http://localhost:3000";
-
+const apiUrl = process.env.REACT_APP_API_URL;
 export async function getOrders() {
-    const response = await fetch(`${API_URL}/orders`, {
+    const response = await fetch(`${apiUrl}/orders`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
     });
@@ -16,7 +15,7 @@ export async function getOrders() {
 }
 
 export async function closeOrder(id) {
-    const response = await fetch(`${API_URL}/orders/${id}/close`, {
+    const response = await fetch(`${apiUrl}/orders/${id}/close`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
     });
