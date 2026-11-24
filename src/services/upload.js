@@ -1,6 +1,5 @@
 
 const apiUrl = import.meta.env.VITE_API_URL;
-
 export async function uploadFile(file) {
   const formData = new FormData();
   formData.append('file', file);

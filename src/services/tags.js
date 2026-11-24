@@ -1,5 +1,4 @@
 const apiUrl = import.meta.env.VITE_API_URL;
-
 export async function getTags(){
     const response = await fetch(`${apiUrl}/tags`,{
         method: 'GET',

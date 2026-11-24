@@ -1,5 +1,4 @@
 const apiUrl = import.meta.env.VITE_API_URL;
-
 export async function getSuppliers() {
     const response = await fetch(`${apiUrl}/suppliers`, {
         method: "GET",

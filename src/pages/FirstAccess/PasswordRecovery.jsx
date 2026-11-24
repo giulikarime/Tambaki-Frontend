@@ -77,7 +77,7 @@ function PasswordRecovery() {
     }
 
     return (
-        <main>
+        <main className="recovery-page">
 
             <div id="formulario-reco">
                 <section id="form-format-reco">

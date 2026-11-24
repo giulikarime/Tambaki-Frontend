@@ -86,9 +86,6 @@ cd react-frontend
 
 ```
 npm install
-npm install react-modal
-npm install lucide-react
-npm install framer-motion
 ```
 
 3. Configure o arquivo `.env` de acordo com o modelo disponibilizado em `.env.example`.

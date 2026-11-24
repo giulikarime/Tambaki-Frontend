@@ -119,9 +119,9 @@ function Header({ expanded, setExpand,setHasInteracted }){
     }
 
     return(
-        <header>
+        <header className="app-header">
             <div id="group-one">
-                <button onClick={() => {
+                <button className="app-header-menu" onClick={() => {
                     const newValue = !expanded;
                     setExpand(newValue);
                     setPreferences(newValue);
@@ -133,7 +133,7 @@ function Header({ expanded, setExpand,setHasInteracted }){
                 <h1 style={{ fontSize: '20px' }}>Olá, {userName} </h1>
             </div>
 
-            <div style={{ position: "relative", width: "30%" }}>
+            <div className="app-header-search">
                 <Search 
                     style={{ 
                     position: "absolute", 

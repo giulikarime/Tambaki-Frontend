@@ -212,6 +212,7 @@ form{
   font-weight: 700;
   border: none;
   text-align: center;
+  font-size: 1rem;
 }
 
 
@@ -239,11 +240,155 @@ background-color: #ffecb3;
 background-color: #ffe0b2;
 }
 
+@media (max-width: 1200px){
+    body:has(.container-users) header #group-one > button{
+        display: none;
+    }
 
-.btn-plus-item.filter{
-    background-color: rgb(226, 165, 52);
+    main:has(> #sidebar):has(.container-users){
+        display: block;
+        width: 100%;
+        height: auto;
+        min-height: 93vh;
+        padding-bottom: 64px;
+        box-sizing: border-box;
+    }
+
+    main:has(> #sidebar):has(.container-users) #sidebar.sidebar,
+    main:has(> #sidebar):has(.container-users) #sidebar.sidebar.expanded{
+        position: fixed;
+        z-index: 20;
+        top: auto;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 64px;
+        max-height: 64px;
+        min-height: 0;
+    }
+
+    main:has(> #sidebar):has(.container-users) #sidebar-menu{
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-around;
+        gap: 4px;
+        height: 100%;
+        padding: 6px 8px;
+        box-sizing: border-box;
+    }
+
+    main:has(> #sidebar):has(.container-users) .sidebar-item{
+        flex: 1;
+        width: auto;
+        justify-content: center;
+        padding: 10px 4px;
+    }
+
+    main:has(> #sidebar):has(.container-users) #sidebar .sidebar-label{
+        display: none;
+    }
+
+    main:has(> #sidebar):has(.container-users) .principal-menu-users{
+        position: relative;
+        top: auto;
+        left: auto;
+        width: 100%;
+        min-width: 0;
+        margin: 0;
+        padding: 40px 24px;
+        box-sizing: border-box;
+        transform: none;
+        gap: 32px;
+    }
+
+    main:has(> #sidebar):has(.container-users) .top-container-users{
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+
+    main:has(> #sidebar):has(.container-users) .top-container-users > div:last-child{
+        flex: 1 1 100%;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    main:has(> #sidebar):has(.container-users) .top-container-users > div:last-child > div{
+        flex: 1 1 240px;
+        min-width: 0;
+    }
+
+    .container-users{
+        overflow-x: auto;
+    }
+
+    .container-users table{
+        min-width: 900px;
+    }
+
+    body:has(.container-users) .container-form{
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
 }
 
-.btn-plus-item.orange{
-    background-color: #f0b96eff;
+@media (max-width: 768px){
+    main:has(> #sidebar):has(.container-users) .principal-menu-users{
+        padding: 32px 16px 40px;
+        gap: 24px;
+    }
+
+    main:has(> #sidebar):has(.container-users) .top-container-users > div:first-child > div:first-child{
+        flex-wrap: nowrap;
+        gap: 10px !important;
+        white-space: nowrap;
+    }
+
+    main:has(> #sidebar):has(.container-users) .top-container-users > div:first-child > div:first-child h1{
+        flex-shrink: 0;
+        font-size: clamp(18px, 5vw, 24px);
+        white-space: nowrap;
+    }
+
+    main:has(> #sidebar):has(.container-users) .top-container-users{
+        align-items: flex-start;
+    }
+
+    main:has(> #sidebar):has(.container-users) .top-container-users > div:last-child{
+        flex: 1 1 100%;
+        align-items: center;
+    }
+
+    main:has(> #sidebar):has(.container-users) .top-container-users > div:last-child > div{
+        flex: 1 1 100%;
+    }
+
+    .container-users table{
+        min-width: 760px;
+    }
+
+    body:has(.container-users) .ReactModal__Content[aria-label="Criar Usuário"],
+    body:has(.container-users) .ReactModal__Content[aria-label="Editar Usuário"]{
+        width: min(760px, calc(100vw - 32px)) !important;
+        max-height: calc(100vh - 32px) !important;
+        box-sizing: border-box;
+    }
+
+    body:has(.container-users) .ReactModal__Content[aria-label="Modal de Filtros"]{
+        width: min(300px, calc(100vw - 24px)) !important;
+        box-sizing: border-box;
+    }
+}
+
+@media (max-width: 520px){
+    body:has(.container-users) .container-form{
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    body:has(.container-users) .btn-modal-submit{
+        width: 100%;
+    }
+
+    body:has(.container-users) .container-filters-options-users{
+        margin-left: 0;
+    }
 }

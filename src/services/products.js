@@ -1,5 +1,4 @@
 const apiUrl = import.meta.env.VITE_API_URL;
-
 export async function getProducts() {
     const response = await fetch(`${apiUrl}/products`, {
         method: "GET",
