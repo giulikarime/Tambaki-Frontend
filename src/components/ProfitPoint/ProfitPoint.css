@@ -1,0 +1,93 @@
+.financial-dashboard {
+    gap: 20px;
+}
+
+.financial-dashboard .dashboard-summary {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+    width: 100%;
+}
+
+.financial-dashboard .summary-card {
+    height: auto;
+    min-height: 96px;
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.financial-dashboard .summary-card h3 {
+    font-size: 15.5px;
+    color: #191444;
+    margin-bottom: 10px;
+}
+
+.profit-chart-card {
+    display: flex;
+    flex-direction: column;
+}
+
+.profit-chart-header {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 4px;
+    min-height: 22px;
+}
+
+.profit-chart-header h3 {
+    margin: 0 0 0 4px;
+}
+
+.profit-chart-tooltip {
+    position: absolute;
+    top: 0;
+    right: 4px;
+    z-index: 3;
+    font-size: 14px;
+    font-weight: 600;
+    background: #191444;
+    color: #ffffff;
+    padding: 7px 14px;
+    border-radius: 8px;
+    white-space: nowrap;
+    pointer-events: none;
+    box-shadow: 0 4px 12px rgba(25, 20, 68, 0.22);
+}
+
+.profit-dot-target {
+    cursor: pointer;
+}
+
+.profit-summary-card strong {
+    font-size: 28px;
+    font-weight: 600;
+    color: #202026;
+}
+
+.profit-margin-arrow.is-positive {
+    color: #3553b5;
+}
+
+.profit-margin-arrow.is-negative {
+    color: #d9534f;
+}
+
+.profit-status-message {
+    background: #ffffff;
+    border: 1px solid #d8d8dc;
+    border-radius: 8px;
+    padding: 28px;
+    text-align: center;
+    font-size: 16px;
+    color: #555555;
+}
+
+@media (max-width: 768px) {
+    .financial-dashboard .dashboard-summary {
+        grid-template-columns: 1fr;
+    }
+}
