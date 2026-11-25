@@ -114,7 +114,7 @@ function MenuOrdering() {
                 await addOrderItem(orderId, { menuId: Number(menuId), quantity });
                 delete remaining[menuId];
             }
-            showAlert("Itens adicionados à comanda.", "success");
+            showAlert("Pedido realizado com sucesso!", "success");
         } catch (error) {
             console.error("Erro ao adicionar itens:", error);
             showAlert(error.message || "Erro ao adicionar itens.", "error");
@@ -127,6 +127,14 @@ function MenuOrdering() {
             }
             setIsSaving(false);
         }
+    }
+
+    function handleCloseOrder() {
+        if (cartItems.length > 0) {
+            showAlert("Há itens na lista que ainda não foram pedidos. Clique em Realizar pedido antes de finalizar a comanda.", "error");
+            return;
+        }
+        navigate('/finish_ticket', { state: { orderId } });
     }
 
     const tableNumber = order?.table?.table_number;
@@ -226,9 +234,14 @@ function MenuOrdering() {
                                 {!hasAnyItem && <li className="empty">Nenhum item ainda.</li>}
                             </ul>
                             <p className="mo-ticket-total">Valor da comanda: <b>{formatPrice(total)}</b></p>
-                            <button id="mo-finish" onClick={handleFinish} disabled={isSaving}>
-                                {isSaving ? "Salvando..." : "Finalizar"}
+                            <div className="mo-ticket-actions"> <button id="mo-finish"
+                                onClick={handleFinish} disabled={isSaving}>
+                                {isSaving ? "Salvando..." : "Realizar pedido"}
                             </button>
+                                <button id="mo-close-order" onClick={handleCloseOrder}
+                                    disabled={isSaving}> Finalizar comanda
+                                </button>
+                            </div>
                         </aside>
                     </div>
                 </div>

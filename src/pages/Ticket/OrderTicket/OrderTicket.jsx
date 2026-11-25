@@ -16,7 +16,7 @@ function OpenTicket() {
 
     const [orderTables, setOrderTables] = useState([]);
     const [selectedTable, setSelectedTable] = useState(null);
-
+    const [filteredTableId, setFilteredTableId] = useState(null);   // <- nova
     const [openOrders, setOpenOrders] = useState([]);
     const [isSaving, setIsSaving] = useState(false);
     const [alertPhrase, setAlertPhrase] = useState("");
@@ -34,10 +34,6 @@ function OpenTicket() {
 
     const navigate = useNavigate();
 
-    function redirect(url) {
-        navigate(url);
-    }
-
     function showAlert(phrase, type) {
         setAlertPhrase(phrase);
         setAlertType(type);
@@ -50,7 +46,9 @@ function OpenTicket() {
             setOrderTables(
                 [...tables].sort((a, b) => Number(a.table_number) - Number(b.table_number))
             );
-            setOpenOrders(orders.filter((order) => order.status === "Aberta"));
+            setOpenOrders(orders.filter((order) => order.status === "Aberta")
+                .sort((a, b) => new Date(b.order_date) - new Date(a.order_date) || b.id - a.id)
+            );
         } catch (error) {
             console.error("Erro ao carregar mesas e comandas:", error);
             showAlert(error.message || "Erro ao carregar mesas e comandas.", "error");
@@ -129,6 +127,18 @@ function OpenTicket() {
         navigate('/menu_ordering', { state: { orderId: order.id } });
     }
 
+    function handleFilterByTable() {
+        if (selectedTable === null) {
+            showAlert("Selecione uma mesa primeiro!", "error");
+            return;
+        }
+        setFilteredTableId(orderTables[selectedTable].id);
+    }
+
+    const filteredTable = orderTables.find((table) => table.id === filteredTableId);
+    const visibleOrders = filteredTable
+        ? openOrders.filter((order) => order.tableId === filteredTable.id)
+        : openOrders;
 
     return (
         <>
@@ -164,7 +174,11 @@ function OpenTicket() {
 
                                     return (
                                         <button
-                                            onClick={() => !isReserved && setSelectedTable(index)}
+                                            onClick={() => {
+                                                if (isReserved) return;
+                                                setSelectedTable(isSelected ? null : index);
+                                                setFilteredTableId(null);
+                                            }}
                                             disabled={isReserved}
                                             className={`selected-table ${isReserved ? 'occupied' : (isSelected ? 'select' : (isBusy ? 'busy' : 'not-select'))}`}
                                             key={index}
@@ -180,8 +194,13 @@ function OpenTicket() {
                         </div>
                         <div id="clients-list">
                             <div id='post-it-fix'></div>
-                            {openOrders.length > 0 ? (
-                                openOrders.map((order) => (
+                            {filteredTable && (
+                                <div className="clients-list-header">
+                                    <b>Mesa {String(filteredTable.table_number).padStart(2, "0")}</b>
+                                </div>
+                            )}
+                            {visibleOrders.length > 0 ? (
+                                visibleOrders.map((order) => (
                                     <p
                                         key={order.id}
                                         onClick={() => handleSelectCommand(order)}
@@ -192,12 +211,13 @@ function OpenTicket() {
                                     </p>
                                 ))
                             ) : (
-                                <p>Nenhuma comanda aberta.</p>
+                                <p>{filteredTable ? "Nenhuma comanda aberta nesta mesa." : "Nenhuma comanda aberta."}</p>
                             )}
                         </div>
                     </div>
                     <div className="actions-buttons" style={{ display: 'flex', gap: '16px' }}>
-                        <button onClick={() => redirect('/menu_ordering')} id='btn-select-table'>
+                        <button type="button"
+                            onClick={handleFilterByTable} id='btn-select-table'>
                             Selecionar Mesa
                         </button>
                         <button
@@ -215,38 +235,40 @@ function OpenTicket() {
                         </button>
                     </div>
                 </div>
-            </main>
+            </main >
 
             {/* Modal de Adicionar Comanda */}
-            {isModalOpen && (
-                <div className="modal-overlay">
-                    <div className="modal-content">
-                        <button
-                            className="modal-close"
-                            onClick={() => setIsModalOpen(false)}
-                        >
-                            ✕
-                        </button>
-                        <h2>Adicionar comanda</h2>
-                        <form onSubmit={handleAddCommand}>
-                            <label htmlFor="modal-name">Nome</label>
-                            <div className="modal-input-group">
-                                <input
-                                    id="modal-name"
-                                    type="text"
-                                    placeholder="Insira um nome..."
-                                    value={modalClientName}
-                                    onChange={(e) => setModalClientName(e.target.value)}
-                                    autoFocus
-                                />
-                                <button type="submit" className="btn-start-command" disabled={isSaving}>
-                                    Iniciar comanda
-                                </button>
-                            </div>
-                        </form>
+            {
+                isModalOpen && (
+                    <div className="modal-overlay">
+                        <div className="modal-content">
+                            <button
+                                className="modal-close"
+                                onClick={() => setIsModalOpen(false)}
+                            >
+                                ✕
+                            </button>
+                            <h2>Adicionar comanda</h2>
+                            <form onSubmit={handleAddCommand}>
+                                <label htmlFor="modal-name">Nome</label>
+                                <div className="modal-input-group">
+                                    <input
+                                        id="modal-name"
+                                        type="text"
+                                        placeholder="Insira um nome..."
+                                        value={modalClientName}
+                                        onChange={(e) => setModalClientName(e.target.value)}
+                                        autoFocus
+                                    />
+                                    <button type="submit" className="btn-start-command" disabled={isSaving}>
+                                        Iniciar comanda
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
-                </div>
-            )}
+                )
+            }
             <AlertModal
                 phrase={alertPhrase}
                 isOpen={alertModalIsOpen}

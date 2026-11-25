@@ -208,19 +208,34 @@
     color: #1b1343;
 }
 
-#menu-ordering-page #mo-finish{
-    align-self: flex-start;
-    padding: 8px 28px;
-    border: none;
+#menu-ordering-page .mo-ticket-actions{
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+#menu-ordering-page .mo-ticket-actions button{
+    width: 100%;
+    padding: 9px 16px;
     border-radius: 8px;
-    background-color: #e08a00;
-    color: #fff;
     font-family: inherit;
     font-weight: bold;
     cursor: pointer;
 }
 
-#menu-ordering-page #mo-finish:disabled{
+#menu-ordering-page #mo-finish{
+    border: none;
+    background-color: #e08a00;
+    color: #fff;
+}
+
+#menu-ordering-page #mo-close-order{
+    border: 2px solid #1b1343;
+    background-color: #1b1343;
+    color: #fff;
+}
+
+#menu-ordering-page .mo-ticket-actions button:disabled{
     opacity: 0.6;
     cursor: default;
 }

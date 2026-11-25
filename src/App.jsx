@@ -15,6 +15,7 @@ import MenuOrdering from './pages/MenuOrdering/MenuOrdering';
 import PasswordRecovery from './pages/FirstAccess/PasswordRecovery';
 import Suppliers from './pages/Suppliers/Suppliers';
 import PasswordReset from './pages/FirstAccess/PasswordReset';
+import FinishTicket from './pages/Ticket/FinishTicket/FinishTicket';
 
 
 function hasValidAccessToken() {
@@ -54,6 +55,8 @@ function App() {
       <Route path='/create_table' element={<ProtectedRoute><Tables /></ProtectedRoute>}></Route>
       <Route path='/suppliers' element={<ProtectedRoute><Suppliers/></ProtectedRoute>}></Route>
       <Route path='/menu_ordering' element={<ProtectedRoute><MenuOrdering/></ProtectedRoute>}></Route>
+      <Route path='/finish_ticket' element={<ProtectedRoute><FinishTicket/></ProtectedRoute>}></Route>
+
     </Routes>
   );
 }
