@@ -16,6 +16,7 @@ function OpenAllTickets(){
     const navigate = useNavigate()
 
     const [tables,setTables] = useState([])
+    const [isLoadingOpenTickets, setIsLoadingOpenTickets] = useState(true);
     const [selectedTable,setSelectedTable] = useState(null);
     const [orders,setOrders] = useState([]);
     const [reservations,setReservations] = useState([]);
@@ -32,6 +33,7 @@ function OpenAllTickets(){
     }
 
     async function loadOpenTickets(){
+        setIsLoadingOpenTickets(true);
         try{
             const [tables, orders, reservations] = await Promise.all([
                 getTables(),
@@ -44,6 +46,8 @@ function OpenAllTickets(){
         } catch(error){
             console.error("Erro ao carregar comandas, reservas e mesas:", error);
             showAlert(error.message || "Erro ao carregar comandas e reservas.", "error");
+        } finally {
+            setIsLoadingOpenTickets(false);
         }
     }
 
@@ -118,7 +122,9 @@ function OpenAllTickets(){
                     </div>
 
                     <div className="tickets-container">
-                        {tables.length > 0 ? (
+                        {isLoadingOpenTickets ? (
+                            <p>Carregando mesas...</p>
+                        ) : tables.length > 0 ? (
                             tables.map((table)=>{
                                     const isOccupied = table.status === "Ocupado" || table.status === "Reservado";
                                     const tableStatus = table.status === "Reservado" ? "Ocupado" : table.status;
@@ -173,7 +179,13 @@ function OpenAllTickets(){
                                     </div>
                                 ))
                             ) : (
-                                <p>{selectedTable === null ? "Selecione uma mesa para ver clientes." : "Nenhuma comanda ou reserva aberta nesta mesa."}</p>
+                                <p>
+                                    {isLoadingOpenTickets
+                                        ? "Carregando comandas e reservas..."
+                                        : selectedTable === null
+                                            ? "Selecione uma mesa para ver clientes."
+                                            : "Nenhuma comanda ou reserva aberta nesta mesa."}
+                                </p>
                             )}
                         </div>
                     </div>

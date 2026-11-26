@@ -18,6 +18,7 @@ function OpenTicket() {
     const [selectedTable, setSelectedTable] = useState(null);
     const [filteredTableId, setFilteredTableId] = useState(null);   // <- nova
     const [openOrders, setOpenOrders] = useState([]);
+    const [isLoadingData, setIsLoadingData] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [alertPhrase, setAlertPhrase] = useState("");
     const [alertType, setAlertType] = useState("success");
@@ -41,6 +42,7 @@ function OpenTicket() {
     }
 
     async function loadData() {
+        setIsLoadingData(true);
         try {
             const [tables, orders] = await Promise.all([getTables(), getOrders()]);
             setOrderTables(
@@ -52,6 +54,8 @@ function OpenTicket() {
         } catch (error) {
             console.error("Erro ao carregar mesas e comandas:", error);
             showAlert(error.message || "Erro ao carregar mesas e comandas.", "error");
+        } finally {
+            setIsLoadingData(false);
         }
     }
 
@@ -165,7 +169,9 @@ function OpenTicket() {
                             onMouseUp={handleMouseLeaveOrUp}
                             onMouseMove={handleMouseMove}
                         >
-                            {orderTables.length > 0 ? (
+                            {isLoadingData ? (
+                                <p>Carregando mesas...</p>
+                            ) : orderTables.length > 0 ? (
                                 orderTables.map((table, index) => {
                                     const isReserved = table.status === "Reservado";
                                     const isBusy = table.status === "Ocupado";
@@ -211,7 +217,13 @@ function OpenTicket() {
                                     </p>
                                 ))
                             ) : (
-                                <p>{filteredTable ? "Nenhuma comanda aberta nesta mesa." : "Nenhuma comanda aberta."}</p>
+                                <p>
+                                    {isLoadingData
+                                        ? "Carregando comandas..."
+                                        : filteredTable
+                                            ? "Nenhuma comanda aberta nesta mesa."
+                                            : "Nenhuma comanda aberta."}
+                                </p>
                             )}
                         </div>
                     </div>

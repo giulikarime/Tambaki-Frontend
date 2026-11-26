@@ -26,6 +26,7 @@ function UsersPage(){
     const [editUserStatus,setEditUserStatus] = useState(false);
 
     const [allUsers,setAllUsers] = useState([]);
+    const [isLoadingUsers, setIsLoadingUsers] = useState(true);
     const user = getLoggedUser();
     const [search,setSearch] = useState('');
 
@@ -192,11 +193,14 @@ function UsersPage(){
     }
 
     async function handleGetUsers() {
+        setIsLoadingUsers(true);
         try{
             const users = await getUsers();
             setAllUsers(users);
         } catch (error){
             console.error("Erro ao carregar usuários.",error);
+        } finally {
+            setIsLoadingUsers(false);
         }
     }
 
@@ -357,7 +361,13 @@ function UsersPage(){
                                 </tr>
                             </thead>
                                 <tbody>
-                                {filteredUsers.length != 0 ? 
+                                {isLoadingUsers ? (
+                                    <tr>
+                                        <td colSpan="6" style={{ textAlign: 'center' }}>
+                                            <p>Carregando usuários...</p>
+                                        </td>
+                                    </tr>
+                                ) : filteredUsers.length != 0 ? 
                                     filteredUsers.map((employees,index)=>(
                                             <tr className="tr-th-group" key={index}>
                                                     <td>{employees.name}</td>
@@ -411,7 +421,11 @@ function UsersPage(){
                                         <label>{item.label}</label>
                                         <select className="input-select-model" name={item.name} id="">
                                             {item.enum ? 
-                                            item.user_enum?.map((u_enum,i)=>(
+                                            item.user_enum?.filter((u_enum) => !(
+                                                item.schema === 'access_level' &&
+                                                user?.access_level === 'Senior' &&
+                                                u_enum === 'Master'
+                                            )).map((u_enum,i)=>(
                                                 <option value={u_enum} key={i}>{u_enum.replaceAll('_',' ')}</option>
                                             )) : ('')}
                                         </select>
@@ -496,9 +510,24 @@ function UsersPage(){
                                         ) : (
                                             <div key={index} className="fields">
                                                 <label>{item.label}</label>
-                                                <select className="input-select-model" name={item.name} id="">
+                                                <select
+                                                    className="input-select-model"
+                                                    name={item.name}
+                                                    defaultValue={selectedUser?.[item.schema]}
+                                                    disabled={
+                                                        !enableEditMode ||
+                                                        (item.schema === 'access_level' &&
+                                                            user?.access_level === 'Senior' &&
+                                                            selectedUser?.access_level === 'Master')
+                                                    }
+                                                >
                                                     {item.enum ? 
-                                                    item.user_enum?.map((u_enum,i)=>(
+                                                    item.user_enum?.filter((u_enum) => !(
+                                                        item.schema === 'access_level' &&
+                                                        user?.access_level === 'Senior' &&
+                                                        selectedUser?.access_level !== 'Master' &&
+                                                        u_enum === 'Master'
+                                                    )).map((u_enum,i)=>(
                                                         <option value={u_enum} key={i}>{u_enum.replaceAll('_',' ')}</option>
                                                     )) : ('')}
                                                 </select>

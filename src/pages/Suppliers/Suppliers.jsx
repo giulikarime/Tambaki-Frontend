@@ -22,6 +22,7 @@ function Suppliers(){
     const [alertModalIsOpen, setAlertModalIsOpen] = useState(false);
 
     const [allSuppliers, setAllSuppliers] = useState([]);
+    const [isLoadingSuppliers, setIsLoadingSuppliers] = useState(true);
 
     const [suppliersEnums, setSuppliersEnums] = useState({
         category: [],
@@ -161,11 +162,14 @@ function Suppliers(){
     }
 
     async function handleGetSuppliers() {
+        setIsLoadingSuppliers(true);
         try {
             const suppliers = await getSuppliers();
             setAllSuppliers(suppliers || []);
         } catch (error) {
             console.error("Erro ao carregar fornecedores.", error);
+        } finally {
+            setIsLoadingSuppliers(false);
         }
     };
 
@@ -339,7 +343,13 @@ function Suppliers(){
                                 </tr>
                             </thead>
                             <tbody>
-                                {filteredSuppliers.length !== 0 ? 
+                                {isLoadingSuppliers ? (
+                                    <tr>
+                                        <td colSpan="6" style={{ textAlign: 'center' }}>
+                                            <p>Carregando fornecedores...</p>
+                                        </td>
+                                    </tr>
+                                ) : filteredSuppliers.length !== 0 ? 
                                     filteredSuppliers.map((sup, i)=>{
                                         const displayCategories = Array.isArray(sup.category) 
                                             ? sup.category.map(c => String(c).replaceAll('_', ' ')).join(', ')

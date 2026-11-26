@@ -9,9 +9,8 @@ import Costs from "../../components/Costs/Costs";
 import ClientsCosts from "../../components/ClientsCosts/ClientsCosts";
 import ProfitPoint from "../../components/ProfitPoint/ProfitPoint";
 import Modal from 'react-modal'
-import { getCosts, getCostsEnums, createCosts, editCosts, deleteCosts } from '../../services/costs'
+import { getCosts, getCostsEnums, getFinancialProducts, createCosts, editCosts, deleteCosts } from '../../services/costs'
 import { getOrders } from '../../services/orders';
-import { getProducts } from '../../services/products';
 import { getMenu } from '../../services/menu';
 import AlertModals from "../../components/SucessModals/AlertModals";
 import {
@@ -27,10 +26,12 @@ import {
 } from "../../utils/profitUtils";
 import { calcularMaiorCategoriaClientes } from "../../utils/clientsCostsUtils";
 import { calcularTendenciaCmvMensal } from "../../utils/cmvUtils";
+import { canEditResource, getAccessLevel } from "../../utils/access";
 
 function Financial(){
 
     const navigate = useNavigate();
+    const canEditCosts = canEditResource('costs');
     const [expanded, setExpand] = useState(false);
     const [hasInteracted, setHasInteracted] = useState(false);
 
@@ -75,8 +76,8 @@ function Financial(){
 
         const [ordersRes, productsRes, menuRes] = await Promise.allSettled([
             getOrders(),
-            getProducts(),
-            getMenu(),
+            getFinancialProducts(),
+            getAccessLevel() === 'Master' ? getMenu() : Promise.resolve([]),
         ]);
 
         if (ordersRes.status === 'fulfilled') {
@@ -341,7 +342,7 @@ function Financial(){
                                 <h2>{card.label}</h2>
                                 <div className="card-value-container">
                                     <p className="subtitle-card">{card.value}</p>
-                                    {card.button ? <button
+                                    {card.button && canEditCosts ? <button
                                                     type="button"
                                                      className="btn-add-card-value"
                                                      onClick={(e)=>{
@@ -360,7 +361,7 @@ function Financial(){
                 </div>
 
                 <Modal
-                    isOpen={addCostModalIsOpen}
+                    isOpen={canEditCosts && addCostModalIsOpen}
                     shouldCloseOnOverlayClick={true}
                     onRequestClose={()=>setAddCostModalIsOpen(!addCostModalIsOpen)}
                     contentLabel="Adicionar custo"

@@ -7,10 +7,12 @@ import React from 'react';
 import { useNavigate } from "react-router-dom"
 import {logout} from '../../services/auth'
 import { getNotifications } from "../../services/notifications"
+import { getAccessLevel } from "../../utils/access"
 
 function Header({ expanded, setExpand,setHasInteracted }){
 
     const [userName, setUserName] = useState("");
+    const isMaster = getAccessLevel() === "Master";
     const [notificationModalIsOpen, setNotificationModalIsOpen] = React.useState(false);
     const [userModalIsOpen, setUserModalIsOpen] = React.useState(false);
     const [notifications,setNotifications] = useState([]);
@@ -38,8 +40,8 @@ function Header({ expanded, setExpand,setHasInteracted }){
     }
 
     useEffect(()=>{
-        handleGetNotifications();
-    },[])
+        if (isMaster) handleGetNotifications();
+    },[isMaster])
 
     useEffect(() => {
         localStorage.setItem('sidebar_boolean', JSON.stringify(preferences));
@@ -158,7 +160,7 @@ function Header({ expanded, setExpand,setHasInteracted }){
                 />
             </div>
             <div id="group-two">
-                <button onClick={()=>setNotificationModalIsOpen(true)}><Bell className='icon-header' color="#fff"></Bell></button>
+                {isMaster && <button onClick={()=>setNotificationModalIsOpen(true)}><Bell className='icon-header' color="#fff"></Bell></button>}
                 <button onClick={()=>setUserModalIsOpen(true)}><User2Icon className='icon-header' color="#fff"></User2Icon></button>
             </div>
             <Modal

@@ -1,7 +1,8 @@
+import { authenticatedFetch } from './authenticatedFetch';
 const apiUrl = import.meta.env.VITE_API_URL;
 
 async function requestCosts(path, errorMessage, options = {}) {
-    const response = await fetch(`${apiUrl}${path}`, {
+    const response = await authenticatedFetch(`${apiUrl}${path}`, {
         headers: { "Content-Type": "application/json" },
         ...options,
     });
@@ -17,6 +18,10 @@ async function requestCosts(path, errorMessage, options = {}) {
 
 export function getCosts() {
     return requestCosts('/costs', "Erro ao buscar custos", { method: "GET" });
+}
+
+export function getFinancialProducts() {
+    return requestCosts('/costs/financial-products', "Erro ao buscar dados financeiros", { method: "GET" });
 }
 
 export function getFixedCosts() {
@@ -46,7 +51,7 @@ export function deleteCosts(id) {
 }
 
 export async function getCostsEnums() {
-    const response = await fetch(`${apiUrl}/costs/enums`);
+    const response = await authenticatedFetch(`${apiUrl}/costs/enums`);
     if (!response.ok) throw new Error('Erro ao buscar enums de custo');
     return response.json();
 }

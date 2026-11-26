@@ -42,6 +42,7 @@ function MenuOrdering() {
 
     const [order, setOrder] = useState(null);
     const [menu, setMenu] = useState([]);
+    const [isLoadingData, setIsLoadingData] = useState(true);
     const [selectedTab, setSelectedTab] = useState('pratos');
     const [cart, setCart] = useState({});
     const [isSaving, setIsSaving] = useState(false);
@@ -63,6 +64,7 @@ function MenuOrdering() {
         }
 
         async function loadData() {
+            setIsLoadingData(true);
             try {
                 const [menuData, orderData] = await Promise.all([
                     getMenu(),
@@ -73,6 +75,8 @@ function MenuOrdering() {
             } catch (error) {
                 console.error("Erro ao carregar cardápio e comanda:", error);
                 showAlert(error.message || "Erro ao carregar cardápio e comanda.", "error");
+            } finally {
+                setIsLoadingData(false);
             }
         }
         loadData();
@@ -210,6 +214,8 @@ function MenuOrdering() {
                                         </div>
                                     );
                                 })
+                            ) : isLoadingData ? (
+                                <p>Carregando itens do cardápio...</p>
                             ) : (
                                 <p>Nenhum item nesta categoria.</p>
                             )}
@@ -231,7 +237,11 @@ function MenuOrdering() {
                                         <span>{formatPrice(item.price * cart[item.id])}</span>
                                     </li>
                                 ))}
-                                {!hasAnyItem && <li className="empty">Nenhum item ainda.</li>}
+                                {!hasAnyItem && (
+                                    <li className="empty">
+                                        {isLoadingData ? "Carregando comanda..." : "Nenhum item ainda."}
+                                    </li>
+                                )}
                             </ul>
                             <p className="mo-ticket-total">Valor da comanda: <b>{formatPrice(total)}</b></p>
                             <div className="mo-ticket-actions"> <button id="mo-finish"

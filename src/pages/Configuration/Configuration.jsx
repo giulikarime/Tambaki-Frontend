@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ChevronRight,
@@ -23,6 +23,7 @@ import logoTambaki from "../../assets/Tambaki_Prototype.png";
 import "./configuration.css";
 import { getLoggedUser } from "../../services/auth";
 import {Dot, LockIcon, User2Icon } from "lucide-react";
+import { getAuditLogs } from "../../services/audit";
 
 export default function Configuration() {
   const navigate = useNavigate();
@@ -31,6 +32,19 @@ export default function Configuration() {
   const [hasInteracted, setHasInteracted] = useState(false);
 
   const user = getLoggedUser();
+  const [auditLogs, setAuditLogs] = useState([]);
+  const [auditLogsError, setAuditLogsError] = useState("");
+  const [isLoadingAuditLogs, setIsLoadingAuditLogs] = useState(false);
+
+  useEffect(() => {
+    if (user?.access_level !== "Master") return;
+
+    setIsLoadingAuditLogs(true);
+    getAuditLogs()
+      .then(setAuditLogs)
+      .catch((error) => setAuditLogsError(error.message))
+      .finally(() => setIsLoadingAuditLogs(false));
+  }, [user?.access_level]);
 
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -186,6 +200,46 @@ export default function Configuration() {
                     <p>Seu perfil é gerenciado pela {user?.storeUnit?.company_name}. Alterações de cargo e permissões são autorizadas pelo responsável administrativo.</p>
                 </div>
             </div>
+
+            {user?.access_level === "Master" && (
+              <section className="audit-log-card" aria-labelledby="audit-log-title">
+                <div className="audit-log-header">
+                  <h2 id="audit-log-title">Logs do sistema</h2>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAuditLogsError("");
+                      setIsLoadingAuditLogs(true);
+                      getAuditLogs()
+                        .then(setAuditLogs)
+                        .catch((error) => setAuditLogsError(error.message))
+                        .finally(() => setIsLoadingAuditLogs(false));
+                    }}
+                    disabled={isLoadingAuditLogs}
+                  >
+                    Atualizar
+                  </button>
+                </div>
+                {auditLogsError && <p role="alert">{auditLogsError}</p>}
+                {isLoadingAuditLogs ? (
+                  <p>Carregando logs...</p>
+                ) : auditLogs.length === 0 ? (
+                  <p>Nenhuma ação registrada.</p>
+                ) : (
+                  <div className="audit-log-list">
+                    {auditLogs.map((log) => (
+                      <article className="audit-log-entry" key={log.id}>
+                        <strong>{log.actorName}</strong>
+                        <span>{log.description}</span>
+                        <time dateTime={log.createdAt}>
+                          {new Date(log.createdAt).toLocaleString("pt-BR")}
+                        </time>
+                      </article>
+                    ))}
+                  </div>
+                )}
+              </section>
+            )}
 
             <div className="config-main-card">
 

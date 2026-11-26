@@ -25,6 +25,7 @@ function BookTable(){
 
     const [orderTables,setOrderTables] = useState([]);
     const [reservations,setReservations] = useState([]);
+    const [isLoadingReservationData, setIsLoadingReservationData] = useState(true);
     const [selectedTable,setSelectedTable] = useState(null);
     const [desiredTime,setDesiredTime] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -55,6 +56,8 @@ function BookTable(){
                 }catch(error){
                     console.error("Erro ao carregar mesas ou reservas.",error);
                     showAlert(error.message || "Erro ao carregar mesas e reservas.", "error");
+                } finally {
+                    setIsLoadingReservationData(false);
                 }
             }
             loadReservationData();
@@ -241,7 +244,9 @@ function BookTable(){
                                     onMouseUp={handleMouseLeaveOrUp}
                                     onMouseMove={handleMouseMove}
                                 >
-                                    {orderTables.length > 0 ? (
+                                    {isLoadingReservationData ? (
+                                        <p>Carregando mesas...</p>
+                                    ) : orderTables.length > 0 ? (
                                         orderTables.map((table)=>{
                                             const isSelected = selectedTable?.id === table.id;
                                             const isOccupied = isTableOccupied(table);

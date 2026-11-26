@@ -1,6 +1,7 @@
+import { authenticatedFetch } from './authenticatedFetch';
 const apiUrl = import.meta.env.VITE_API_URL;
 export async function getSuppliers() {
-    const response = await fetch(`${apiUrl}/suppliers`, {
+    const response = await authenticatedFetch(`${apiUrl}/suppliers`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
     });
@@ -15,7 +16,7 @@ export async function getSuppliers() {
 }
 
 export async function createSuppliers(payload) {
-    const response = await fetch(`${apiUrl}/suppliers`, {
+    const response = await authenticatedFetch(`${apiUrl}/suppliers`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
@@ -31,7 +32,7 @@ export async function createSuppliers(payload) {
 }
 
 export async function editSuppliers(payload,id) {
-    const response = await fetch(`${apiUrl}/suppliers/${id}`, {
+    const response = await authenticatedFetch(`${apiUrl}/suppliers/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
@@ -47,7 +48,7 @@ export async function editSuppliers(payload,id) {
 }
 
 export async function deleteSuppliers(id) {
-    const response = await fetch(`${apiUrl}/suppliers/${id}`, {
+    const response = await authenticatedFetch(`${apiUrl}/suppliers/${id}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
     });
@@ -62,7 +63,7 @@ export async function deleteSuppliers(id) {
 }
 
 export async function getSuppliersEnums() {
-    const response = await fetch(`${apiUrl}/suppliers/enums`);
+    const response = await authenticatedFetch(`${apiUrl}/suppliers/enums`);
     if (!response.ok) throw new Error('Erro ao buscar enums de fornecedores');
     return response.json();
 }

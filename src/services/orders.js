@@ -1,94 +1,40 @@
-<<<<<<< HEAD
+import { authenticatedFetch } from './authenticatedFetch';
+
 const apiUrl = import.meta.env.VITE_API_URL;
-export async function getOrders() {
-    const response = await fetch(`${apiUrl}/orders`, {
-        method: "GET",
+
+async function request(path, options, errorMessage) {
+    const response = await authenticatedFetch(`${apiUrl}${path}`, {
         headers: { "Content-Type": "application/json" },
+        ...options,
     });
 
     const data = await response.json();
-
-    if (!response.ok) {
-        throw new Error(data.message || "Erro ao buscar comandas");
-    }
-
-    return data;
-=======
-const apiUrl = process.env.REACT_APP_API_URL;
-export async function getOrders() {
-    const response = await fetch(`${apiUrl}/orders`, {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-        throw new Error(data.message || "Erro ao buscar comandas");
-    }
-
+    if (!response.ok) throw new Error(data.message || errorMessage);
     return data;
 }
 
-export async function closeOrder(id) {
-    const response = await fetch(`${apiUrl}/orders/${id}/close`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-        throw new Error(data.message || "Erro ao fechar comanda");
-    }
-
-    return data;
+export function getOrders() {
+    return request('/orders', { method: "GET" }, "Erro ao buscar comandas");
 }
 
-export async function createOrder(payload) {
-    const response = await fetch(`${apiUrl}/orders`, {
+export function closeOrder(id) {
+    return request(`/orders/${id}/close`, { method: "PATCH" }, "Erro ao fechar comanda");
+}
+
+export function createOrder(payload) {
+    return request('/orders', {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-        throw new Error(data.message || "Erro ao abrir comanda");
-    }
-
-    return data;
+    }, "Erro ao abrir comanda");
 }
 
-export async function getOrderById(id) {
-    const response = await fetch(`${apiUrl}/orders/${id}`, {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-        throw new Error(data.message || "Erro ao buscar comanda");
-    }
-
-    return data;
+export function getOrderById(id) {
+    return request(`/orders/${id}`, { method: "GET" }, "Erro ao buscar comanda");
 }
 
-export async function addOrderItem(orderId, payload) {
-    const response = await fetch(`${apiUrl}/orders/${orderId}/items`, {
+export function addOrderItem(orderId, payload) {
+    return request(`/orders/${orderId}/items`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-        throw new Error(data.message || "Erro ao adicionar item");
-    }
-
-    return data;
->>>>>>> 185f6eb79980197a308f888ca24cf44a0e629c47
+    }, "Erro ao adicionar item");
 }

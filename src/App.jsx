@@ -7,7 +7,7 @@ import Stock from './pages/Stock/Stock';
 import UsersPage from './pages/UsersPage/UsersPage';
 import Configuration from './pages/Configuration/Configuration';
 import OrderTicket from './pages/Ticket/OrderTicket/OrderTicket';
-import { Navigate, Routes, Route } from 'react-router-dom'
+import { Navigate, Routes, Route, useLocation } from 'react-router-dom'
 import OpenAllTickets from './pages/Ticket/OpenAllTickets/OpenAllTickets';
 import BookTable from './pages/Ticket/BookTable/BookTable';
 import Tables from './pages/Tables/Tables';
@@ -16,6 +16,8 @@ import PasswordRecovery from './pages/FirstAccess/PasswordRecovery';
 import Suppliers from './pages/Suppliers/Suppliers';
 import PasswordReset from './pages/FirstAccess/PasswordReset';
 import FinishTicket from './pages/Ticket/FinishTicket/FinishTicket';
+import Error from './pages/Error/Error'
+import { canViewPath, getAccessLevel } from './utils/access';
 
 
 function hasValidAccessToken() {
@@ -34,7 +36,10 @@ function hasValidAccessToken() {
 }
 
 function ProtectedRoute({ children }) {
-  return hasValidAccessToken() ? children : <Navigate to="/" replace />;
+  const location = useLocation();
+  if (!hasValidAccessToken()) return <Navigate to="/" replace />;
+  if (!getAccessLevel()) return <Navigate to="/" replace />;
+  return canViewPath(location.pathname) ? children : <Navigate to="/home" replace />;
 }
 
 function App() {
@@ -56,7 +61,7 @@ function App() {
       <Route path='/suppliers' element={<ProtectedRoute><Suppliers/></ProtectedRoute>}></Route>
       <Route path='/menu_ordering' element={<ProtectedRoute><MenuOrdering/></ProtectedRoute>}></Route>
       <Route path='/finish_ticket' element={<ProtectedRoute><FinishTicket/></ProtectedRoute>}></Route>
-
+      <Route path='/*' element={<Error></Error>}></Route>
     </Routes>
   );
 }

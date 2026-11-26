@@ -31,6 +31,7 @@ function FinishTicket() {
     const orderId = location.state?.orderId;
 
     const [order, setOrder] = useState(null);
+    const [isLoadingOrder, setIsLoadingOrder] = useState(true);
     const [discountText, setDiscountText] = useState("");
     const [paymentMethod, setPaymentMethod] = useState("");
     const [isSaving, setIsSaving] = useState(false);
@@ -53,6 +54,7 @@ function FinishTicket() {
         }
 
         async function loadOrder() {
+            setIsLoadingOrder(true);
             try {
                 const orderData = await getOrderById(orderId);
                 setOrder(orderData);
@@ -63,6 +65,8 @@ function FinishTicket() {
             } catch (error) {
                 console.error("Erro ao carregar comanda:", error);
                 showAlert(error.message || "Erro ao carregar comanda.", "error");
+            } finally {
+                setIsLoadingOrder(false);
             }
         }
         loadOrder();
@@ -154,6 +158,8 @@ function FinishTicket() {
                                             <span>{formatPrice(item.total)}</span>
                                         </li>
                                     ))
+                                ) : isLoadingOrder ? (
+                                    <li className="ft-empty">Carregando itens da comanda...</li>
                                 ) : (
                                     <li className="ft-empty">Nenhum item nesta comanda.</li>
                                 )}
