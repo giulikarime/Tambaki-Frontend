@@ -48,6 +48,7 @@ function App() {
     <Routes>
       <Route path='/' element={<Login />}></Route>
       <Route path='/recovery' element={<PasswordRecovery />}></Route>
+      <Route path='/new-password' element={<PasswordReset />}></Route>
       <Route path='/home' element={<ProtectedRoute><Home /></ProtectedRoute>}></Route>
       <Route path='/dashboard' element={<ProtectedRoute><Financial /></ProtectedRoute>}></Route>
       <Route path='/menu' element={<ProtectedRoute><Menu /></ProtectedRoute>}></Route>

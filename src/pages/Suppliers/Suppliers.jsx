@@ -334,12 +334,12 @@ function Suppliers(){
                         <table className="table"> 
                             <thead className="thead-style-sup tr-th-group">
                                 <tr>
-                                    <th className="entreprise">EMPRESA</th>
-                                    <th className="category">CATEGORIA</th>
-                                    <th className="deadline">PRAZO</th>
-                                    <th className="phone">TELEFONE</th>
-                                    <th className="email">EMAIL</th>
-                                    <th className="info">INFORMAÇÕES</th>
+                                    <th className="suppliers-colors">EMPRESA</th>
+                                    <th className="suppliers-colors">CATEGORIA</th>
+                                    <th className="suppliers-colors">PRAZO</th>
+                                    <th className="suppliers-colors">TELEFONE</th>
+                                    <th className="suppliers-colors">EMAIL</th>
+                                    <th className="suppliers-colors">INFORMAÇÕES</th>
                                 </tr>
                             </thead>
                             <tbody>
