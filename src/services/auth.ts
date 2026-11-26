@@ -62,3 +62,39 @@ export async function logout(): Promise<{ message: string }> {
 
   return data as { message: string };
 }
+
+async function postAuthJson<T>(path: string, body: unknown, fallbackError: string): Promise<T> {
+  const response = await fetch(`${apiUrl}${path}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    const message = Array.isArray(data.message) ? data.message[0] : data.message;
+    throw new Error(message || fallbackError);
+  }
+
+  return data as T;
+}
+
+export function forgotPassword(email: string): Promise<{ message: string }> {
+  return postAuthJson<{ message: string }>(
+    '/auth/forgot-password',
+    { email },
+    'Erro ao solicitar recuperação de senha',
+  );
+}
+
+export function resetPassword(payload: {
+  token: string;
+  newPassword: string;
+}): Promise<{ message: string }> {
+  return postAuthJson<{ message: string }>(
+    '/auth/reset-password',
+    payload,
+    'Erro ao redefinir senha',
+  );
+}

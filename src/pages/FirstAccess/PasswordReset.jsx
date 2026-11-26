@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import LogoRestaurant from "../../components/LogoRestaurant/LogoRestaurant"; 
+import { resetPassword } from "../../services/auth";
 import { m, LazyMotion, domAnimation } from "framer-motion";
 import { Eye, EyeOff } from 'lucide-react';
 import './CSS/pass-reset.css'
@@ -11,12 +12,15 @@ function PasswordReset(){
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const token = searchParams.get('token');
     const [type, setType] = useState('password');
     const [confirmType, setConfirmType] = useState('password');
 
     const [passwordConfirmationIsOpen, setPasswordConfirmationIsOpen] = useState(false);
     function close_modal(){
         setPasswordConfirmationIsOpen(false);
+        navigate('/');
     }
     const modalPasswordStyle = {
         overlay:{
@@ -36,7 +40,7 @@ function PasswordReset(){
             borderRadius: '16px',
             border: 'none',
             boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
-            backgroundColor: 'rgb(210, 255, 138)',
+            backgroundColor: 'rgb(202, 236, 147)',
             display:'flex',
             flexDirection:'column',
             gap:'20px',
@@ -60,6 +64,16 @@ function PasswordReset(){
         e.preventDefault();
         setError(null);
 
+        if (!token) {
+            setError("Link de redefinição inválido ou ausente. Solicite um novo e-mail.");
+            return;
+        }
+
+        if (form.password.length < 6) {
+            setError("A senha deve ter no mínimo 6 caracteres.");
+            return;
+        }
+
         if (form.password !== form.confirmPassword) {
             setError("As senhas não coincidem.");
             return;
@@ -67,7 +81,7 @@ function PasswordReset(){
 
         setLoading(true);
         try {
-            await resetPassword({ password: form.password });
+            await resetPassword({ token, newPassword: form.password });
             setPasswordConfirmationIsOpen(true);
         } catch (err) {
             setError(err.message);
@@ -75,14 +89,6 @@ function PasswordReset(){
             setLoading(false);
         }
     };
-
-    function redirect(url){
-        navigate(url);
-    }
-
-    function back_redirect(){
-        navigate('/');
-    }
 
     return (
     <main>
