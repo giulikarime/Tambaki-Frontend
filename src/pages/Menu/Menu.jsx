@@ -906,7 +906,7 @@ function Menu() {
                         emptyPreviewBeforeSaving();
                     }}
                     shouldCloseOnOverlayClick={true}
-                    contentLabel="Modal de Editar Prato"
+                    contentLabel="Modal de Adicionar Prato"
                     style={modalStyle}
                 >
                     {(() => {

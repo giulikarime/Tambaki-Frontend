@@ -1,8 +1,11 @@
 .cards-dashboard{
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
     justify-content: flex-start;
     gap: 28px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 main:has(.principal-menu-users) {
@@ -54,6 +57,8 @@ main:has(.principal-menu-users) .principal-menu-users {
     box-shadow: 0 5px 10px rgba(77, 40, 40, 0.377);
     transition: all 0.3s ease;
     align-items: flex-start;
+    box-sizing: border-box;
+    overflow: hidden;
 }
 
 .card-value:hover{
