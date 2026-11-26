@@ -8,43 +8,6 @@
     box-sizing: border-box;
 }
 
-main:has(.principal-menu-users) {
-    width: 100%;
-    min-width: 0;
-    height: auto !important;
-    min-height: calc(100vh - 7vh);
-    display: flex;
-    flex-direction: row !important;
-    align-items: stretch;
-    overflow: visible !important;
-    box-sizing: border-box;
-}
-
-main:has(.principal-menu-users) > #sidebar {
-    height: auto !important;
-    min-height: calc(100vh - 7vh);
-    align-self: stretch;
-}
-
-main:has(.principal-menu-users) .principal-menu-users {
-    position: relative !important;
-    top: auto !important;
-    left: auto !important;
-    margin: 28px auto 50px !important;
-    transform: none !important;
-    align-self: flex-start;
-}
-
-main:has(.principal-menu-users) .principal-menu-users {
-    position: relative;
-    top: auto;
-    left: auto;
-    width: min(980px, calc(100% - 80px));
-    min-width: 0;
-    margin: 28px auto 50px;
-    transform: none;
-}
-
 .card-value{
     flex: 1;
     max-width: 310px;
@@ -147,4 +110,11 @@ main:has(.principal-menu-users) .principal-menu-users {
 .container-btn-cmv button:hover{
     border: 1px solid #16460d;
     background-color: rgb(241, 255, 241);
+}
+
+@media (max-width: 768px){
+    main:has(> #sidebar):has(.principal-menu-users):has(.cards-dashboard) .principal-menu-users{
+        padding: 32px 16px 40px;
+        gap: 24px;
+    }
 }

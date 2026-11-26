@@ -23,7 +23,7 @@ function MenuCard({ item, onClick }) {
         if (rawImg.startsWith('http')) {
             imageUrl = rawImg;
         } else {
-            const backendUrl = 'http://localhost:3000'; 
+            const backendUrl = import.meta.env.VITE_API_URL;
             imageUrl = `${backendUrl}/${rawImg.startsWith('/') ? rawImg.slice(1) : rawImg}`;
         }
     }
