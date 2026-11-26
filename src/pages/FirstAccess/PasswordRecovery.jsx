@@ -1,14 +1,16 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import LogoRestaurant from "../../components/LogoRestaurant/LogoRestaurant";
+import { forgotPassword } from "../../services/auth";
 import { m, LazyMotion, domAnimation } from "framer-motion";
 import './CSS/pass-reco.css'
 import Modal from 'react-modal'
 
 
 function PasswordRecovery() {
-    const [form, setForm] = useState({ email: "", password: "" });
+    const [form, setForm] = useState({ email: "" });
     const [error, setError] = useState(null);
+    const [successMessage, setSuccessMessage] = useState("");
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
@@ -54,23 +56,18 @@ function PasswordRecovery() {
         setLoading(true);
 
         try {
-            const result = await login(form);
-
-            // Guarda o token para usar nas próximas requisições
-            localStorage.setItem("accessToken", result.accessToken);
-            localStorage.setItem("account", JSON.stringify(result.account));
-
-            navigate("/dashboard"); // ajuste para a rota certa do seu app
+            const result = await forgotPassword(form.email.trim());
+            setSuccessMessage(
+                result.message ||
+                `Se o e-mail ${form.email} estiver cadastrado, enviaremos um link em instantes.`
+            );
+            setSendEmailModalIsOpen(true);
         } catch (err) {
             setError(err.message);
         } finally {
             setLoading(false);
         }
     };
-
-    function redirect(url){
-        navigate(url);
-    }
 
     function back_redirect(){
         navigate(-1);
@@ -88,6 +85,8 @@ function PasswordRecovery() {
 
                             <p className="p-yellow">Digite o e-mail cadastrado para receber as instruções de redefinição de senha.</p>
 
+                            {error && <p className="error-message">{error}</p>}
+
                             <input
                                 type="email"
                                 name="email"
@@ -101,7 +100,6 @@ function PasswordRecovery() {
                             <button id="enviar"
                                 type="submit"
                                 disabled={loading}
-                                onClick={()=>setSendEmailModalIsOpen(!sendEmailModalIsOpen)}
                             >
                                 {loading ? "Enviando..." : "Enviar instruções para email"}
                             </button>
@@ -109,10 +107,10 @@ function PasswordRecovery() {
                             <button
                                 onClick={back_redirect}
                                 id="voltar"
-                                type="submit"
+                                type="button"
                                 disabled={loading}
                             >
-                                {loading ? "Voltando..." : "Voltar ao Login"}
+                                Voltar ao Login
                             </button>
 
                         </form>
@@ -221,7 +219,7 @@ function PasswordRecovery() {
             style={modalSendEmailStyle}
             className='modal-send-email'
         >
-            <p>Informações enviadas para o email xyz.</p>
+            <p>{successMessage}</p>
         </Modal>
         </main>
     );
