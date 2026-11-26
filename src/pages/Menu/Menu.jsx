@@ -420,7 +420,7 @@ function Menu() {
                         if (uploadedUrl) finalImageUrls.push(uploadedUrl);
                     }
                 } else {
-                    const cleanUrl = item.replace('http://localhost:3000/', '');
+                    const cleanUrl = item.replace(`${import.meta.env.VITE_API_URL}/`, '');
                     finalImageUrls.push(cleanUrl);
                 }
             }
@@ -670,7 +670,7 @@ function Menu() {
                                     onClick={() => {
                                         setSelectedMenu(item);
                                         const formattedImages = (item.img || []).map(img => 
-                                            img.startsWith('http') || img.startsWith('blob') ? img : `http://localhost:3000/${img}`
+                                            img.startsWith('http') || img.startsWith('blob') ? img : `${import.meta.env.VITE_API_URL}/${img}`
                                         );
                                         setPreview(formattedImages);
                                         setIndexOfPreview(0);
@@ -906,7 +906,7 @@ function Menu() {
                         emptyPreviewBeforeSaving();
                     }}
                     shouldCloseOnOverlayClick={true}
-                    contentLabel="Modal de Editar Prato"
+                    contentLabel="Modal de Adicionar Prato"
                     style={modalStyle}
                 >
                     {(() => {
@@ -963,7 +963,7 @@ function Menu() {
                                                         src={
                                                             preview[indexOfPreview]?.startsWith('http') || preview[indexOfPreview]?.startsWith('blob') 
                                                                 ? preview[indexOfPreview] 
-                                                                : `http://localhost:3000/${preview[indexOfPreview]}`
+                                                                : `${import.meta.env.VITE_API_URL}/${preview[indexOfPreview]}`
                                                         } 
                                                         className="card-full-image" 
                                                         alt="Preview" 

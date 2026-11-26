@@ -5,17 +5,6 @@ main{
     
 }
 
-.principal-menu-users{
-    width: 70%;
-    position: absolute;
-    top: 150px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    flex-direction: column;
-    gap: 40px;
-}
-
 .top-container-users{
     display: flex;
     flex-direction: column;
@@ -48,7 +37,7 @@ th{
     height: 35px;
 }
 
-.see-more-users-page{
+.see-more-users{
     background-color: #df8400;
     width: 100%;
     border-radius: 50px;
@@ -57,7 +46,7 @@ th{
     font-weight: 700;
 }
 
-.see-more-users-page:hover{
+.see-more-users:hover{
     cursor: pointer;
 }
 
@@ -133,7 +122,15 @@ form{
 }
 
 .btn-plus-item.blue-filter{
-    background-color: #87b3f2;
+    background-color: rgb(179, 203, 255);
+}
+
+.btn-plus-item.orange{
+    background-color: #ffd54f;
+}
+
+.btn-plus-item.filter{
+    background-color: #ffd54f;
 }
 
 .btn-modal-file-users{
@@ -215,30 +212,12 @@ form{
   font-size: 1rem;
 }
 
-
-.name{
-background-color: #ffa000;
+.users-colors{
+background-color: #ffc13b;
+color: #2b2a2a;
 }
 
-.role{
-background-color: #ffb300;
-}
 
-.email-users{
-background-color: #ffd54f;
-}
-
-.phone-users{
-background-color: #ffe082;
-}
-
-.access_level{
-background-color: #ffecb3;
-}
-
-.info-users{
-background-color: #ffe0b2;
-}
 
 @media (max-width: 1200px){
     body:has(.container-users) header #group-one > button{

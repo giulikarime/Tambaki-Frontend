@@ -196,7 +196,7 @@ export default function Configuration() {
                     </div>
                 </div>
                 <div id="gerenciamento">
-                    <LockIcon color={'rgb(77, 75, 75)'} size={25}></LockIcon>
+                    <LockIcon color={'rgb(77, 75, 75)'} size={36}></LockIcon>
                     <p>Seu perfil é gerenciado pela {user?.storeUnit?.company_name}. Alterações de cargo e permissões são autorizadas pelo responsável administrativo.</p>
                 </div>
             </div>
