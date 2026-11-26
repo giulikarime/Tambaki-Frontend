@@ -1,6 +1,7 @@
+import { authenticatedFetch } from './authenticatedFetch';
 const apiUrl = import.meta.env.VITE_API_URL;
 export async function getUsers() {
-    const response = await fetch(`${apiUrl}/users`,{
+    const response = await authenticatedFetch(`${apiUrl}/users`,{
         method:'GET',
         headers:{"Content-Type": 'application/json'},
     });
@@ -15,7 +16,7 @@ export async function getUsers() {
 }
 
 export async function createUsers(payload) {
-    const response = await fetch(`${apiUrl}/users`,{
+    const response = await authenticatedFetch(`${apiUrl}/users`,{
         method:'POST',
         headers:{"Content-Type": 'application/json'},
         body: JSON.stringify(payload),
@@ -31,7 +32,7 @@ export async function createUsers(payload) {
 }
 
 export async function editUsers(payload,id) {
-    const response = await fetch(`${apiUrl}/users/${id}`,{
+    const response = await authenticatedFetch(`${apiUrl}/users/${id}`,{
         method:'PATCH',
         headers:{"Content-Type": 'application/json'},
         body: JSON.stringify(payload),
@@ -47,7 +48,7 @@ export async function editUsers(payload,id) {
 }
 
 export async function deleteUsers(id) {
-    const response = await fetch(`${apiUrl}/users/${id}`,{
+    const response = await authenticatedFetch(`${apiUrl}/users/${id}`,{
         method:'DELETE',
         headers:{"Content-Type": 'application/json'},
     });
@@ -62,7 +63,7 @@ export async function deleteUsers(id) {
 }
 
 export async function getUserEnums() {
-    const response = await fetch(`${apiUrl}/users/enums`);
+    const response = await authenticatedFetch(`${apiUrl}/users/enums`);
     if (!response.ok) throw new Error('Erro ao buscar enums de usuários');
     return response.json();
 }

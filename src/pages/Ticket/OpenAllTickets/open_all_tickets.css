@@ -85,3 +85,28 @@ main{
     flex-direction: column;
     gap: 30px;
 }
+
+.client-records{
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.client-card,
+.client-card.blue,
+.close-order-button.blue{
+    width: 100%;
+    min-height: 38px;
+    padding: 8px 0;
+    border: none;
+    border-radius: 0;
+    background-color: transparent;
+    color: #111111;
+    text-align: left;
+}
+
+.client-card{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}

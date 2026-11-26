@@ -1,6 +1,7 @@
+import { authenticatedFetch } from './authenticatedFetch';
 const apiUrl = import.meta.env.VITE_API_URL;
 export async function getTags(){
-    const response = await fetch(`${apiUrl}/tags`,{
+    const response = await authenticatedFetch(`${apiUrl}/tags`,{
         method: 'GET',
         headers: {'Content-Type': "application/json"},
     })
@@ -16,7 +17,7 @@ export async function getTags(){
 }
 
 export async function createTags(payload){
-    const response = await fetch(`${apiUrl}/tags`,{
+    const response = await authenticatedFetch(`${apiUrl}/tags`,{
         method: 'POST',
         headers: {'Content-Type': "application/json"},
         body: JSON.stringify(payload),
@@ -33,7 +34,7 @@ export async function createTags(payload){
 }
 
 export async function editTags(payload,id){
-    const response = await fetch(`${apiUrl}/tags/${id}`,{
+    const response = await authenticatedFetch(`${apiUrl}/tags/${id}`,{
         method: 'PATCH',
         headers: {'Content-Type': "application/json"},
         body: JSON.stringify(payload),
@@ -50,7 +51,7 @@ export async function editTags(payload,id){
 }
 
 export async function deleteTags(id){
-    const response = await fetch(`${apiUrl}/tags/${id}`,{
+    const response = await authenticatedFetch(`${apiUrl}/tags/${id}`,{
         method: 'DELETE',
         headers: {'Content-Type': "application/json"},
     })

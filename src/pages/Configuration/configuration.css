@@ -58,6 +58,62 @@ main {
   align-items: center;
 }
 
+.audit-log-card {
+  width: 55%;
+  padding: 24px 30px;
+  background: #fdfcfc;
+  border: 1px solid rgba(25, 20, 68, 0.08);
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(25, 20, 68, 0.05);
+}
+
+.audit-log-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  color: #191444;
+}
+
+.audit-log-header button {
+  padding: 8px 14px;
+  border: 0;
+  border-radius: 8px;
+  background: #191444;
+  color: white;
+  cursor: pointer;
+}
+
+.audit-log-header button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.audit-log-list {
+  display: grid;
+  gap: 10px;
+  max-height: 360px;
+  overflow: auto;
+  margin-top: 16px;
+}
+
+.audit-log-entry {
+  display: grid;
+  grid-template-columns: minmax(100px, 0.8fr) 2fr auto;
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  border-radius: 10px;
+  background: #f5f4f8;
+  color: #191444;
+  font-size: 13px;
+}
+
+.audit-log-entry time {
+  color: #777171;
+  white-space: nowrap;
+}
+
 .config-search-wrapper {
   position: relative;
   width: min(100%, 420px);

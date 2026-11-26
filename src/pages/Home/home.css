@@ -126,6 +126,26 @@ button:hover {
     color: #f5ae47;
 }
 
+.table-card.occupied{
+    border: 4px solid #191444;
+    background-color: #191444;
+    color: white;
+}
+
+.table-card.occupied #p-table-status{
+    color: #f5ae47;
+}
+
+.table-card.free{
+    border: 4px solid #87b3f2;
+    background-color: transparent;
+    color: #191444;
+}
+
+.table-card.free #p-table-status{
+    color: #191444;
+}
+
 .form-modal-table{
     display: flex;
     flex-direction: column;

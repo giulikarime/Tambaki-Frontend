@@ -1,6 +1,7 @@
+import { authenticatedFetch } from './authenticatedFetch';
 const apiUrl = import.meta.env.VITE_API_URL;
 export async function getNotifications() {
-    const response = await fetch(`${apiUrl}/notifications`, {
+    const response = await authenticatedFetch(`${apiUrl}/notifications`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
     });

@@ -1,6 +1,7 @@
 import { House, Utensils, HandCoins, PackageOpen, UserCheck, Store } from "lucide-react"
 import { useLocation, useNavigate } from 'react-router-dom'
 import './sidebar.css'
+import { canViewPath } from '../../utils/access'
 
 function Sidebar({ expanded, hasInteracted }) {
 
@@ -24,7 +25,7 @@ function Sidebar({ expanded, hasInteracted }) {
     return (
         <div id="sidebar" className={`sidebar ${hasInteracted ? 'animate' : ''} ${expanded ? 'expanded' : ''}`}>
             <div id="sidebar-menu">
-                {menuItems.map(({icon: Icon, label, url},id) => {
+                {menuItems.filter(({ url }) => canViewPath(url)).map(({icon: Icon, label, url},id) => {
                     const isActive = location.pathname === url;
                     
                     return(

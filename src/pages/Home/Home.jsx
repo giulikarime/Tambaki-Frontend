@@ -4,6 +4,7 @@ import './home.css'
 import Header from "../../components/HeaderAndSidebar/Header"
 import Sidebar from "../../components/HeaderAndSidebar/Sidebar";
 import { getTables, createTable, updateTable, deleteTable } from "../../services/tables";
+import { canEditResource } from "../../utils/access";
 import { getOrders } from "../../services/orders";
 import { getReservations } from "../../services/reserves";
 import { useNavigate } from "react-router-dom";
@@ -12,9 +13,12 @@ import { getLoggedUser } from "../../services/auth";
 import AlertModals from '../../components/SucessModals/AlertModals';
 
 function Home() {
+    const canEditHome = canEditResource('home');
     const [tablesList,setTablesList] = useState([]);
+    const [isLoadingTables, setIsLoadingTables] = useState(true);
     const [orderList, setOrderList]  = useState([]);
     const [bookTableList, setBookTableList]  = useState([]);
+    const [isLoadingOrders, setIsLoadingOrders] = useState(true);
     const [expanded, setExpand] = useState(false);
     const [hasInteracted, setHasInteracted] = useState(false);
     const orderSize = String(orderList.length).padStart(2, "0");
@@ -90,11 +94,14 @@ function Home() {
     }
 
     async function refreshTables(){
+        setIsLoadingTables(true);
         try{
             const tables = await getTables();
-            setTablesList(tables);
+            setTablesList([...tables].sort((a, b) => Number(a.table_number) - Number(b.table_number)));
         } catch (error){
             console.error("Erro ao carregar mesas: ",error.message);
+        } finally {
+            setIsLoadingTables(false);
         }
     }
 
@@ -105,12 +112,16 @@ function Home() {
     useEffect(()=>{
         async function loadOrders(){
             try{
-                const orders = await getOrders();
-                const reserves = await getReservations();
+                const [orders, reserves] = await Promise.all([
+                    getOrders(),
+                    getReservations(),
+                ]);
                 setBookTableList(reserves);
                 setOrderList(orders);
             } catch(error){
                 console.error("Erro ao carregar comandas: ",error.message);
+            } finally {
+                setIsLoadingOrders(false);
             }
         }
 
@@ -220,31 +231,48 @@ function Home() {
                 <Sidebar expanded={expanded} hasInteracted={hasInteracted} />
                 <div id="principal-menu">
                     <div id="btn-group">
-                        <button onClick={()=>redirect('/order_ticket')} style={{ backgroundColor: '#3c57afff', color: 'white' }} className="principal-btn">
+                        {canEditHome && <button onClick={()=>redirect('/order_ticket')} style={{ backgroundColor: '#3c57afff', color: 'white' }} className="principal-btn">
                             <Plus color="white" style={{backgroundColor:'#6f7dc6',borderRadius:'10px'}} size={40}></Plus>
                             <h2>Abrir Comanda</h2>
                             <p>Selecione a mesa e os itens do cardápio para abrir uma comanda.</p>
-                        </button>
-                        <button onClick={()=>redirect('/open_all_tickets')} style={{ backgroundColor: '#f3b45c', color: 'black'}} className="principal-btn">
+                        </button>}
+                        {canEditHome && <button onClick={()=>redirect('/open_all_tickets')} style={{ backgroundColor: '#f3b45c', color: 'black'}} className="principal-btn">
                             <CalendarFold color="black" size={50} style={{backgroundColor:'#dda761', borderRadius:'16px', padding:'8px'}}></CalendarFold>
                             <h2>Comandas e Reservas Abertas</h2>
-                            {orderList.length === 0 && bookTableList.length === 0 ? (
+                            {isLoadingOrders ? (
+                                <p>Carregando comandas e reservas...</p>
+                            ) : orderList.length === 0 && bookTableList.length === 0 ? (
                                 <p>Nenhuma comanda ou reserva aberta.</p>
                             ) : (
                                 <p>{orderSize} comandas abertas e {bookSize} reservas agendadas.</p>
                             )}
-                        </button>
-                        <button onClick={()=>redirect('/book_table')} style={{ backgroundColor: '#7eb5f8', color: 'black' }} className="principal-btn">
+                        </button>}
+                        {canEditHome && <button onClick={()=>redirect('/book_table')} style={{ backgroundColor: '#7eb5f8', color: 'black' }} className="principal-btn">
                             <ClipboardCheck color="black" size={30} style={{backgroundColor:'#a4c8fd', borderRadius:'16px', padding:'8px'}}></ClipboardCheck>
                             <h2>Reservar Mesa</h2>
                             <p>Reservar uma mesa para um cliente.</p>
-                        </button>
+                        </button>}
+                        {!canEditHome && (
+                            <div className="principal-btn" style={{ backgroundColor: '#f3b45c', color: 'black' }}>
+                                <CalendarFold color="black" size={50} style={{backgroundColor:'#dda761', borderRadius:'16px', padding:'8px'}}></CalendarFold>
+                                <h2>Comandas e Reservas Abertas</h2>
+                                {isLoadingOrders ? (
+                                    <p>Carregando comandas e reservas...</p>
+                                ) : orderList.length === 0 && bookTableList.length === 0 ? (
+                                    <p>Nenhuma comanda ou reserva aberta.</p>
+                                ) : (
+                                    <p>{orderSize} comandas abertas e {bookSize} reservas agendadas.</p>
+                                )}
+                            </div>
+                        )}
                     </div>
                     <div id="tables-group">
-                        <button onClick={()=>setCreateTableModalIsOpen(true)} style={{fontSize:20,display:'flex',alignItems:'center',gap:5}}>
-                            <b>Mesas da unidade</b>
-                            <Plus size={26}></Plus>
-                        </button>
+                        {canEditHome ? (
+                            <button onClick={()=>setCreateTableModalIsOpen(true)} style={{fontSize:20,display:'flex',alignItems:'center',gap:5}}>
+                                <b>Mesas da unidade</b>
+                                <Plus size={26}></Plus>
+                            </button>
+                        ) : <h2>Mesas da unidade</h2>}
                         <div
                             id="tables-list"
                             ref={tablesListRef}
@@ -253,31 +281,42 @@ function Home() {
                             onMouseUp={handleMouseLeaveOrUp}
                             onMouseMove={handleMouseMove}
                         >
-                            {tablesList.length === 0 ? (
+                            {isLoadingTables ? (
+                                <p>Carregando mesas...</p>
+                            ) : tablesList.length === 0 ? (
                                 <div>
                                     <p>Nenhuma mesa foi criada.</p>
                                 </div>
                             ) : (
-                                tablesList.map((table)=>(
-                                    <button 
-                                        onClick={()=>{
-                                            setSelectedTable(table);
-                                            setEditTableModalIsOpen(true);
-                                            setEditTableStatus(false);
-                                            setFormError("");
-                                        }} 
-                                        key={table.id} 
-                                        className={`table-card ${table.table_number % 2 === 0 ? 'blue' : 'orange'}`}
-                                    >
-                                        <p><b>{String(table.table_number).padStart(2,"0")}</b></p>
-                                        <p id="p-table-status"><b>{table.status}</b></p>
-                                    </button>
-                                ))
+                                tablesList.map((table)=>{
+                                    const statusClass = table.status === "Reservado" || table.status === "Ocupado"
+                                        ? "occupied"
+                                        : table.status === "Livre"
+                                            ? "free"
+                                            : (table.table_number % 2 === 0 ? "blue" : "orange");
+                                    const tableStatus = table.status === "Reservado" ? "Ocupado" : table.status;
+
+                                    return (
+                                        <button 
+                                            onClick={()=>{
+                                                setSelectedTable(table);
+                                                setEditTableModalIsOpen(true);
+                                                setEditTableStatus(false);
+                                                setFormError("");
+                                            }} 
+                                            key={table.id} 
+                                            className={`table-card ${statusClass}`}
+                                        >
+                                            <p><b>{String(table.table_number).padStart(2,"0")}</b></p>
+                                            <p id="p-table-status"><b>{tableStatus}</b></p>
+                                        </button>
+                                    );
+                                })
                             )}
                         </div>
                     </div>
                     <Modal
-                        isOpen={createTableModalIsOpen}
+                        isOpen={canEditHome && createTableModalIsOpen}
                         onRequestClose={() => setCreateTableModalIsOpen(false)}
                         contentLabel="Criar Nova Mesa"
                         shouldCloseOnOverlayClick={true}
@@ -309,17 +348,17 @@ function Home() {
                         {editTableStatus ? (
                                 <div className="edit-table-field">
                                     <h2>Edite Mesa {selectedTable?.table_number}</h2>
-                                    <button onClick={()=>setEditTableStatus(!editTableStatus)}>Desabilitar Edição<SquarePen></SquarePen></button>
+                                    {canEditHome && <button onClick={()=>setEditTableStatus(!editTableStatus)}>Desabilitar Edição<SquarePen></SquarePen></button>}
                                     <button onClick={()=> setEditTableModalIsOpen(false)} style={{fontSize:'30px'}}>&times;</button>
                                 </div>
                             ) : (
                                 <div className="edit-table-field">
                                     <h2>Mesa {selectedTable?.table_number}</h2>
-                                    <button onClick={()=>setEditTableStatus(!editTableStatus)}>Habilitar Edição<SquarePen></SquarePen></button>
+                                    {canEditHome && <button onClick={()=>setEditTableStatus(!editTableStatus)}>Habilitar Edição<SquarePen></SquarePen></button>}
                                     <button onClick={()=> setEditTableModalIsOpen(false)} style={{fontSize:'30px'}}>&times;</button>
                                 </div>
                         )}
-                        <form className="form-modal-table" onSubmit={handleUpdateTable}>
+                        <form className="form-modal-table" onSubmit={canEditHome ? handleUpdateTable : (event) => event.preventDefault()}>
                             {editTableStatus ? (
                             <div className="container-fields">
                                 <div className='fields'>
@@ -331,8 +370,12 @@ function Home() {
                                     <input className="input-modal-table" type="number" name="table_max" defaultValue={selectedTable?.capacity} required />
                                 </div>
                                 <div className="delete-modal-table">
-                                    <button className='btn-modal-table' type='submit'>Salvar</button>
-                                    <button className='delete-btn-modal-table' type='button' onClick={handleDeleteTable}><Trash2></Trash2></button>
+                                    {canEditHome && (
+                                        <>
+                                        <button className='btn-modal-table' type='submit'>Salvar</button>
+                                        <button className='delete-btn-modal-table' type='button' onClick={handleDeleteTable}><Trash2></Trash2></button>
+                                        </>
+                                    )}
                                 </div>
                             </div>
                             ) : (

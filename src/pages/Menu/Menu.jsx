@@ -16,6 +16,7 @@ import { getProductEnums } from "../../services/products";
 import { getLoggedUser } from "../../services/auth";
 import MenuCard from "../../components/MenuCard/MenuCard";
 import { uploadFile } from "../../services/upload";
+import { canEditResource } from "../../utils/access";
 
 function ColorPicker({ name, defaultValue }) {
     return (
@@ -41,6 +42,7 @@ function ColorPicker({ name, defaultValue }) {
 }
 
 function Menu() {
+    const canEditMenu = canEditResource('menu');
     const navigate = useNavigate();
     const [formError, setFormError] = useState('');
     const [formSuccess, setFormSuccess] = useState('');
@@ -50,6 +52,7 @@ function Menu() {
     const user = getLoggedUser();
 
     const [menu, setMenu] = useState([]);
+    const [isLoadingMenu, setIsLoadingMenu] = useState(true);
 
     const [itensEnums, setItensEnums] = useState({
         allergens: [],
@@ -66,6 +69,7 @@ function Menu() {
     });
 
     const [tags, setTags] = useState([]);
+    const [isLoadingTags, setIsLoadingTags] = useState(true);
     const [tagsModalIsOpen, setTagsModalIsOpen] = useState(false);
     const [editTagsModalIsOpen, setEditTagsModalIsOpen] = useState(false);
     const [selectedTag, setSelectedTag] = useState(null);
@@ -192,11 +196,14 @@ function Menu() {
     ]
 
     async function get_menus() {
+        setIsLoadingMenu(true);
         try {
             const menu_value = await getMenu();
             setMenu(menu_value);
         } catch (error) {
             console.error("Não foi possível carregar os pratos.", error);
+        } finally {
+            setIsLoadingMenu(false);
         }
     }
 
@@ -229,11 +236,14 @@ function Menu() {
     }, []);
 
     async function get_tags() {
+        setIsLoadingTags(true);
         try {
             const tags_ = await getTags();
             setTags(tags_);
         } catch (error) {
             console.error("Erro ao carregar dados das etiquetas.", error);
+        } finally {
+            setIsLoadingTags(false);
         }
     }
 
@@ -634,19 +644,23 @@ function Menu() {
                                 <h1>Cardápio</h1>
                             </div>
                             <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 15 }}>
-                                <button onClick={() => setAddMenuModalIsOpen(!addMenuModalIsOpen)} className='btn-plus-item menu'>Adicionar Prato<Plus /></button>
-                                <button onClick={() => setTagsModalIsOpen(!tagsModalIsOpen)} className="btn-stock-base">Etiquetas</button>
+                                {canEditMenu && <button onClick={() => setAddMenuModalIsOpen(!addMenuModalIsOpen)} className='btn-plus-item menu'>Adicionar Prato<Plus /></button>}
+                                {canEditMenu && <button onClick={() => setTagsModalIsOpen(!tagsModalIsOpen)} className="btn-stock-base">Etiquetas</button>}
                                 <button
                                     onClick={() => setFilterProductModalIsOpen(!filterProductModalIsOpen)}
                                     id='btn-funnel-base'
                                     className="btn-stock-base">Filtrar <Funnel size={20} /></button>
                             </div>
                         </div>
-                        <p style={{ color: '#777171ff' }}>Visualize e edite seu cardápio.</p>
+                        <p style={{ color: '#777171ff' }}>
+                            {canEditMenu ? 'Visualize e edite seu cardápio.' : 'Visualize seu cardápio.'}
+                        </p>
                     </div>
                     {/* Correção do espaçamento excessivo alterando justifyContent para flex-start com gap controlado */}
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '24px', marginTop: '20px', justifyContent: 'flex-start' }}>
-                        {filteredMenu.length <= 0 ? (
+                        {isLoadingMenu ? (
+                            <p>Carregando itens do cardápio...</p>
+                        ) : filteredMenu.length <= 0 ? (
                             <p>Nenhum prato encontrado com os filtros selecionados.</p>
                         ) : (
                             filteredMenu.map((item, i) => (
@@ -673,7 +687,7 @@ function Menu() {
 
                 {/* Modal de Adicionar Prato */}
                 <Modal
-                    isOpen={addMenuModalIsOpen}
+                    isOpen={canEditMenu && addMenuModalIsOpen}
                     onRequestClose={() => {
                         setAddMenuModalIsOpen(false);
                         emptyPreviewBeforeSaving();
@@ -843,7 +857,9 @@ function Menu() {
 
                                             {addTagsToListModal && (
                                                 <ul className="add-allergen-select">
-                                                    {tags.length <= 0 ? (
+                                                    {isLoadingTags ? (
+                                                        <li>Carregando etiquetas...</li>
+                                                    ) : tags.length <= 0 ? (
                                                         <li>Ainda não existem etiquetas</li>
                                                     ) : 
                                                         tags.map((tag, i) => (
@@ -908,13 +924,13 @@ function Menu() {
                                     }}>
                                     <div className="group-one-top-container" style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
                                         <h2>{selectedMenu?.name}</h2>
-                                        <button 
+                                        {canEditMenu && <button
                                             type="button"
                                             style={{display:'flex',flexDirection:'row',alignItems:'center',gap:'10px',fontSize:'18px'}} 
                                             onClick={() => setEditMenuStatus(!editMenuStatus)}
                                         >
                                             {text_enable_edit} <SquarePen />
-                                        </button>
+                                        </button>}
                                         <div style={{display: 'flex', gap: '15px', alignItems: 'center'}}>
                                             <button
                                                 onClick={() => {
@@ -934,7 +950,7 @@ function Menu() {
                                         addAllergensToListModal ? setAddAllergensToListModal(false) : ('');
                                         addTagsToListModal ? setAddTagsToListModal(false) : ('');
                                     }}
-                                    onSubmit={handleEditMenu}
+                                    onSubmit={canEditMenu ? handleEditMenu : (event) => event.preventDefault()}
                                 >
                                     <div className="container-add-img">
                                         <div
@@ -1112,7 +1128,9 @@ function Menu() {
 
                                                             {addTagsToListModal && editMenuStatus && (
                                                                 <ul className="add-allergen-select">
-                                                                    {tags.length <= 0 ? (
+                                                                    {isLoadingTags ? (
+                                                                        <p>Carregando etiquetas...</p>
+                                                                    ) : tags.length <= 0 ? (
                                                                         <li>Ainda não existem etiquetas</li>
                                                                     ) : 
                                                                         tags.map((tag, i) => (
@@ -1160,7 +1178,7 @@ function Menu() {
 
                 {/* Modal de Gerenciar Etiquetas */}
                 <Modal
-                    isOpen={tagsModalIsOpen}
+                    isOpen={canEditMenu && tagsModalIsOpen}
                     onRequestClose={() => {
                         setTagsModalIsOpen(false);
                     }}

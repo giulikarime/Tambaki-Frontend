@@ -1,6 +1,7 @@
+import { authenticatedFetch } from './authenticatedFetch';
 const apiUrl = import.meta.env.VITE_API_URL;
 export async function getMenu() {
-    const response = await fetch(`${apiUrl}/menu`, {
+    const response = await authenticatedFetch(`${apiUrl}/menu`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
     });
@@ -15,7 +16,7 @@ export async function getMenu() {
 }
 
 export async function createMenu(payload) {
-    const response = await fetch(`${apiUrl}/menu`, {
+    const response = await authenticatedFetch(`${apiUrl}/menu`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
@@ -31,7 +32,7 @@ export async function createMenu(payload) {
 }
 
 export async function editMenu(payload,id) {
-    const response = await fetch(`${apiUrl}/menu/${id}`, {
+    const response = await authenticatedFetch(`${apiUrl}/menu/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
@@ -47,7 +48,7 @@ export async function editMenu(payload,id) {
 }
 
 export async function deleteMenu(id) {
-    const response = await fetch(`${apiUrl}/menu/${id}`, {
+    const response = await authenticatedFetch(`${apiUrl}/menu/${id}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
     });
@@ -62,7 +63,7 @@ export async function deleteMenu(id) {
 }
 
 export async function getMenuEnums() {
-    const response = await fetch(`${apiUrl}/menu/enum`);
+    const response = await authenticatedFetch(`${apiUrl}/menu/enum`);
     if (!response.ok) throw new Error('Erro ao buscar enums de produto');
     return response.json();
 }

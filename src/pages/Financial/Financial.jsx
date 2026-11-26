@@ -9,12 +9,29 @@ import Costs from "../../components/Costs/Costs";
 import ClientsCosts from "../../components/ClientsCosts/ClientsCosts";
 import ProfitPoint from "../../components/ProfitPoint/ProfitPoint";
 import Modal from 'react-modal'
-import { getCosts, getCostsEnums, createCosts, editCosts } from '../../services/costs'
+import { getCosts, getCostsEnums, getFinancialProducts, createCosts, editCosts, deleteCosts } from '../../services/costs'
+import { getOrders } from '../../services/orders';
+import { getMenu } from '../../services/menu';
 import AlertModals from "../../components/SucessModals/AlertModals";
+import {
+    calcularTendenciaMensal,
+    formatCompactCurrency,
+    somarCustosFixosEVariaveis,
+} from "../../utils/costsUtils";
+import {
+    calcularFaturamento,
+    calcularLucro,
+    calcularPontoDeEquilibrioDias,
+    somarCustoProdutos,
+} from "../../utils/profitUtils";
+import { calcularMaiorCategoriaClientes } from "../../utils/clientsCostsUtils";
+import { calcularTendenciaCmvMensal } from "../../utils/cmvUtils";
+import { canEditResource, getAccessLevel } from "../../utils/access";
 
 function Financial(){
 
     const navigate = useNavigate();
+    const canEditCosts = canEditResource('costs');
     const [expanded, setExpand] = useState(false);
     const [hasInteracted, setHasInteracted] = useState(false);
 
@@ -28,11 +45,124 @@ function Financial(){
     const month = new Date().toLocaleString('pt-BR', { month: 'long' });
     const year = presentDate.getFullYear();
 
+    const [myCosts,setMyCosts] = useState([]);
+    const [myOrders, setMyOrders] = useState([]);
+    const [myProducts, setMyProducts] = useState([]);
+    const [myMenu, setMyMenu] = useState([]);
+    const [loadingCosts, setLoadingCosts] = useState(true);
+    const [loadingOrders, setLoadingOrders] = useState(true);
+    const [loadingProducts, setLoadingProducts] = useState(true);
+    const [costsLoaded, setCostsLoaded] = useState(false);
+    const [ordersLoaded, setOrdersLoaded] = useState(false);
+    const [productsLoaded, setProductsLoaded] = useState(false);
+    const [selectedCost,setSelectedCost] = useState('');
+
+    async function handleGetCosts() {
+        setLoadingCosts(true);
+        try {
+            const cost_value = await getCosts();
+            setMyCosts(Array.isArray(cost_value) ? cost_value : []);
+            setCostsLoaded(true);
+        } catch (error) {
+            console.error("Não foi possível carregar os custos.", error);
+        } finally {
+            setLoadingCosts(false);
+        }
+    }
+
+    async function handleGetOrdersAndProducts() {
+        setLoadingOrders(true);
+        setLoadingProducts(true);
+
+        const [ordersRes, productsRes, menuRes] = await Promise.allSettled([
+            getOrders(),
+            getFinancialProducts(),
+            getAccessLevel() === 'Master' ? getMenu() : Promise.resolve([]),
+        ]);
+
+        if (ordersRes.status === 'fulfilled') {
+            setMyOrders(Array.isArray(ordersRes.value) ? ordersRes.value : []);
+            setOrdersLoaded(true);
+        } else {
+            console.error("Não foi possível carregar as comandas.", ordersRes.reason);
+        }
+        setLoadingOrders(false);
+
+        if (productsRes.status === 'fulfilled') {
+            setMyProducts(Array.isArray(productsRes.value) ? productsRes.value : []);
+            setProductsLoaded(true);
+        } else {
+            console.error("Não foi possível carregar os produtos.", productsRes.reason);
+        }
+        setLoadingProducts(false);
+
+        if (menuRes.status === 'fulfilled') {
+            setMyMenu(Array.isArray(menuRes.value) ? menuRes.value : []);
+        } else {
+            console.error("Não foi possível carregar o cardápio.", menuRes.reason);
+        }
+    }
+
+    const totalCombinedCosts = somarCustosFixosEVariaveis(myCosts);
+    const combinedCostsTrend = calcularTendenciaMensal(myCosts);
+    const totalRevenue = calcularFaturamento(myOrders);
+    const totalProductCost = somarCustoProdutos(myProducts);
+    const cmvTrend = calcularTendenciaCmvMensal(myProducts);
+    const totalProfit = calcularLucro(totalRevenue, totalCombinedCosts);
+    const breakEvenDays = calcularPontoDeEquilibrioDias({
+        faturamento: totalRevenue,
+        cmv: totalProductCost,
+        costs: myCosts,
+    });
+    const topCategoryInfo = calcularMaiorCategoriaClientes(myOrders, myMenu);
+
+    const profitSubtitle = loadingOrders
+        ? 'Carregando dados...'
+        : !ordersLoaded
+            ? 'Indisponível no momento'
+            : breakEvenDays === null
+                ? 'Sem vendas suficientes'
+                : breakEvenDays === 0
+                    ? 'Sem custos fixos'
+                    : `Equilíbrio em ${breakEvenDays} ${breakEvenDays === 1 ? 'dia' : 'dias'}`;
+
     const cardsData = [
-        {label: 'Custo de Mercadoria Vendida', value: 'R$ 38,2 k', subtitle: '4% vs. mês anterior', button: false, id: 'yellow', selected: 'CMV', action: ()=>setAddCMVModalIsOpen(!addCMVModalIsOpen)},
-        {label: 'Custos Fixos e Variáveis', value: 'R$ 21,6 k', subtitle: '2% vs. mês anterior', button: true, id: 'orange', selected: 'Custos', action: ()=>setAddCostModalIsOpen(!addCostModalIsOpen)},
-        {label: 'Lucro e Ponto de Equilíbrio', value: 'R$ 17,9 k', subtitle: 'Equilíbrio em 18 dias', button: true, id: 'blue', selected: 'Lucro', action: ()=>setAddProfitPointModalIsOpen(!addProfitPointModalIsOpen)},
-        {label: 'Maiores Gastos dos Clientes', value: 'Rodízio', subtitle: '42% do faturamento', button: false, id: 'dark-blue', selected: 'Clientes', action: ()=>setAddClientCostModalIsOpen(!addClientCostModalIsOpen)}
+        {
+            label: 'Custo de Mercadoria Vendida',
+            value: loadingProducts ? '...' : productsLoaded ? formatCompactCurrency(totalProductCost) : '--',
+            subtitle: loadingProducts ? 'Carregando dados...' : productsLoaded ? `${cmvTrend.percentChange}% vs. mês anterior` : 'Indisponível no momento',
+            button: false,
+            id: 'yellow',
+            selected: 'CMV',
+            action: ()=>setAddCMVModalIsOpen(!addCMVModalIsOpen),
+        },
+        {
+            label: 'Custos Fixos e Variáveis',
+            value: loadingCosts ? '...' : costsLoaded ? formatCompactCurrency(totalCombinedCosts) : '--',
+            subtitle: loadingCosts ? 'Carregando dados...' : costsLoaded ? `${combinedCostsTrend.percentChange}% vs. mês anterior` : 'Indisponível no momento',
+            button: true,
+            id: 'orange',
+            selected: 'Custos',
+            action: ()=>setAddCostModalIsOpen(!addCostModalIsOpen),
+        },
+        {
+            label: 'Lucro e Ponto de Equilíbrio',
+            value: (loadingOrders || loadingCosts) ? '...' : (ordersLoaded && costsLoaded) ? formatCompactCurrency(totalProfit) : '--',
+            subtitle: profitSubtitle,
+            button: true,
+            id: 'blue',
+            selected: 'Lucro',
+            action: ()=>setAddProfitPointModalIsOpen(!addProfitPointModalIsOpen),
+        },
+        {
+            label: 'Maiores Gastos dos Clientes',
+            value: loadingOrders ? '...' : ordersLoaded ? topCategoryInfo.categoryLabel : '--',
+            subtitle: loadingOrders ? 'Carregando dados...' : ordersLoaded ? `${topCategoryInfo.percentage}% do faturamento` : 'Indisponível no momento',
+            button: false,
+            id: 'dark-blue',
+            selected: 'Clientes',
+            action: ()=>setAddClientCostModalIsOpen(!addClientCostModalIsOpen),
+        }
     ];
 
     const costsLabelData = [
@@ -47,20 +177,9 @@ function Financial(){
         costType: []
     });
 
-    const [myCosts,setMyCosts] = useState([]);
-    const [selectedCost,setSelectedCost] = useState('');
-
-    async function handleGetCosts() {
-        try {
-            const cost_value = await getCosts();
-            setMyCosts(cost_value);
-        } catch (error) {
-            console.error("Não foi possível carregar os custos.", error);
-        }
-    }
-
     useEffect(()=>{
         handleGetCosts();
+        handleGetOrdersAndProducts();
     },[])
 
     useEffect(() => {
@@ -100,6 +219,7 @@ function Financial(){
 
         try {
             await createCosts(payload);
+            await handleGetCosts();
             setAddCostModalIsOpen(false);
             event.target.reset();
             setFormSuccess("Custo criado com sucesso!");
@@ -200,6 +320,7 @@ function Financial(){
                             </div>
                             <div className="groups-top-container">
                                 <button
+                                    onClick={()=>setSelectedCard('Lucro')}
                                     className="btn-stock-base">Gerenciar Custos e Lucro
                                 </button>
                                 <button
@@ -221,7 +342,7 @@ function Financial(){
                                 <h2>{card.label}</h2>
                                 <div className="card-value-container">
                                     <p className="subtitle-card">{card.value}</p>
-                                    {card.button ? <button
+                                    {card.button && canEditCosts ? <button
                                                     type="button"
                                                      className="btn-add-card-value"
                                                      onClick={(e)=>{
@@ -235,12 +356,12 @@ function Financial(){
                         ))}
                     </div>
                     <div>
-                        {selectCard === 'CMV' ? (<CMV/>) : selectCard === 'Custos' ? (<Costs/>) : selectCard === 'Lucro' ? (<ProfitPoint/>) : selectCard === 'Clientes' ? (<ClientsCosts/>) : null}
+                        {selectCard === 'CMV' ? (<CMV products={myProducts} orders={myOrders} loading={loadingProducts || loadingOrders} />) : selectCard === 'Custos' ? (<Costs costs={myCosts} loading={loadingCosts} />) : selectCard === 'Lucro' ? (<ProfitPoint orders={myOrders} costs={myCosts} products={myProducts} loading={loadingCosts || loadingOrders} />) : selectCard === 'Clientes' ? (<ClientsCosts orders={myOrders} menu={myMenu} products={myProducts} loading={loadingOrders} />) : null}
                     </div>
                 </div>
 
                 <Modal
-                    isOpen={addCostModalIsOpen}
+                    isOpen={canEditCosts && addCostModalIsOpen}
                     shouldCloseOnOverlayClick={true}
                     onRequestClose={()=>setAddCostModalIsOpen(!addCostModalIsOpen)}
                     contentLabel="Adicionar custo"

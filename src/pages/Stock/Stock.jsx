@@ -27,6 +27,7 @@ function Stock() {
 
     // ===================== Dados principais (produtos e relacionados) =====================
     const [products, setProducts] = useState([]);
+    const [isLoadingProducts, setIsLoadingProducts] = useState(true);
     const [suppliers, setSuppliers] = useState([]);
 
     const [selectAllergensForProducts,setSelectAllergensForProducts] = useState([]);
@@ -365,11 +366,14 @@ function Stock() {
 
     // ===================== Busca de dados no backend =====================
     async function get_products() {
+        setIsLoadingProducts(true);
         try {
             const products_db = await getProducts();
             setProducts(products_db);
         } catch (error) {
             console.error("Produtos não encontrados no sistema.", error);
+        } finally {
+            setIsLoadingProducts(false);
         }
     }
 
@@ -712,7 +716,9 @@ function Stock() {
                         ))}
                     </div>
                     <div id="products-list">
-                            {filteredProducts.length !== 0 ? (
+                            {isLoadingProducts ? (
+                                <p>Carregando produtos...</p>
+                            ) : filteredProducts.length !== 0 ? (
                                 filteredProducts.map((item) => (
                                     <ProductCard
                                         key={item.id}

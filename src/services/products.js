@@ -1,6 +1,7 @@
+import { authenticatedFetch } from './authenticatedFetch';
 const apiUrl = import.meta.env.VITE_API_URL;
 export async function getProducts() {
-    const response = await fetch(`${apiUrl}/products`, {
+    const response = await authenticatedFetch(`${apiUrl}/products`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
     });
@@ -15,13 +16,13 @@ export async function getProducts() {
 }
 
 export async function getProductEnums() {
-    const response = await fetch(`${apiUrl}/products/enums`);
+    const response = await authenticatedFetch(`${apiUrl}/products/enums`);
     if (!response.ok) throw new Error('Erro ao buscar enums de produto');
     return response.json();
 }
 
 export async function createProducts(payload) {
-    const response = await fetch(`${apiUrl}/products`, {
+    const response = await authenticatedFetch(`${apiUrl}/products`, {
         method: 'POST',
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -37,7 +38,7 @@ export async function createProducts(payload) {
 }
 
 export async function editProducts(id, payload) {
-    const response = await fetch(`${apiUrl}/products/${id}`, {
+    const response = await authenticatedFetch(`${apiUrl}/products/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -53,7 +54,7 @@ export async function editProducts(id, payload) {
 }
 
 export async function deleteProducts(id) {
-    const response = await fetch(`${apiUrl}/products/${id}`, {
+    const response = await authenticatedFetch(`${apiUrl}/products/${id}`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' }
     })
@@ -68,7 +69,7 @@ export async function deleteProducts(id) {
 }
 
 export async function writeOffProducts(id, new_stock_quantity) {
-    const response = await fetch(`${apiUrl}/products/${id}/write-off`, {
+    const response = await authenticatedFetch(`${apiUrl}/products/${id}/write-off`, {
         method: 'PATCH', // método correto
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ quantity: new_stock_quantity }) // objeto com chave

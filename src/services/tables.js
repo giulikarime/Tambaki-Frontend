@@ -1,6 +1,7 @@
+import { authenticatedFetch } from './authenticatedFetch';
 const apiUrl = import.meta.env.VITE_API_URL;
 export async function getTables() {
-    const response = await fetch(`${apiUrl}/tables`, {
+    const response = await authenticatedFetch(`${apiUrl}/tables`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
     });
@@ -15,7 +16,7 @@ export async function getTables() {
 }
 
 export async function createTable(payload) {
-    const response = await fetch(`${apiUrl}/tables`, {
+    const response = await authenticatedFetch(`${apiUrl}/tables`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -31,7 +32,7 @@ export async function createTable(payload) {
 }
 
 export async function updateTable(id, payload) {
-    const response = await fetch(`${apiUrl}/tables/${id}`, {
+    const response = await authenticatedFetch(`${apiUrl}/tables/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -47,7 +48,7 @@ export async function updateTable(id, payload) {
 }
 
 export async function deleteTable(id) {
-    const response = await fetch(`${apiUrl}/tables/${id}`, {
+    const response = await authenticatedFetch(`${apiUrl}/tables/${id}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
     });
