@@ -223,30 +223,12 @@ form{
   font-size: 1rem;
 }
 
-
-.name{
-background-color: #ffa000;
+.users-colors{
+background-color: #ffc13b;
+color: #2b2a2a;
 }
 
-.role{
-background-color: #ffb300;
-}
 
-.email-users{
-background-color: #ffd54f;
-}
-
-.phone-users{
-background-color: #ffe082;
-}
-
-.access_level{
-background-color: #ffecb3;
-}
-
-.info-users{
-background-color: #ffe0b2;
-}
 
 @media (max-width: 1200px){
     body:has(.container-users) header #group-one > button{

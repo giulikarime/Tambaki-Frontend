@@ -352,12 +352,12 @@ function UsersPage(){
                         <table className="table">
                             <thead className="thead-style tr-th-group">
                                 <tr>
-                                    <th className='name'>NOME</th>
-                                    <th className='role'>CARGO</th>
-                                    <th className='email-users'>EMAIL</th>
-                                    <th className='phone-users'>TELEFONE</th>
-                                    <th className='access_level'>NÍVEL DE ACESSO</th>
-                                    <th className='info-users'>INFORMAÇÕES</th>
+                                    <th className='users-colors'>NOME</th>
+                                    <th className='users-colors'>CARGO</th>
+                                    <th className='users-colors'>EMAIL</th>
+                                    <th className='users-colors'>TELEFONE</th>
+                                    <th className='users-colors'>NÍVEL DE ACESSO</th>
+                                    <th className='users-colors'>INFORMAÇÕES</th>
                                 </tr>
                             </thead>
                                 <tbody>

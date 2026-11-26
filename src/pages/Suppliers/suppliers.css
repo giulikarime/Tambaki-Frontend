@@ -111,36 +111,11 @@ li button{
     font-size: 15px;
 }
 
-
-.entreprise{
-    background-color: #1a3573;
-    color: white;
-}
-
-.category{
+.suppliers-colors{
     background-color: #264a9f;
     color: white;
 }
 
-.deadline{
-    background-color: #3b74fa;
-    color: white;
-}
-
-.phone{
-    background-color: #7ca6fc;
-    color: #203371;
-}
-
-.email{
-    background-color: #a1c0fc;
-    color: #2e479c;
-}
-
-.info{
-    background-color: #deeaff;
-    color: #203371;
-}
 
 .see-more-sup{
     background-color: #3a74fa;
