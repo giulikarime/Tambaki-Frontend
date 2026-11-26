@@ -258,21 +258,30 @@ function Home() {
                                     <p>Nenhuma mesa foi criada.</p>
                                 </div>
                             ) : (
-                                tablesList.map((table)=>(
-                                    <button 
-                                        onClick={()=>{
-                                            setSelectedTable(table);
-                                            setEditTableModalIsOpen(true);
-                                            setEditTableStatus(false);
-                                            setFormError("");
-                                        }} 
-                                        key={table.id} 
-                                        className={`table-card ${table.table_number % 2 === 0 ? 'blue' : 'orange'}`}
-                                    >
-                                        <p><b>{String(table.table_number).padStart(2,"0")}</b></p>
-                                        <p id="p-table-status"><b>{table.status}</b></p>
-                                    </button>
-                                ))
+                                tablesList.map((table)=>{
+                                    const statusClass = table.status === "Reservado" || table.status === "Ocupado"
+                                        ? "occupied"
+                                        : table.status === "Livre"
+                                            ? "free"
+                                            : (table.table_number % 2 === 0 ? "blue" : "orange");
+                                    const tableStatus = table.status === "Reservado" ? "Ocupado" : table.status;
+
+                                    return (
+                                        <button 
+                                            onClick={()=>{
+                                                setSelectedTable(table);
+                                                setEditTableModalIsOpen(true);
+                                                setEditTableStatus(false);
+                                                setFormError("");
+                                            }} 
+                                            key={table.id} 
+                                            className={`table-card ${statusClass}`}
+                                        >
+                                            <p><b>{String(table.table_number).padStart(2,"0")}</b></p>
+                                            <p id="p-table-status"><b>{tableStatus}</b></p>
+                                        </button>
+                                    );
+                                })
                             )}
                         </div>
                     </div>

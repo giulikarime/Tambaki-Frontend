@@ -5,6 +5,9 @@ import './open_all_tickets.css'
 import { ChevronLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { getTables } from "../../../services/tables";
+import { closeOrder, getOrders } from "../../../services/orders";
+import { getReservations } from "../../../services/reserves";
+import AlertModal from "../../../components/AlertModal";
 
 function OpenAllTickets(){
 
@@ -14,22 +17,88 @@ function OpenAllTickets(){
 
     const [tables,setTables] = useState([])
     const [selectedTable,setSelectedTable] = useState(null);
+    const [orders,setOrders] = useState([]);
+    const [reservations,setReservations] = useState([]);
+    const [alertPhrase,setAlertPhrase] = useState("");
+    const [alertType,setAlertType] = useState("success");
+    const [alertModalIsOpen,setAlertModalIsOpen] = useState(false);
+    const [selectedOrderId,setSelectedOrderId] = useState(null);
+    const [closingOrderId,setClosingOrderId] = useState(null);
 
-    const [clients,setClients] = useState([]);
+    function showAlert(phrase, type){
+        setAlertPhrase(phrase);
+        setAlertType(type);
+        setAlertModalIsOpen(true);
+    }
 
-    async function handleAllTables(){
+    async function loadOpenTickets(){
         try{
-            const tables = await getTables();
+            const [tables, orders, reservations] = await Promise.all([
+                getTables(),
+                getOrders(),
+                getReservations(),
+            ]);
             setTables(tables);
+            setOrders(orders);
+            setReservations(reservations);
         } catch(error){
-            console.error("Erro ao carregar mesas.");
-            return;
+            console.error("Erro ao carregar comandas, reservas e mesas:", error);
+            showAlert(error.message || "Erro ao carregar comandas e reservas.", "error");
         }
     }
 
     useEffect(()=>{
-        handleAllTables();
+        loadOpenTickets();
     },[])
+
+    const clients = selectedTable === null ? [] : [
+        ...orders
+            .filter((order) => order.tableId === selectedTable && order.status === "Aberta")
+            .map((order) => ({
+                id: `order-${order.id}`,
+                orderId: order.id,
+                name: order.nameClient,
+                type: "Comanda",
+            })),
+        ...reservations
+            .filter((reservation) => (
+                reservation.tableId === selectedTable &&
+                ["Pendente", "Confirmada"].includes(reservation.status)
+            ))
+            .map((reservation) => ({
+                id: `reservation-${reservation.id}`,
+                name: reservation.name,
+                type: "Reserva",
+            })),
+    ];
+
+    async function handleCloseOrder(orderId){
+        const orderToClose = orders.find((order) => order.id === orderId);
+        if (!orderToClose) return;
+
+        setClosingOrderId(orderId);
+        try {
+            await closeOrder(orderId);
+            const remainingOrders = orders.filter((order) => order.id !== orderId);
+            const hasOpenOrder = remainingOrders.some(
+                (order) => order.tableId === orderToClose.tableId && order.status === "Aberta"
+            );
+
+            setOrders(remainingOrders);
+            setTables((currentTables) => currentTables.map((table) => (
+                table.id === orderToClose.tableId
+                    ? { ...table, status: hasOpenOrder ? "Ocupado" : "Livre" }
+                    : table
+            )));
+            setSelectedOrderId(null);
+            showAlert("Comanda fechada com sucesso.", "success");
+        } catch (error) {
+            console.error("Erro ao fechar comanda:", error);
+            showAlert(error.message || "Erro ao fechar comanda.", "error");
+        } finally {
+            setClosingOrderId(null);
+        }
+    }
 
     return(
         <>
@@ -41,25 +110,28 @@ function OpenAllTickets(){
                         <div className="top-group-text">
                             <button onClick={()=>navigate(-1)} className="btn-back-base"><ChevronLeft></ChevronLeft></button>
                             <h1>COMANDAS E RESERVAS ABERTAS</h1>
+                            <button className="add-order-button" onClick={()=>navigate("/order_ticket")}>
+                                Adicionar Comanda
+                            </button>
                         </div>
                         <p style={{ color: '#777171ff' }}>Selecione a mesa do cliente e edite suas comandas.</p>
                     </div>
 
                     <div className="tickets-container">
                         {tables.length > 0 ? (
-                            tables.map((table,index)=>{
-                                    const isOccupied = table.status === "Ocupado";
-                                    const isSelected = selectedTable === index;
+                            tables.map((table)=>{
+                                    const isOccupied = table.status === "Ocupado" || table.status === "Reservado";
+                                    const tableStatus = table.status === "Reservado" ? "Ocupado" : table.status;
+                                    const isSelected = selectedTable === table.id;
 
                                     return(
                                         <button 
-                                            onClick={()=> !isOccupied && setSelectedTable(index)}
-                                            disabled={isOccupied}
-                                            className={`selected-table ${isOccupied ? 'occupied' : (isSelected ? 'select' : 'not-select')}`} 
-                                            key={index}
+                                            onClick={()=>setSelectedTable(table.id)}
+                                            className={`selected-table ${isSelected ? 'select' : (isOccupied ? 'occupied' : 'not-select')}`} 
+                                            key={table.id}
                                         >
                                             <p><b>{String(table.table_number).padStart(2,"0")}</b></p>
-                                            <p>{table.status}</p>
+                                            <p>{tableStatus}</p>
                                         </button>
                                     )
                                 })
@@ -69,16 +141,50 @@ function OpenAllTickets(){
                     </div>
                     <div className="clients-list">
                         <h1>CLIENTES</h1>
-                        <div>
+                        <div className="client-records">
                             {clients.length > 0 ? (
-                                <p>Teste</p>
+                                clients.map((client)=>(
+                                    <div className="client-record" key={client.id}>
+                                        {client.orderId ? (
+                                            <button
+                                                type="button"
+                                                className={`client-card ${selectedOrderId === client.orderId ? "selected" : ""}`}
+                                                onClick={() => setSelectedOrderId(
+                                                    selectedOrderId === client.orderId ? null : client.orderId
+                                                )}
+                                            >
+                                                <span>{client.name} - Mesa {tables.find((table) => table.id === selectedTable)?.table_number}</span>
+                                            </button>
+                                        ) : (
+                                            <div className="client-card reservation-card">
+                                                <span>{client.name} - Mesa {tables.find((table) => table.id === selectedTable)?.table_number} - Reserva</span>
+                                            </div>
+                                        )}
+                                        {selectedOrderId === client.orderId && client.orderId && (
+                                            <button
+                                                type="button"
+                                                className="close-order-button"
+                                                disabled={closingOrderId === client.orderId}
+                                                onClick={() => handleCloseOrder(client.orderId)}
+                                            >
+                                                {closingOrderId === client.orderId ? "Fechando..." : "Fechar Comanda"}
+                                            </button>
+                                        )}
+                                    </div>
+                                ))
                             ) : (
-                                <p>Nenhuma comanda aberta.</p>
+                                <p>{selectedTable === null ? "Selecione uma mesa para ver clientes." : "Nenhuma comanda ou reserva aberta nesta mesa."}</p>
                             )}
                         </div>
                     </div>
                 </div>
             </main>
+            <AlertModal
+                phrase={alertPhrase}
+                isOpen={alertModalIsOpen}
+                setIsOpen={setAlertModalIsOpen}
+                type={alertType}
+            />
         </>
     );
 }
