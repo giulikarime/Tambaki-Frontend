@@ -38,26 +38,51 @@
 
 #menu-ordering-page .mo-tabs{
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: 12px;
+    width: 100%;
+    padding: 4px 2px 10px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    touch-action: pan-x;
+    cursor: grab;
+    user-select: none;
+}
+
+#menu-ordering-page .mo-tabs::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Edge novo */
+}
+
+#menu-ordering-page .mo-tabs.dragging{
+    cursor: grabbing;
 }
 
 #menu-ordering-page .mo-tab{
-    padding: 6px 22px;
+    flex: 0 0 200px;
+    min-height: 44px;
+    padding: 8px 12px;
     border: 2px solid #000;
     border-radius: 20px;
     background-color: transparent;
     color: #000;
     font-family: inherit;
-    font-size: 13px;
+    font-size: 15px;
     font-weight: bold;
     cursor: pointer;
+    white-space: nowrap;
 }
 
 #menu-ordering-page .mo-tab.active{
     background-color: #3f51b5;
     border-color: #3f51b5;
     color: #fff;
+}
+
+@media (max-width: 768px) {
+    #menu-ordering-page .mo-tab{
+        flex-basis: 145px;
+    }
 }
 
 #menu-ordering-page .mo-layout{
@@ -172,6 +197,30 @@
 #menu-ordering-page #mo-ticket h2{
     font-size: 15px;
     color: #1b1343;
+}
+
+#menu-ordering-page .mo-client-name{
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+#menu-ordering-page .mo-client-name label{
+    font-size: 12px;
+    font-weight: bold;
+    color: #1b1343;
+}
+
+#menu-ordering-page .mo-client-name input{
+    box-sizing: border-box;
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #1b1343;
+    border-radius: 6px;
+    background-color: #fff8e9;
+    color: #1b1343;
+    font: inherit;
+    font-size: 13px;
 }
 
 #menu-ordering-page .mo-ticket-list{
