@@ -16,6 +16,14 @@ main{
     gap: 40px;
 }
 
+main:has(> #sidebar):has(#principal-menu-stock) {
+    display: flex;
+    width: 100%;
+    height: auto;
+    min-height: 93vh;
+    box-sizing: border-box;
+}
+
 .container-stock{
     display: flex;
     flex-direction: column;
