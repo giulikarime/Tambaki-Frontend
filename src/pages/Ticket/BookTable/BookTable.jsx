@@ -91,15 +91,6 @@ function BookTable(){
         });
     }
 
-    function getRecommendedTable() {
-        const peopleCount = Number(quantityPeople);
-        if (!Number.isInteger(peopleCount) || peopleCount < 1) return null;
-
-        return orderTables.find(
-            (table) => table.capacity >= peopleCount && !isTableOccupied(table),
-        ) || null;
-    }
-
     function getTableIssue(table) {
         if (table.capacity < Number(quantityPeople)) return "capacity";
         if (isTableOccupied(table)) return "occupied";
@@ -133,15 +124,10 @@ function BookTable(){
 
         const tableIssue = getTableIssue(selectedTable);
         if (tableIssue) {
-            const recommendedTable = getRecommendedTable();
             const issueMessage = tableIssue === "capacity"
                 ? `A mesa ${String(selectedTable.table_number).padStart(2, "0")} não comporta ${peopleCount} pessoas.`
                 : `A mesa ${String(selectedTable.table_number).padStart(2, "0")} está ocupada nesse horário.`;
-            setFormError(
-                recommendedTable
-                    ? `${issueMessage} Recomendamos a mesa ${String(recommendedTable.table_number).padStart(2, "0")}, com capacidade para ${recommendedTable.capacity} pessoas.`
-                    : `${issueMessage} Não há outra mesa livre com capacidade para ${peopleCount} pessoas.`
-            );
+            setFormError(issueMessage);
             setAlertType('error');
             setAlertModalIsOpen(true);
             return;
@@ -231,9 +217,6 @@ function BookTable(){
         const walk = x - startX.current;
         el.scrollLeft = scrollLeftStart.current - walk;
     }
-
-    const selectedTableIssue = selectedTable ? getTableIssue(selectedTable) : null;
-    const recommendedTable = getRecommendedTable();
 
     return(
         <>
@@ -332,45 +315,6 @@ function BookTable(){
                                     )}
                                 </div>
                             </div>
-                            {desiredTime
-                                && !isLoadingReservationData
-                                && orderTables.length > 0
-                                && Number.isInteger(Number(quantityPeople))
-                                && Number(quantityPeople) >= 1
-                                && (!selectedTable || selectedTableIssue)
-                                && (() => {
-                                const isCapacityIssue = selectedTableIssue === "capacity";
-                                return (
-                                    <div className="reservation-recommendation">
-                                        {selectedTableIssue && (
-                                            <span>
-                                                {isCapacityIssue
-                                                    ? `Mesa ${String(selectedTable.table_number).padStart(2,"0")} não comporta ${quantityPeople} pessoas.`
-                                                    : `Mesa ${String(selectedTable.table_number).padStart(2,"0")} ocupada às ${desiredTime}.`}
-                                            </span>
-                                        )}
-                                        {recommendedTable ? (
-                                            <>
-                                                {!selectedTableIssue && (
-                                                    <span>
-                                                        Mesa {String(recommendedTable.table_number).padStart(2,"0")} recomendada para {quantityPeople} pessoas.
-                                                    </span>
-                                                )}
-                                                <button
-                                                    type="button"
-                                                    onClick={()=>setSelectedTable(recommendedTable)}
-                                                >
-                                                    Usar mesa {String(recommendedTable.table_number).padStart(2,"0")} ({recommendedTable.capacity} lugares)
-                                                </button>
-                                            </>
-                                        ) : (
-                                            <span>
-                                                Nenhuma mesa livre com capacidade para {quantityPeople} pessoas.
-                                            </span>
-                                        )}
-                                    </div>
-                                );
-                            })()}
                             <button disabled={isSubmitting || !selectedTable} type="submit" id='btn-select-table'>
                                 {isSubmitting ? "Reservando..." : "Reservar"}
                             </button>

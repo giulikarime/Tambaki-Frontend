@@ -12,10 +12,8 @@ main:has(> #sidebar):has(#principal-menu-order){
 
 #principal-menu-order{
     width: 70%;
-    position: absolute;
-    top: 100px;
-    left: 50%;
-    transform: translateX(-50%);
+    position: relative;
+    margin: 100px auto 0;
     display: flex;
     flex-direction: column;
     gap: 40px;
@@ -105,24 +103,6 @@ main:has(> #sidebar):has(#principal-menu-order){
     background-color: #f1f1f1;
     color: rgb(134, 134, 134);
     border: 2px solid rgb(184, 184, 184);
-    cursor: pointer;
-}
-
-.reservation-recommendation{
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-top: 14px;
-    color: #6b2020;
-    font-weight: 600;
-}
-
-.reservation-recommendation button{
-    padding: 8px 12px;
-    border: none;
-    border-radius: 8px;
-    background-color: #1b1343;
-    color: white;
     cursor: pointer;
 }
 
