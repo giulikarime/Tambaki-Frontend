@@ -1,17 +1,5 @@
-<<<<<<< HEAD
 {
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
-=======
-{
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/"
-    }
-  ]
-}
->>>>>>> 839f9df (feat: cache for reload.)
