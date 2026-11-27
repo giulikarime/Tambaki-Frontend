@@ -14,6 +14,7 @@ import { uploadFile} from "../../services/upload";
 import AlertModals from "../../components/SucessModals/AlertModals";
 import ProductCard from "../../components/ProductCard/ProductCard";
 import FiltersModal from '../../components/FiltersModal/FiltersModal';
+import { getCached, hasCached } from "../../services/cache";
 
 function Stock() {
     // ===================== Navegação e layout padrão =====================
@@ -26,16 +27,16 @@ function Stock() {
     const [alertModalIsOpen,setAlertModalIsOpen] = useState(false);
 
     // ===================== Dados principais (produtos e relacionados) =====================
-    const [products, setProducts] = useState([]);
-    const [isLoadingProducts, setIsLoadingProducts] = useState(true);
-    const [suppliers, setSuppliers] = useState([]);
+    const [products, setProducts] = useState(() => getCached('products:list') ?? []);
+    const [isLoadingProducts, setIsLoadingProducts] = useState(() => !hasCached('products:list'));
+    const [suppliers, setSuppliers] = useState(() => getCached('suppliers:list') ?? []);
 
     const [selectAllergensForProducts,setSelectAllergensForProducts] = useState([]);
     const [addAllergensToListModal,setAddAllergensToListModal] = useState(false)
 
 
     // Enums vindos do backend, usados para popular os <select> dos formulários
-    const [productEnums, setProductEnums] = useState({
+    const [productEnums, setProductEnums] = useState(() => getCached('products:enums') ?? {
         categories: [],
         allergens: [],
         storageLocations: [],
@@ -366,7 +367,7 @@ function Stock() {
 
     // ===================== Busca de dados no backend =====================
     async function get_products() {
-        setIsLoadingProducts(true);
+        if (!hasCached('products:list')) setIsLoadingProducts(true);
         try {
             const products_db = await getProducts();
             setProducts(products_db);

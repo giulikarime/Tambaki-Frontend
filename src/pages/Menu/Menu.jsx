@@ -656,8 +656,7 @@ function Menu() {
                             {canEditMenu ? 'Visualize e edite seu cardápio.' : 'Visualize seu cardápio.'}
                         </p>
                     </div>
-                    {/* Correção do espaçamento excessivo alterando justifyContent para flex-start com gap controlado */}
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '24px', marginTop: '20px', justifyContent: 'flex-start' }}>
+                    <div className="menu-items-grid">
                         {isLoadingMenu ? (
                             <p>Carregando itens do cardápio...</p>
                         ) : filteredMenu.length <= 0 ? (

@@ -28,6 +28,7 @@ import { calcularMaiorCategoriaClientes } from "../../utils/clientsCostsUtils";
 import { calcularTendenciaCmvMensal, separarCmvPorMesesDeCustos, somarCmvDosCustos } from "../../utils/cmvUtils";
 import { canEditResource, getAccessLevel } from "../../utils/access";
 import { getCmvPlannings, saveCmvPlanning } from "../../services/cmvPlanning";
+import { getCached, hasCached } from "../../services/cache";
 
 function Financial(){
 
@@ -45,20 +46,21 @@ function Financial(){
 
     const month = new Date().toLocaleString('pt-BR', { month: 'long' });
     const year = presentDate.getFullYear();
+    const cmvPlanningCacheKey = `cmv-planning:${year}`;
 
-    const [myCosts,setMyCosts] = useState([]);
-    const [myOrders, setMyOrders] = useState([]);
-    const [myProducts, setMyProducts] = useState([]);
-    const [myMenu, setMyMenu] = useState([]);
-    const [cmvPlannings, setCmvPlannings] = useState([]);
-    const [loadingCosts, setLoadingCosts] = useState(true);
-    const [loadingOrders, setLoadingOrders] = useState(true);
-    const [loadingProducts, setLoadingProducts] = useState(true);
-    const [loadingCmvPlannings, setLoadingCmvPlannings] = useState(true);
+    const [myCosts,setMyCosts] = useState(() => getCached('costs:list') ?? []);
+    const [myOrders, setMyOrders] = useState(() => getCached('orders:list') ?? []);
+    const [myProducts, setMyProducts] = useState(() => getCached('costs:financial-products') ?? []);
+    const [myMenu, setMyMenu] = useState(() => getCached('menu:list') ?? []);
+    const [cmvPlannings, setCmvPlannings] = useState(() => getCached(cmvPlanningCacheKey) ?? []);
+    const [loadingCosts, setLoadingCosts] = useState(() => !hasCached('costs:list'));
+    const [loadingOrders, setLoadingOrders] = useState(() => !hasCached('orders:list'));
+    const [loadingProducts, setLoadingProducts] = useState(() => !hasCached('costs:financial-products'));
+    const [loadingCmvPlannings, setLoadingCmvPlannings] = useState(() => !hasCached(cmvPlanningCacheKey));
     const [isSavingCmvPlanning, setIsSavingCmvPlanning] = useState(false);
-    const [costsLoaded, setCostsLoaded] = useState(false);
-    const [ordersLoaded, setOrdersLoaded] = useState(false);
-    const [productsLoaded, setProductsLoaded] = useState(false);
+    const [costsLoaded, setCostsLoaded] = useState(() => hasCached('costs:list'));
+    const [ordersLoaded, setOrdersLoaded] = useState(() => hasCached('orders:list'));
+    const [productsLoaded, setProductsLoaded] = useState(() => hasCached('costs:financial-products'));
     const [selectedCost,setSelectedCost] = useState('');
 
     const totalCombinedCosts = somarCustosFixosEVariaveis(myCosts);
@@ -77,7 +79,7 @@ function Financial(){
     // ... resto igual
 
     async function handleGetCosts() {
-        setLoadingCosts(true);
+        if (!costsLoaded) setLoadingCosts(true);
         try {
             const cost_value = await getCosts();
             setMyCosts(Array.isArray(cost_value) ? cost_value : []);
@@ -90,8 +92,9 @@ function Financial(){
     }
 
     async function handleGetOrdersAndProducts() {
-        setLoadingOrders(true);
-        setLoadingProducts(true);
+        if (!ordersLoaded) setLoadingOrders(true);
+        if (!productsLoaded) setLoadingProducts(true);
+        if (!hasCached(cmvPlanningCacheKey)) setLoadingCmvPlannings(true);
 
         const [ordersRes, productsRes, menuRes, cmvPlanningsRes] = await Promise.allSettled([
             getOrders(),
@@ -195,9 +198,9 @@ function Financial(){
         {label: 'Tipo de Custo', mode: 'select', placeholderEdit: 'costType'},
     ]
 
-    const [costEnums, setCostsEnums] = useState({
+    const [costEnums, setCostsEnums] = useState(() => getCached('costs:enums') ?? {
         costCategory: [],
-        costType: []
+        costType: [],
     });
 
     useEffect(()=>{

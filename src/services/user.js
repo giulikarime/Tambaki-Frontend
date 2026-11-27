@@ -1,18 +1,25 @@
 import { authenticatedFetch } from './authenticatedFetch';
+import { cached, invalidate } from './cache';
+
 const apiUrl = import.meta.env.VITE_API_URL;
-export async function getUsers() {
-    const response = await authenticatedFetch(`${apiUrl}/users`,{
-        method:'GET',
-        headers:{"Content-Type": 'application/json'},
-    });
+const TTL_USERS = 2 * 60 * 1000;
+const TTL_ENUMS = 60 * 60 * 1000;
 
-    const data = await response.json();
+export function getUsers() {
+    return cached('users:list', async () => {
+        const response = await authenticatedFetch(`${apiUrl}/users`,{
+            method:'GET',
+            headers:{"Content-Type": 'application/json'},
+        });
 
-    if(!response.ok){
-        throw new Error(data.message || "Erro ao buscar usuários.");
-    }
+        const data = await response.json();
 
-    return data;
+        if(!response.ok){
+            throw new Error(data.message || "Erro ao buscar usuários.");
+        }
+
+        return data;
+    }, TTL_USERS);
 }
 
 export async function createUsers(payload) {
@@ -28,6 +35,7 @@ export async function createUsers(payload) {
         throw new Error(data.message || "Erro ao criar usuário.");
     }
 
+    invalidate('users:list');
     return data;
 }
 
@@ -44,6 +52,7 @@ export async function editUsers(payload,id) {
         throw new Error(data.message || "Erro ao editar usuário.");
     }
 
+    invalidate('users:list');
     return data;
 }
 
@@ -59,11 +68,14 @@ export async function deleteUsers(id) {
         throw new Error(data.message || "Erro ao deletar usuário.");
     }
 
+    invalidate('users:list');
     return data;
 }
 
-export async function getUserEnums() {
-    const response = await authenticatedFetch(`${apiUrl}/users/enums`);
-    if (!response.ok) throw new Error('Erro ao buscar enums de usuários');
-    return response.json();
+export function getUserEnums() {
+    return cached('users:enums', async () => {
+        const response = await authenticatedFetch(`${apiUrl}/users/enums`);
+        if (!response.ok) throw new Error('Erro ao buscar enums de usuários');
+        return response.json();
+    }, TTL_ENUMS);
 }

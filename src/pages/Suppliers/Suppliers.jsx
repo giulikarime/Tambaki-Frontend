@@ -10,6 +10,7 @@ import React from 'react';
 import FiltersModal from "../../components/FiltersModal/FiltersModal";
 import AlertModals from "../../components/SucessModals/AlertModals";
 import { uploadFile } from "../../services/upload";
+import { getCached, hasCached } from "../../services/cache";
 
 function Suppliers(){
 
@@ -21,10 +22,10 @@ function Suppliers(){
     const [alertType, setAlertType] = useState('');
     const [alertModalIsOpen, setAlertModalIsOpen] = useState(false);
 
-    const [allSuppliers, setAllSuppliers] = useState([]);
-    const [isLoadingSuppliers, setIsLoadingSuppliers] = useState(true);
+    const [allSuppliers, setAllSuppliers] = useState(() => getCached('suppliers:list') ?? []);
+    const [isLoadingSuppliers, setIsLoadingSuppliers] = useState(() => !hasCached('suppliers:list'));
 
-    const [suppliersEnums, setSuppliersEnums] = useState({
+    const [suppliersEnums, setSuppliersEnums] = useState(() => getCached('suppliers:enums') ?? {
         category: [],
         lead_time_days: []
     });
@@ -162,7 +163,7 @@ function Suppliers(){
     }
 
     async function handleGetSuppliers() {
-        setIsLoadingSuppliers(true);
+        if (!hasCached('suppliers:list')) setIsLoadingSuppliers(true);
         try {
             const suppliers = await getSuppliers();
             setAllSuppliers(suppliers || []);

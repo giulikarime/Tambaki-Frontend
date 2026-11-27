@@ -10,6 +10,7 @@ import { getUsers, createUsers, editUsers, deleteUsers, getUserEnums } from "../
 import FiltersModal from "../../components/FiltersModal/FiltersModal";
 import { getLoggedUser } from "../../services/auth";
 import AlertModals from "../../components/SucessModals/AlertModals";
+import { getCached, hasCached } from "../../services/cache";
 
 function UsersPage(){
 
@@ -25,12 +26,12 @@ function UsersPage(){
     const [newDocumentUrlUser,setNewDocumentUrlUser] = useState(fileName)
     const [editUserStatus,setEditUserStatus] = useState(false);
 
-    const [allUsers,setAllUsers] = useState([]);
-    const [isLoadingUsers, setIsLoadingUsers] = useState(true);
+    const [allUsers,setAllUsers] = useState(() => getCached('users:list') ?? []);
+    const [isLoadingUsers, setIsLoadingUsers] = useState(() => !hasCached('users:list'));
     const user = getLoggedUser();
     const [search,setSearch] = useState('');
 
-    const [usersEnums,setUsersEnums] = useState({
+    const [usersEnums,setUsersEnums] = useState(() => getCached('users:enums') ?? {
         access_level: [],
         employ_type: [],
         shift: [],
@@ -193,7 +194,7 @@ function UsersPage(){
     }
 
     async function handleGetUsers() {
-        setIsLoadingUsers(true);
+        if (!hasCached('users:list')) setIsLoadingUsers(true);
         try{
             const users = await getUsers();
             setAllUsers(users);

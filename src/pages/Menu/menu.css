@@ -9,6 +9,17 @@
     gap: 40px;
 }
 
+.menu-items-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    align-items: stretch;
+    width: 100%;
+    min-width: 0;
+    gap: 24px;
+    margin-top: 20px;
+    box-sizing: border-box;
+}
+
 
 #menu-header {
     display: flex;
@@ -701,6 +712,10 @@ body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicio
 }
 
 @media (max-width: 1200px) {
+    .menu-items-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
     body:has(.principal-menu-users) header {
         width: 100%;
         height: auto;
@@ -898,6 +913,10 @@ body:has(.principal-menu-users) .ReactModal__Content[aria-label="Modal de Adicio
 }
 
 @media (max-width: 768px) {
+    .menu-items-grid {
+        gap: 12px;
+    }
+
     main:has(> #sidebar):has(.principal-menu-users) .principal-menu-users {
         padding: 32px 12px 40px;
         gap: 24px;

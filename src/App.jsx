@@ -19,6 +19,13 @@ import FinishTicket from './pages/Ticket/FinishTicket/FinishTicket';
 import Error from './pages/Error/Error'
 import { canViewPath, getAccessLevel } from './utils/access';
 
+if (typeof window !== 'undefined') {
+  const currentUrl = new URL(window.location.href);
+  if (currentUrl.hostname.startsWith('www.') && currentUrl.hostname.endsWith('.com.br')) {
+    currentUrl.hostname = currentUrl.hostname.slice(4);
+    window.location.replace(currentUrl.href);
+  }
+}
 
 function hasValidAccessToken() {
   const token = localStorage.getItem('accessToken');

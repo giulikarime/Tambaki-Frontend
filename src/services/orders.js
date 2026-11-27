@@ -1,6 +1,8 @@
 import { authenticatedFetch } from './authenticatedFetch';
+import { cached, invalidate } from './cache';
 
 const apiUrl = import.meta.env.VITE_API_URL;
+const TTL_ORDERS = 30 * 1000;
 
 async function request(path, options, errorMessage) {
     const response = await authenticatedFetch(`${apiUrl}${path}`, {
@@ -14,34 +16,57 @@ async function request(path, options, errorMessage) {
 }
 
 export function getOrders() {
-    return request('/orders', { method: "GET" }, "Erro ao buscar comandas");
+    return cached(
+        'orders:list',
+        () => request('/orders', { method: "GET" }, "Erro ao buscar comandas"),
+        TTL_ORDERS,
+    );
 }
 
-export function closeOrder(id) {
-    return request(`/orders/${id}/close`, { method: "PATCH" }, "Erro ao fechar comanda");
+function invalidateOrdersData() {
+    invalidate('orders:');
 }
 
-export function createOrder(payload) {
-    return request('/orders', {
+function invalidateHomeTables() {
+    invalidate('tables:list');
+    invalidate('reservations:list');
+}
+
+export async function closeOrder(id) {
+    const result = await request(`/orders/${id}/close`, { method: "PATCH" }, "Erro ao fechar comanda");
+    invalidateOrdersData();
+    invalidateHomeTables();
+    return result;
+}
+
+export async function createOrder(payload) {
+    const result = await request('/orders', {
         method: "POST",
         body: JSON.stringify(payload),
     }, "Erro ao abrir comanda");
+    invalidateOrdersData();
+    invalidateHomeTables();
+    return result;
 }
 
 export function getOrderById(id) {
     return request(`/orders/${id}`, { method: "GET" }, "Erro ao buscar comanda");
 }
 
-export function addOrderItem(orderId, payload) {
-    return request(`/orders/${orderId}/items`, {
+export async function addOrderItem(orderId, payload) {
+    const result = await request(`/orders/${orderId}/items`, {
         method: "POST",
         body: JSON.stringify(payload),
     }, "Erro ao adicionar item");
+    invalidateOrdersData();
+    return result;
 }
 
-export function updateOrderItem(orderId, itemId, payload) {
-    return request(`/orders/${orderId}/items/${itemId}`, {
+export async function updateOrderItem(orderId, itemId, payload) {
+    const result = await request(`/orders/${orderId}/items/${itemId}`, {
         method: "PATCH",
         body: JSON.stringify(payload),
     }, "Erro ao atualizar item");
+    invalidateOrdersData();
+    return result;
 }

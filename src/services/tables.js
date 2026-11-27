@@ -1,18 +1,24 @@
 import { authenticatedFetch } from './authenticatedFetch';
+import { cached, invalidate } from './cache';
+
 const apiUrl = import.meta.env.VITE_API_URL;
-export async function getTables() {
-    const response = await authenticatedFetch(`${apiUrl}/tables`, {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-    });
+const TTL_TABLES = 15 * 1000;
 
-    const data = await response.json();
+export function getTables() {
+    return cached('tables:list', async () => {
+        const response = await authenticatedFetch(`${apiUrl}/tables`, {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+        });
 
-    if (!response.ok) {
-        throw new Error(data.message || "Erro ao buscar mesas");
-    }
+        const data = await response.json();
 
-    return data;
+        if (!response.ok) {
+            throw new Error(data.message || "Erro ao buscar mesas");
+        }
+
+        return data;
+    }, TTL_TABLES);
 }
 
 export async function createTable(payload) {
@@ -28,6 +34,7 @@ export async function createTable(payload) {
         throw new Error(data.message || "Erro ao criar mesa");
     }
 
+    invalidate('tables:list');
     return data;
 }
 
@@ -44,6 +51,7 @@ export async function updateTable(id, payload) {
         throw new Error(data.message || "Erro ao atualizar mesa");
     }
 
+    invalidate('tables:list');
     return data;
 }
 
@@ -60,5 +68,6 @@ export async function deleteTable(id) {
         throw new Error(data.message || "Erro ao excluir mesa");
     }
 
+    invalidate('tables:list');
     return data;
 }
