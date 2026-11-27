@@ -12,15 +12,10 @@ main:has(> #sidebar):has(#principal-menu-tickets){
 
 #principal-menu-tickets{
     width: 70%;
-<<<<<<< HEAD
-    position: relative;
-    margin: 150px auto 0;
-=======
     position: absolute;
     top: 100px;
     left: 50%;
     transform: translateX(-50%);
->>>>>>> 12469d0 (fix: fixing bookTable.)
     display: flex;
     flex-direction: column;
     gap: 40px;
