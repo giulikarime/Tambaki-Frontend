@@ -1,5 +1,19 @@
 {
   "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/home", "destination": "/index.html" },
+    { "source": "/dashboard", "destination": "/index.html" },
+    { "source": "/menu", "destination": "/index.html" },
+    { "source": "/stock", "destination": "/index.html" },
+    { "source": "/users", "destination": "/index.html" },
+    { "source": "/configuration", "destination": "/index.html" },
+    { "source": "/order_ticket", "destination": "/index.html" },
+    { "source": "/open_all_tickets", "destination": "/index.html" },
+    { "source": "/book_table", "destination": "/index.html" },
+    { "source": "/create_table", "destination": "/index.html" },
+    { "source": "/suppliers", "destination": "/index.html" },
+    { "source": "/menu_ordering", "destination": "/index.html" },
+    { "source": "/finish_ticket", "destination": "/index.html" },
+    { "source": "/recovery", "destination": "/index.html" },
+    { "source": "/new-password", "destination": "/index.html" }
   ]
 }
