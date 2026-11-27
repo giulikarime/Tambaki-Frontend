@@ -1,24 +1,39 @@
 import { authenticatedFetch } from './authenticatedFetch';
+import { cached, invalidate } from './cache';
+
 const apiUrl = import.meta.env.VITE_API_URL;
-export async function getProducts() {
-    const response = await authenticatedFetch(`${apiUrl}/products`, {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-    });
 
-    const data = await response.json();
-
-    if (!response.ok) {
-        throw new Error(data.message || "Erro ao buscar produtos");
-    }
-
-    return data;
+function invalidateFinancialProducts() {
+    invalidate('costs:financial-products');
 }
 
-export async function getProductEnums() {
-    const response = await authenticatedFetch(`${apiUrl}/products/enums`);
-    if (!response.ok) throw new Error('Erro ao buscar enums de produto');
-    return response.json();
+export async function getProducts() {
+    return cached(
+        'products:list',
+        async () => {
+            const response = await authenticatedFetch(`${apiUrl}/products`, {
+                method: "GET",
+                headers: { "Content-Type": "application/json" },
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || "Erro ao buscar produtos");
+            }
+
+            return data;
+        },
+        30 * 1000,
+    );
+}
+
+export function getProductEnums() {
+    return cached('products:enums', async () => {
+        const response = await authenticatedFetch(`${apiUrl}/products/enums`);
+        if (!response.ok) throw new Error('Erro ao buscar enums de produto');
+        return response.json();
+    }, 60 * 60 * 1000);
 }
 
 export async function createProducts(payload) {
@@ -34,6 +49,8 @@ export async function createProducts(payload) {
         throw new Error(data.message || "Erro ao criar produto");
     }
 
+    invalidate('products:list');
+    invalidateFinancialProducts();
     return data;
 }
 
@@ -50,6 +67,8 @@ export async function editProducts(id, payload) {
         throw new Error(data.message || "Erro ao editar produto.");
     }
 
+    invalidate('products:list');
+    invalidateFinancialProducts();
     return data;
 }
 
@@ -65,6 +84,8 @@ export async function deleteProducts(id) {
         throw new Error(data.message || "Erro ao deletar produto.");
     }
 
+    invalidate('products:list');
+    invalidateFinancialProducts();
     return data;
 }
 
@@ -81,5 +102,7 @@ export async function writeOffProducts(id, new_stock_quantity) {
         throw new Error(data.message || 'Erro ao dar baixa em produto.');
     }
 
+    invalidate('products:list');
+    invalidateFinancialProducts();
     return data;
 }

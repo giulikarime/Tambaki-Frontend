@@ -2,6 +2,7 @@
  Sem isso, o TypeScript não reconhece o `import.meta.env` e mostra erro no editor.
  Isso afeta só o editor; o app roda normalmente com ou sem essa linha. */
 /// <reference types="vite/client" />
+import { clearCache } from './cache';
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -29,6 +30,7 @@ export async function login(payload: LoginPayload): Promise<LoginResponse> {
     throw new Error(data.message || 'Erro ao fazer login');
   }
 
+  clearCache();
   localStorage.setItem('accessToken', data.accessToken);
   localStorage.setItem('account', JSON.stringify(data.account));
 
@@ -41,6 +43,7 @@ export function getLoggedUser() {
 }
 
 export async function logout(): Promise<{ message: string }> {
+  clearCache();
   const token = localStorage.getItem('accessToken');
 
   const response = await fetch(`${apiUrl}/auth/logout`, {

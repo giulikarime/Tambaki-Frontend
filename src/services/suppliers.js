@@ -1,18 +1,25 @@
 import { authenticatedFetch } from './authenticatedFetch';
+import { cached, invalidate } from './cache';
+
 const apiUrl = import.meta.env.VITE_API_URL;
-export async function getSuppliers() {
-    const response = await authenticatedFetch(`${apiUrl}/suppliers`, {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-    });
+const TTL_SUPPLIERS = 2 * 60 * 1000;
+const TTL_ENUMS = 60 * 60 * 1000;
 
-    const data = await response.json();
+export function getSuppliers() {
+    return cached('suppliers:list', async () => {
+        const response = await authenticatedFetch(`${apiUrl}/suppliers`, {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+        });
 
-    if (!response.ok) {
-        throw new Error(data.message || "Erro ao buscar fornecedores");
-    }
+        const data = await response.json();
 
-    return data;
+        if (!response.ok) {
+            throw new Error(data.message || "Erro ao buscar fornecedores");
+        }
+
+        return data;
+    }, TTL_SUPPLIERS);
 }
 
 export async function createSuppliers(payload) {
@@ -28,6 +35,8 @@ export async function createSuppliers(payload) {
         throw new Error(data.message || "Erro ao criar fornecedor");
     }
 
+    invalidate('suppliers:list');
+    invalidate('products:list');
     return data;
 }
 
@@ -44,6 +53,8 @@ export async function editSuppliers(payload,id) {
         throw new Error(data.message || "Erro ao editar fornecedor");
     }
 
+    invalidate('suppliers:list');
+    invalidate('products:list');
     return data;
 }
 
@@ -59,11 +70,15 @@ export async function deleteSuppliers(id) {
         throw new Error(data.message || "Erro ao deletar fornecedor");
     }
 
+    invalidate('suppliers:list');
+    invalidate('products:list');
     return data;
 }
 
-export async function getSuppliersEnums() {
-    const response = await authenticatedFetch(`${apiUrl}/suppliers/enums`);
-    if (!response.ok) throw new Error('Erro ao buscar enums de fornecedores');
-    return response.json();
+export function getSuppliersEnums() {
+    return cached('suppliers:enums', async () => {
+        const response = await authenticatedFetch(`${apiUrl}/suppliers/enums`);
+        if (!response.ok) throw new Error('Erro ao buscar enums de fornecedores');
+        return response.json();
+    }, TTL_ENUMS);
 }

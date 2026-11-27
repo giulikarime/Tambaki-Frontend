@@ -1,4 +1,5 @@
 import { authenticatedFetch } from './authenticatedFetch';
+import { cached, invalidate } from './cache';
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -14,17 +15,23 @@ async function request(path, options, errorMessage) {
 }
 
 export function getCmvPlannings(year) {
-    return request(
-        `/cmv-planning?year=${year}`,
-        { method: "GET" },
-        "Erro ao buscar planejamentos de CMV",
+    return cached(
+        `cmv-planning:${year}`,
+        () => request(
+            `/cmv-planning?year=${year}`,
+            { method: "GET" },
+            "Erro ao buscar planejamentos de CMV",
+        ),
+        5 * 60 * 1000,
     );
 }
 
-export function saveCmvPlanning(payload) {
-    return request(
+export async function saveCmvPlanning(payload) {
+    const result = await request(
         '/cmv-planning',
         { method: "POST", body: JSON.stringify(payload) },
         "Erro ao salvar planejamento de CMV",
     );
+    invalidate('cmv-planning:');
+    return result;
 }

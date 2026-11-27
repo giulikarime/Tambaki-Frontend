@@ -38,11 +38,11 @@ function PasswordRecovery() {
             borderRadius: '16px',
             border: 'none',
             boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
-            backgroundColor: '#dfd1d1ff',
+            backgroundColor: 'rgb(202, 236, 147)',
             display:'flex',
             flexDirection:'column',
             gap:'20px',
-            color: '#b21106'
+            color: '#0a7a18'
         }
     }
 

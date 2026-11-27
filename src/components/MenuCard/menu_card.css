@@ -43,7 +43,7 @@
     background-color: rgba(0, 0, 0, 0.5);
     color: #fff;
     padding: 4px 10px;
-    font-size: 11px;
+    font-size: 12px;
     border-radius: 8px;
     backdrop-filter: blur(4px);
     z-index: 2;
@@ -65,7 +65,7 @@
 }
 
 .menu-card-title {
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 700;
     line-height: 1.2;
     color: #1a1a1a;
@@ -75,19 +75,19 @@
 }
 
 .menu-card-price {
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 700;
     line-height: 1.2;
     color: #1a1a1a;
     background: #f3b45d;
-    padding: 2px 4px 3px 4px;
+    padding: 5px 8px;
     border-radius: 8px;
     white-space: nowrap; /* Impede que o preço quebre a linha (ex: o R$ fique em cima e o valor em baixo) */
     flex-shrink: 0;
 }
 
 .menu-card-description {
-    font-size: 13px;
+    font-size: 14px;
     color: #777;
     margin: 0;
     line-height: 1.4;
@@ -99,24 +99,26 @@
 }
 
 .menu-card-tags {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    align-items: start;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
     gap: 6px;
     margin: 10px 0 2px 0;
 
 }
 
 .menu-card-tag {
-    font-size: 10px;
+    font-size: 14px;
     min-width: 0;
-    padding: 4px 3px;
+    width: max-content;
+    max-width: 100%;
+    padding: 6px 4px;
     border-radius: 6px;
     font-weight: 700;
     text-align: center;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    box-sizing: border-box;
 }
 
 .menu-card-btn {
@@ -141,7 +143,9 @@
     border: none;
     border-radius: 20px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-    width: 250px;
+    width: 100%;
+    min-width: 0;
+    height: 100%;
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -160,8 +164,7 @@
 
 @media (max-width: 1200px) {
     .menu-card.menu-card-button {
-        flex: 0 1 270px;
-        width: min(270px, 100%);
+        width: 100%;
         min-width: 0;
     }
 
@@ -177,9 +180,8 @@
     }
 
     .menu-card.menu-card-button {
-        flex: 0 0 calc((100% - 12px) / 2);
-        width: calc((100% - 12px) / 2);
-        max-width: none;
+        width: 100%;
+        max-width: 100%;
         min-width: 0;
         padding: 10px;
     }
@@ -198,16 +200,14 @@
     }
 
     .menu-card-tags {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
         margin-top: 6px;
     }
 }
 
 @media (max-width: 480px) {
     .menu-card.menu-card-button {
-        flex-basis: calc((100% - 12px) / 2);
-        width: calc((100% - 12px) / 2);
-        max-width: none;
+        width: 100%;
+        max-width: 100%;
         min-width: 0;
         border-radius: 14px;
         padding: 8px;
@@ -238,15 +238,14 @@
     }
 
     .menu-card-tags {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 4px;
     }
 
     .menu-card-tag {
-        padding: 4px 3px;
+        padding: 6px 4px;
     }
 
     .menu-card-price {
-        font-size: 13px;
+        font-size: 15px;
     }
 }

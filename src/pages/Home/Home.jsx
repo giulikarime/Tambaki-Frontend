@@ -11,14 +11,20 @@ import { useNavigate } from "react-router-dom";
 import Modal from 'react-modal'
 import { getLoggedUser } from "../../services/auth";
 import AlertModals from '../../components/SucessModals/AlertModals';
+import { getCached, hasCached } from "../../services/cache";
 
 function Home() {
     const canEditHome = canEditResource('home');
-    const [tablesList,setTablesList] = useState([]);
-    const [isLoadingTables, setIsLoadingTables] = useState(true);
-    const [orderList, setOrderList]  = useState([]);
-    const [bookTableList, setBookTableList]  = useState([]);
-    const [isLoadingOrders, setIsLoadingOrders] = useState(true);
+    const [tablesList,setTablesList] = useState(() => getCached('tables:list') ?? []);
+    const [isLoadingTables, setIsLoadingTables] = useState(() => !hasCached('tables:list'));
+    const [orderList, setOrderList] = useState(() => {
+        const orders = getCached('orders:list');
+        return Array.isArray(orders) ? orders.filter((order) => order.status === "Aberta") : [];
+    });
+    const [bookTableList, setBookTableList] = useState(() => getCached('reservations:list') ?? []);
+    const [isLoadingOrders, setIsLoadingOrders] = useState(() => (
+        !hasCached('orders:list') || !hasCached('reservations:list')
+    ));
     const [expanded, setExpand] = useState(false);
     const [hasInteracted, setHasInteracted] = useState(false);
     const orderSize = String(orderList.length).padStart(2, "0");
@@ -94,7 +100,7 @@ function Home() {
     }
 
     async function refreshTables(){
-        setIsLoadingTables(true);
+        if (!hasCached('tables:list')) setIsLoadingTables(true);
         try{
             const tables = await getTables();
             setTablesList([...tables].sort((a, b) => Number(a.table_number) - Number(b.table_number)));
