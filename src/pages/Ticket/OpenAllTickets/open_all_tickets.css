@@ -51,6 +51,11 @@ main{
     display: none;
 }
 
+.tickets-empty-message{
+    width: max-content;
+    white-space: nowrap;
+}
+
 .selected-table{
     box-sizing: border-box;
     display: flex;

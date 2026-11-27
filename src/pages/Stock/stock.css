@@ -7,11 +7,10 @@ main{
 
 #principal-menu-stock{
     width: 70%;
-    position: relative;
-    top: auto;
-    left: auto;
-    margin: 150px auto 0;
-    align-self: flex-start;
+    position: absolute;
+    top: 130px;
+    left: 50%;
+    transform: translateX(-50%);
     display: flex;
     flex-direction: column;
     gap: 40px;

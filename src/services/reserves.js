@@ -17,6 +17,19 @@ export function getReservations() {
     }, TTL_RESERVATIONS);
 }
 
+export function getOpenReservations() {
+    return cached('reservations:open', async () => {
+        const response = await authenticatedFetch(`${apiUrl}/reservations/open/list`, {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+        });
+
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || "Erro ao buscar reservas abertas");
+        return data;
+    }, TTL_RESERVATIONS);
+}
+
 export async function createReservation(payload) {
     const response = await authenticatedFetch(`${apiUrl}/reservations`, {
         method: "POST",
@@ -32,6 +45,6 @@ export async function createReservation(payload) {
         throw new Error(message || "Erro ao criar reserva");
     }
 
-    invalidate('reservations:list');
+    invalidate('reservations:');
     return data;
 }

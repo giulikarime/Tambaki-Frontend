@@ -1,0 +1,81 @@
+.error-page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 100vh;
+    padding: 24px;
+    box-sizing: border-box;
+    background-color: #fff8e9;
+}
+
+.error-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    width: min(100%, 560px);
+    padding: 48px 40px;
+    box-sizing: border-box;
+    border-radius: 20px;
+    background-color: #ffffff;
+    box-shadow: 0 8px 24px rgba(27, 19, 67, 0.12);
+    text-align: center;
+}
+
+.error-code {
+    padding: 8px 16px;
+    border-radius: 999px;
+    background-color: #cae2ff;
+    color: #1b1343;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.error-card h1 {
+    color: #1b1343;
+    font-size: clamp(24px, 5vw, 34px);
+    line-height: 1.2;
+}
+
+.error-message {
+    color: #625e70;
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+.error-home-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    margin-top: 6px;
+    padding: 0 22px;
+    border-radius: 10px;
+    background-color: #87b3f2;
+    color: #1b1343;
+    font-size: 15px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.error-home-link:hover {
+    background-color: #75a4e7;
+    transform: translateY(-2px);
+}
+
+.error-home-link:focus-visible {
+    outline: 3px solid #1b1343;
+    outline-offset: 3px;
+}
+
+@media (max-width: 480px) {
+    .error-page {
+        padding: 16px;
+    }
+
+    .error-card {
+        padding: 36px 24px;
+    }
+}

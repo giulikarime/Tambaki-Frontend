@@ -23,13 +23,21 @@ export function getOrders() {
     );
 }
 
+export function getOpenOrders() {
+    return cached(
+        'orders:open',
+        () => request('/orders/open/list', { method: "GET" }, "Erro ao buscar comandas abertas"),
+        TTL_ORDERS,
+    );
+}
+
 function invalidateOrdersData() {
     invalidate('orders:');
 }
 
 function invalidateHomeTables() {
     invalidate('tables:list');
-    invalidate('reservations:list');
+    invalidate('reservations:');
 }
 
 export async function closeOrder(id) {

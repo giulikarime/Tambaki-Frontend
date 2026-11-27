@@ -269,7 +269,7 @@ function MenuOrdering() {
                 <div id="mo-container">
                     <div className="mo-top">
                         <button onClick={() => navigate('/order_ticket')} className="btn-back-base"><ChevronLeft></ChevronLeft></button>
-                        <h1>CARDÁPIO</h1>
+                        <h1>Selecionar Pedido</h1>
                     </div>
 
                     <div
