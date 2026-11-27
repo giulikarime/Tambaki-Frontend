@@ -59,7 +59,8 @@ main {
 }
 
 .audit-log-card {
-  width: 55%;
+  box-sizing: border-box;
+  width: 100%;
   padding: 24px 30px;
   background: #fdfcfc;
   border: 1px solid rgba(25, 20, 68, 0.08);
@@ -936,7 +937,7 @@ main {
   }
 
   .audit-log-card {
-    width: 90%;
+    width: 100%;
   }
 
   #card-perfil {
@@ -1014,7 +1015,7 @@ main {
   }
 
   .audit-log-card {
-    width: 95%;
+    width: 100%;
     padding: 18px 14px;
   }
 

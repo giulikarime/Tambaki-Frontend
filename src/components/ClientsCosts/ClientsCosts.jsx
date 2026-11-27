@@ -61,7 +61,7 @@ function TicketEvolutionChart({ series, year }) {
             <div className="clients-chart-header">
                 <div>
                     <h3>Evolução do Ticket ao Longo dos Meses</h3>
-                    <p className="clients-subtitle">Unidade XYZ - {year}</p>
+                    <p className="clients-subtitle">Unidade Sabor&Cia - {year}</p>
                 </div>
                 {hoveredItem && (
                     <div className="clients-chart-tooltip">

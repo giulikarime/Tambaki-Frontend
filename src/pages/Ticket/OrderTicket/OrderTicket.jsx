@@ -1,13 +1,18 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Header from "../../../components/HeaderAndSidebar/Header";
 import Sidebar from "../../../components/HeaderAndSidebar/Sidebar";
 import './order_ticket.css';
 import "../../../App.css";
 import { ChevronLeft } from "lucide-react";
 import { getTables } from "../../../services/tables";
+import { getOrders } from "../../../services/orders";
+import { getReservations } from "../../../services/reserves";
 import { useNavigate } from "react-router-dom";
-import { createOrder, getOrders } from "../../../services/orders";
-import AlertModal from "../../../components/AlertModal";
+import AlertModals from "../../../components/SucessModals/AlertModals";
+import {
+    getReservationDateTime,
+    isPendingReservationOverdue,
+} from "../../../utils/reservationTime";
 
 function OpenTicket() {
 
@@ -15,18 +20,16 @@ function OpenTicket() {
     const [hasInteracted, setHasInteracted] = useState(false);
 
     const [orderTables, setOrderTables] = useState([]);
+    const [orders, setOrders] = useState([]);
+    const [reservations, setReservations] = useState([]);
     const [selectedTable, setSelectedTable] = useState(null);
-    const [filteredTableId, setFilteredTableId] = useState(null);   // <- nova
-    const [openOrders, setOpenOrders] = useState([]);
+    const [currentTime, setCurrentTime] = useState(() => new Date());
     const [isLoadingData, setIsLoadingData] = useState(true);
-    const [isSaving, setIsSaving] = useState(false);
     const [alertPhrase, setAlertPhrase] = useState("");
     const [alertType, setAlertType] = useState("success");
     const [alertModalIsOpen, setAlertModalIsOpen] = useState(false);
 
     const [clientName, setClientName] = useState("");
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [modalClientName, setModalClientName] = useState("");
 
     const tablesListRef = useRef(null);
     const isDragging = useRef(false);
@@ -44,16 +47,19 @@ function OpenTicket() {
     async function loadData() {
         setIsLoadingData(true);
         try {
-            const [tables, orders] = await Promise.all([getTables(), getOrders()]);
+            const [tables, ordersData, reservationsData] = await Promise.all([
+                getTables(),
+                getOrders(),
+                getReservations(),
+            ]);
             setOrderTables(
                 [...tables].sort((a, b) => Number(a.table_number) - Number(b.table_number))
             );
-            setOpenOrders(orders.filter((order) => order.status === "Aberta")
-                .sort((a, b) => new Date(b.order_date) - new Date(a.order_date) || b.id - a.id)
-            );
+            setOrders(ordersData);
+            setReservations(reservationsData);
         } catch (error) {
-            console.error("Erro ao carregar mesas e comandas:", error);
-            showAlert(error.message || "Erro ao carregar mesas e comandas.", "error");
+            console.error("Erro ao carregar mesas, comandas e reservas:", error);
+            showAlert(error.message || "Erro ao carregar mesas e reservas.", "error");
         } finally {
             setIsLoadingData(false);
         }
@@ -63,11 +69,29 @@ function OpenTicket() {
         loadData();
     }, [])
 
-    function orderLabel(order) {
-        const number = order.table?.table_number
-            ?? orderTables.find((table) => table.id === order.tableId)?.table_number;
-        return `${order.nameClient} - Mesa ${String(number).padStart(2, "0")}`;
-    }
+    useEffect(() => {
+        const timer = setInterval(() => setCurrentTime(new Date()), 30_000);
+        return () => clearInterval(timer);
+    }, []);
+
+    const isTableAvailable = useCallback((table, at = new Date()) => {
+        if (!table || table.status === "Ocupado") return false;
+
+        const hasOpenOrder = orders.some(
+            (order) => order.tableId === table.id && order.status === "Aberta",
+        );
+        const hasCurrentReservation = reservations.some((reservation) => {
+            if (reservation.tableId !== table.id) return false;
+            if (!["Pendente", "Confirmada"].includes(reservation.status)) return false;
+            if (isPendingReservationOverdue(reservation, at)) return false;
+
+            const startsAt = getReservationDateTime(reservation, false);
+            const endsAt = getReservationDateTime(reservation, true);
+            return startsAt && endsAt && startsAt <= at && at < endsAt;
+        });
+
+        return !hasOpenOrder && !hasCurrentReservation;
+    }, [orders, reservations]);
 
     function handleMouseDown(e) {
         const el = tablesListRef.current;
@@ -92,57 +116,46 @@ function OpenTicket() {
         el.scrollLeft = scrollLeftStart.current - walk;
     }
 
-    async function handleAddCommand(e) {
-        e.preventDefault();
+    
 
-        if (selectedTable === null) {
-            alert("Selecione uma mesa primeiro!");
-            return;
-        }
-
-        const clientNameTrimmed = modalClientName.trim();
-        if (!clientNameTrimmed) {
-            alert("Insira o nome do cliente!");
-            return;
-        }
-
-        const tableObj = orderTables[selectedTable];
-
-        setIsSaving(true);
-        try {
-            await createOrder({
-                nameClient: clientNameTrimmed,
-                tableId: tableObj.id,
-                service_type: "Mesa",
-            });
-            setModalClientName("");
-            setIsModalOpen(false);
-            setSelectedTable(null);
-            await loadData();
-        } catch (error) {
-            console.error("Erro ao abrir comanda:", error);
-            showAlert(error.message || "Erro ao abrir comanda.", "error");
-        } finally {
-            setIsSaving(false);
-        }
-    }
-
-    function handleSelectCommand(order) {
-        navigate('/menu_ordering', { state: { orderId: order.id } });
-    }
-
-    function handleFilterByTable() {
+    function handleStartOrder() {
         if (selectedTable === null) {
             showAlert("Selecione uma mesa primeiro!", "error");
             return;
         }
-        setFilteredTableId(orderTables[selectedTable].id);
+
+        const table = orderTables[selectedTable];
+        if (!isTableAvailable(table, new Date())) {
+            showAlert("Selecione uma mesa livre.", "error");
+            return;
+        }
+
+        const nameClient = clientName.trim();
+        if (!nameClient) {
+            showAlert("Insira o nome do cliente.", "error");
+            return;
+        }
+
+        navigate('/menu_ordering', {
+            state: {
+                draftOrder: {
+                    nameClient,
+                    tableId: table.id,
+                    tableNumber: table.table_number,
+                },
+            },
+        });
     }
 
-    const filteredTable = orderTables.find((table) => table.id === filteredTableId);
-    const visibleOrders = filteredTable
-        ? openOrders.filter((order) => order.tableId === filteredTable.id)
-        : openOrders;
+    const availableTables = orderTables.filter((table) => isTableAvailable(table, currentTime));
+
+    useEffect(() => {
+        if (selectedTable === null) return;
+        const selected = orderTables[selectedTable];
+        if (!selected || !isTableAvailable(selected, currentTime)) {
+            setSelectedTable(null);
+        }
+    }, [currentTime, isTableAvailable, orderTables, selectedTable]);
 
     return (
         <>
@@ -157,7 +170,14 @@ function OpenTicket() {
                                 <h1>Abrir Comanda</h1>
                             </div>
                         </div>
-                        <input id='input-client-order' type="text" placeholder="Insira o nome do cliente..." />
+                        <input
+                            id='input-client-order'
+                            type="text"
+                            placeholder="Insira o nome do cliente..."
+                            value={clientName}
+                            onChange={(event) => setClientName(event.target.value)}
+                            required
+                        />
                         <p style={{ color: '#777171ff' }}>Selecione a mesa do cliente e monte seu pedido.</p>
                     </div>
                     <div id="sec-container">
@@ -171,117 +191,46 @@ function OpenTicket() {
                         >
                             {isLoadingData ? (
                                 <p>Carregando mesas...</p>
-                            ) : orderTables.length > 0 ? (
-                                orderTables.map((table, index) => {
-                                    const isReserved = table.status === "Reservado";
-                                    const isBusy = table.status === "Ocupado";
-                                    const tableStatus = isReserved ? "Ocupado" : table.status;
-                                    const isSelected = selectedTable === index;
+                            ) : availableTables.length > 0 ? (
+                                availableTables.map((table) => {
+                                    const tableIndex = orderTables.findIndex(
+                                        (item) => item.id === table.id,
+                                    );
+                                    const isSelected = selectedTable === tableIndex;
 
                                     return (
                                         <button
                                             onClick={() => {
-                                                if (isReserved) return;
-                                                setSelectedTable(isSelected ? null : index);
-                                                setFilteredTableId(null);
+                                                if (!isTableAvailable(table, new Date())) {
+                                                    showAlert("Esta mesa está ocupada ou reservada neste horário.", "error");
+                                                    setSelectedTable(null);
+                                                    return;
+                                                }
+                                                setSelectedTable(isSelected ? null : tableIndex);
                                             }}
-                                            disabled={isReserved}
-                                            className={`selected-table ${isReserved ? 'occupied' : (isSelected ? 'select' : (isBusy ? 'busy' : 'not-select'))}`}
-                                            key={index}
+                                            className={`selected-table ${isSelected ? 'select' : 'not-select'}`}
+                                            key={table.id}
                                         >
                                             <p><b>{String(table.table_number).padStart(2, "0")}</b></p>
-                                            <p>{tableStatus}</p>
+                                            <p>Livre</p>
                                         </button>
                                     )
                                 })
                             ) : (
-                                <p>Nenhuma mesa encontrada.</p>
+                                <p>Nenhuma mesa livre no momento.</p>
                             )}
                         </div>
-                        <div id="clients-list">
-                            <div id='post-it-fix'></div>
-                            {filteredTable && (
-                                <div className="clients-list-header">
-                                    <b>Mesa {String(filteredTable.table_number).padStart(2, "0")}</b>
-                                </div>
-                            )}
-                            {visibleOrders.length > 0 ? (
-                                visibleOrders.map((order) => (
-                                    <p
-                                        key={order.id}
-                                        onClick={() => handleSelectCommand(order)}
-                                        style={{ cursor: 'pointer', textDecoration: 'underline' }}
-                                        title="Clique para montar o pedido"
-                                    >
-                                        {orderLabel(order)}
-                                    </p>
-                                ))
-                            ) : (
-                                <p>
-                                    {isLoadingData
-                                        ? "Carregando comandas..."
-                                        : filteredTable
-                                            ? "Nenhuma comanda aberta nesta mesa."
-                                            : "Nenhuma comanda aberta."}
-                                </p>
-                            )}
-                        </div>
+
                     </div>
                     <div className="actions-buttons" style={{ display: 'flex', gap: '16px' }}>
                         <button type="button"
-                            onClick={handleFilterByTable} id='btn-select-table'>
-                            Selecionar Mesa
-                        </button>
-                        <button
-                            type="button"
-                            id='btn-add-command'
-                            onClick={() => {
-                                if (selectedTable === null) {
-                                    alert("Selecione uma mesa primeiro!");
-                                    return;
-                                }
-                                setIsModalOpen(true);
-                            }}
-                        >
-                            Adicionar Comanda
+                            onClick={handleStartOrder} id='btn-select-table'>
+                            Iniciar comanda
                         </button>
                     </div>
                 </div>
             </main >
-
-            {/* Modal de Adicionar Comanda */}
-            {
-                isModalOpen && (
-                    <div className="modal-overlay">
-                        <div className="modal-content">
-                            <button
-                                className="modal-close"
-                                onClick={() => setIsModalOpen(false)}
-                            >
-                                ✕
-                            </button>
-                            <h2>Adicionar comanda</h2>
-                            <form onSubmit={handleAddCommand}>
-                                <label htmlFor="modal-name">Nome</label>
-                                <div className="modal-input-group">
-                                    <input
-                                        id="modal-name"
-                                        type="text"
-                                        placeholder="Insira um nome..."
-                                        value={modalClientName}
-                                        onChange={(e) => setModalClientName(e.target.value)}
-                                        autoFocus
-                                    />
-                                    <button type="submit" className="btn-start-command" disabled={isSaving}>
-                                        Iniciar comanda
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                )
-            }
-            <AlertModal
+            <AlertModals
                 phrase={alertPhrase}
                 isOpen={alertModalIsOpen}
                 setIsOpen={setAlertModalIsOpen}

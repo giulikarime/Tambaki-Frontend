@@ -6,7 +6,8 @@ import { ChevronLeft } from "lucide-react";
 import { getTables } from "../../../services/tables";
 import { createReservation, getReservations } from "../../../services/reserves";
 import { useNavigate } from "react-router-dom";
-import AlertModal from "../../../components/AlertModal";
+import AlertModals from "../../../components/SucessModals/AlertModals";
+import { getReservationDateTime } from "../../../utils/reservationTime";
 
 function formatLocalDateTime(date){
     const pad = (value) => String(value).padStart(2, "0");
@@ -27,25 +28,25 @@ function BookTable(){
     const [reservations,setReservations] = useState([]);
     const [isLoadingReservationData, setIsLoadingReservationData] = useState(true);
     const [selectedTable,setSelectedTable] = useState(null);
+    const [clientName, setClientName] = useState("");
+    const [clientPhone, setClientPhone] = useState("");
     const [desiredTime,setDesiredTime] = useState("");
+    const [quantityPeople, setQuantityPeople] = useState("1");
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [alertPhrase, setAlertPhrase] = useState("");
     const [alertType, setAlertType] = useState("success");
     const [alertModalIsOpen, setAlertModalIsOpen] = useState(false);
+    const [successPhrase, setSuccessPhrase] = useState('');
+    const [formError, setFormError] = useState('');
 
     const tablesListRef = useRef(null);
     const isDragging = useRef(false);
     const startX = useRef(0);
     const scrollLeftStart = useRef(0);
 
-    function showAlert(phrase, type){
-        setAlertPhrase(phrase);
-        setAlertType(type);
-        setAlertModalIsOpen(true);
-    }
 
     useEffect(()=>{
             async function loadReservationData(){
+                setFormError('');
                 try{
                     const [tables, reservationsData] = await Promise.all([
                         getTables(),
@@ -55,7 +56,9 @@ function BookTable(){
                     setReservations(reservationsData);
                 }catch(error){
                     console.error("Erro ao carregar mesas ou reservas.",error);
-                    showAlert(error.message || "Erro ao carregar mesas e reservas.", "error");
+                    setFormError('Erro ao carregar mesas e reservas');
+                    setAlertType('error');
+                    setAlertModalIsOpen(true);
                 } finally {
                     setIsLoadingReservationData(false);
                 }
@@ -63,35 +66,11 @@ function BookTable(){
             loadReservationData();
         },[])
 
-    function getReservationDateTime(reservation, isEnd) {
-        const dateValue = isEnd ? reservation.endsAtDate : reservation.startsAtDate;
-        const timeValue = isEnd ? reservation.endsAtHours : reservation.startsAtHours;
-
-        if (!dateValue || !timeValue) return null;
-
-        const dateMatch = String(dateValue).match(/^(\d{4})-(\d{2})-(\d{2})/);
-        const timeMatch = String(timeValue).match(/T(\d{2}):(\d{2})|^(\d{2}):(\d{2})/);
-        if (!dateMatch) return null;
-
-        const hours = timeMatch ? Number(timeMatch[1] ?? timeMatch[3]) : 0;
-        const minutes = timeMatch ? Number(timeMatch[2] ?? timeMatch[4]) : 0;
-        return new Date(
-            Number(dateMatch[1]),
-            Number(dateMatch[2]) - 1,
-            Number(dateMatch[3]),
-            hours,
-            minutes,
-            0,
-            0,
-        );
-    }
-
     function getDesiredRange() {
         if (!desiredTime) return null;
 
-        const [hours, minutes] = desiredTime.split(":").map(Number);
-        const startsAt = new Date();
-        startsAt.setHours(hours, minutes, 0, 0);
+        const startsAt = new Date(desiredTime);
+        if (Number.isNaN(startsAt.getTime())) return null;
         const endsAt = new Date(startsAt.getTime() + 2 * 60 * 60 * 1000);
         return { startsAt, endsAt };
     }
@@ -113,41 +92,81 @@ function BookTable(){
     }
 
     function getRecommendedTable() {
-        return orderTables.find((table) => table.capacity >= 1 && !isTableOccupied(table)) || null;
+        const peopleCount = Number(quantityPeople);
+        if (!Number.isInteger(peopleCount) || peopleCount < 1) return null;
+
+        return orderTables.find(
+            (table) => table.capacity >= peopleCount && !isTableOccupied(table),
+        ) || null;
+    }
+
+    function getTableIssue(table) {
+        if (table.capacity < Number(quantityPeople)) return "capacity";
+        if (isTableOccupied(table)) return "occupied";
+        return null;
     }
 
     async function handleCreateReservation(event){
         event.preventDefault();
+        setSuccessPhrase('');
+        setFormError('');
+        setAlertType('');
+        const peopleCount = Number(quantityPeople);
+        if (!Number.isInteger(peopleCount) || peopleCount < 1) {
+            setFormError("Informe um número inteiro de pessoas maior que zero.");
+            setAlertType('error');
+            setAlertModalIsOpen(true);
+            return;
+        }
         if (!selectedTable) {
-            showAlert("Selecione uma mesa para fazer a reserva.", "error");
+            setFormError("Selecione uma mesa para fazer a reserva.");
+            setAlertType('error');
+            setAlertModalIsOpen(true);
             return;
         }
         if (!desiredTime) {
-            showAlert("Selecione o horário desejado.", "error");
+            setFormError("Selecione o horário e a data desejada.");
+            setAlertType('error');
+            setAlertModalIsOpen(true);
             return;
         }
 
-        if (isTableOccupied(selectedTable)) {
+        const tableIssue = getTableIssue(selectedTable);
+        if (tableIssue) {
             const recommendedTable = getRecommendedTable();
-            showAlert(
+            const issueMessage = tableIssue === "capacity"
+                ? `A mesa ${String(selectedTable.table_number).padStart(2, "0")} não comporta ${peopleCount} pessoas.`
+                : `A mesa ${String(selectedTable.table_number).padStart(2, "0")} está ocupada nesse horário.`;
+            setFormError(
                 recommendedTable
-                    ? `Mesa ${String(selectedTable.table_number).padStart(2, "0")} ocupada. Recomendamos a mesa ${String(recommendedTable.table_number).padStart(2, "0")}.`
-                    : "Esta mesa está ocupada nesse horário e não há outra mesa livre.",
-                "error",
+                    ? `${issueMessage} Recomendamos a mesa ${String(recommendedTable.table_number).padStart(2, "0")}, com capacidade para ${recommendedTable.capacity} pessoas.`
+                    : `${issueMessage} Não há outra mesa livre com capacidade para ${peopleCount} pessoas.`
             );
+            setAlertType('error');
+            setAlertModalIsOpen(true);
             return;
         }
 
-        const form = event.currentTarget;
-        const formData = new FormData(form);
-        const [hours, minutes] = formData.get("startsAtHours").split(":").map(Number);
-        const startsAt = new Date();
-        startsAt.setHours(hours, minutes, 0, 0);
+        const phone = clientPhone.replace(/\D/g, "");
+        if (!/^\d{10,11}$/.test(phone)) {
+            setFormError("Informe um telefone com DDD e 10 ou 11 dígitos.");
+            setAlertType('error');
+            setAlertModalIsOpen(true);
+            return;
+        }
+        const startsAt = new Date(desiredTime);
+        if (Number.isNaN(startsAt.getTime())) {
+            setFormError("Selecione uma data e horário válidos.");
+            setAlertType('error');
+            setAlertModalIsOpen(true);
+            return;
+        }
         const endsAt = new Date(startsAt.getTime() + 2 * 60 * 60 * 1000);
 
         const payload = {
-            name: formData.get("name").trim(),
-            quantityPeople: 1,
+            name: clientName.trim(),
+            phone,
+            quantityPeople: peopleCount,
             startsAtDate: formatLocalDate(startsAt),
             startsAtHours: formatLocalDateTime(startsAt),
             endsAtDate: formatLocalDate(endsAt),
@@ -158,11 +177,14 @@ function BookTable(){
         setIsSubmitting(true);
         try {
             await createReservation(payload);
-            showAlert("Reserva criada com sucesso!", "success");
+            setSuccessPhrase("Reserva criada com sucesso!");
+            setAlertType('success');
+            setAlertModalIsOpen(true);
             setReservations((currentReservations) => [
                 ...currentReservations,
                 {
                     tableId: selectedTable.id,
+                    quantityPeople: peopleCount,
                     status: "Pendente",
                     startsAtDate: payload.startsAtDate,
                     startsAtHours: payload.startsAtHours,
@@ -171,11 +193,15 @@ function BookTable(){
                 },
             ]);
             setSelectedTable(null);
+            setClientName("");
+            setClientPhone("");
             setDesiredTime("");
-            form.reset();
+            setQuantityPeople("1");
         } catch (error) {
             console.error("Erro ao criar reserva:", error);
-            showAlert(error.message || "Erro ao criar reserva.", "error");
+            setFormError(error.message || "Erro ao criar reserva.");
+            setAlertType('error');
+            setAlertModalIsOpen(true);
         } finally {
             setIsSubmitting(false);
         }
@@ -206,6 +232,9 @@ function BookTable(){
         el.scrollLeft = scrollLeftStart.current - walk;
     }
 
+    const selectedTableIssue = selectedTable ? getTableIssue(selectedTable) : null;
+    const recommendedTable = selectedTableIssue ? getRecommendedTable() : null;
+
     return(
         <>
             <Header expanded={expanded} setExpand={setExpand} setHasInteracted={setHasInteracted} ></Header>
@@ -222,17 +251,43 @@ function BookTable(){
                     </div>
                         <form onSubmit={handleCreateReservation} autoComplete="off">
                             <div className="content-inputs">
-                                <input className='input-client-order-reserve' type="text" name="name" placeholder="Insira o nome do cliente..." aria-label="Nome do cliente" required />
-                                <input
-                                    className='input-client-order-reserve'
-                                    style={{width:'300px'}}
-                                    type="time"
-                                    name="startsAtHours"
-                                    aria-label="Horário inicial"
-                                    value={desiredTime}
-                                    onChange={(event)=>setDesiredTime(event.target.value)}
-                                    required
-                                />
+                                <div className="align-client-table">
+                                    <label htmlFor="reservation-client-name">Nome</label>
+                                    <input id="reservation-client-name" className='input-client-order-reserve' type="text" name="name" value={clientName} onChange={(event) => setClientName(event.target.value)} placeholder="Digite o nome do cliente..." aria-label="Nome do cliente" required />
+                                </div>
+                                <div className="align-client-table">
+                                    <label htmlFor="reservation-client-phone">Telefone</label>
+                                    <input id="reservation-client-phone" className='input-client-order-reserve' type="tel" name="phone" value={clientPhone} onChange={(event) => setClientPhone(event.target.value)} placeholder="Digite o telefone do cliente..." aria-label="Telefone do cliente" autoComplete="tel" inputMode="tel" maxLength={20} required />
+                                </div>
+                                <div className="align-client-table">
+                                    <label htmlFor="reservation-client-people">Número de Pessoas</label>
+                                    <input
+                                        id="reservation-client-people"
+                                        className="input-client-order-reserve"
+                                        type="number"
+                                        name="quantityPeople"
+                                        min="1"
+                                        step="1"
+                                        value={quantityPeople}
+                                        onChange={(event) => setQuantityPeople(event.target.value)}
+                                        placeholder="Ex.: 5"
+                                        aria-label="Número de Pessoas"
+                                        inputMode="numeric"
+                                        required
+                                    />
+                                </div>
+                                <div className="align-client-table">
+                                    <label htmlFor="">Horário</label>
+                                    <input
+                                        className='input-client-order-reserve'
+                                        type="datetime-local"
+                                        name="startsAtHours"
+                                        aria-label="Horário inicial"
+                                        value={desiredTime}
+                                        onChange={(event)=>setDesiredTime(event.target.value)}
+                                        required
+                                    />
+                                </div>
                             </div>
                             <p className="reservation-instruction">Selecione a mesa do cliente e faça sua reserva.</p>
                             <div id="sec-container">
@@ -250,17 +305,25 @@ function BookTable(){
                                         orderTables.map((table)=>{
                                             const isSelected = selectedTable?.id === table.id;
                                             const isOccupied = isTableOccupied(table);
+                                            const hasInsufficientCapacity = Number(quantityPeople) > table.capacity;
+                                            const isUnavailable = isOccupied || hasInsufficientCapacity;
                                             const tableTextColor = isSelected ? "white" : "black";
 
                                             return(
                                                 <button 
                                                     type="button"
                                                     onClick={()=>setSelectedTable(table)}
-                                                    className={`selected-table ${isSelected ? 'select' : isOccupied ? 'occupied' : 'not-select'}`} 
+                                                    className={`selected-table ${isSelected ? 'select' : isUnavailable ? 'occupied' : 'not-select'}`} 
                                                     key={table.id}
                                                 >
                                                     <p style={{color: tableTextColor}}><b>{String(table.table_number).padStart(2,"0")}</b></p>
-                                                    <p style={{color: tableTextColor}}>{isOccupied ? "Ocupada" : "Livre"}</p>
+                                                    <p style={{color: tableTextColor}}>
+                                                        {isOccupied
+                                                            ? "Ocupada"
+                                                            : hasInsufficientCapacity
+                                                                ? "Poucos lugares"
+                                                                : "Livre"}
+                                                    </p>
                                                 </button>
                                             )
                                         })
@@ -269,22 +332,41 @@ function BookTable(){
                                     )}
                                 </div>
                             </div>
-                            {desiredTime && selectedTable && isTableOccupied(selectedTable) && (() => {
-                                const recommendedTable = getRecommendedTable();
+                            {desiredTime
+                                && !isLoadingReservationData
+                                && orderTables.length > 0
+                                && Number.isInteger(Number(quantityPeople))
+                                && Number(quantityPeople) >= 1
+                                && (!selectedTable || selectedTableIssue)
+                                && (() => {
+                                const isCapacityIssue = selectedTableIssue === "capacity";
                                 return (
                                     <div className="reservation-recommendation">
-                                        <span>
-                                            Mesa {String(selectedTable.table_number).padStart(2,"0")} ocupada às {desiredTime}.
-                                        </span>
+                                        {selectedTableIssue && (
+                                            <span>
+                                                {isCapacityIssue
+                                                    ? `Mesa ${String(selectedTable.table_number).padStart(2,"0")} não comporta ${quantityPeople} pessoas.`
+                                                    : `Mesa ${String(selectedTable.table_number).padStart(2,"0")} ocupada às ${desiredTime}.`}
+                                            </span>
+                                        )}
                                         {recommendedTable ? (
-                                            <button
-                                                type="button"
-                                                onClick={()=>setSelectedTable(recommendedTable)}
-                                            >
-                                                Usar mesa {String(recommendedTable.table_number).padStart(2,"0")}
-                                            </button>
+                                            <>
+                                                {!selectedTableIssue && (
+                                                    <span>
+                                                        Mesa {String(recommendedTable.table_number).padStart(2,"0")} recomendada para {quantityPeople} pessoas.
+                                                    </span>
+                                                )}
+                                                <button
+                                                    type="button"
+                                                    onClick={()=>setSelectedTable(recommendedTable)}
+                                                >
+                                                    Usar mesa {String(recommendedTable.table_number).padStart(2,"0")} ({recommendedTable.capacity} lugares)
+                                                </button>
+                                            </>
                                         ) : (
-                                            <span>Nenhuma mesa livre neste horário.</span>
+                                            <span>
+                                                Nenhuma mesa livre com capacidade para {quantityPeople} pessoas.
+                                            </span>
                                         )}
                                     </div>
                                 );
@@ -295,12 +377,12 @@ function BookTable(){
                         </form>
                 </div>
             </main>
-            <AlertModal
-                phrase={alertPhrase}
+            <AlertModals
+                phrase={successPhrase ? successPhrase : formError}
                 isOpen={alertModalIsOpen}
                 setIsOpen={setAlertModalIsOpen}
                 type={alertType}
-            />
+            ></AlertModals>
         </>
     );
 }

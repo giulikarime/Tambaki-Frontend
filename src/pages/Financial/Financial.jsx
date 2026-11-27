@@ -25,8 +25,9 @@ import {
     somarCustoProdutos,
 } from "../../utils/profitUtils";
 import { calcularMaiorCategoriaClientes } from "../../utils/clientsCostsUtils";
-import { calcularTendenciaCmvMensal } from "../../utils/cmvUtils";
+import { calcularTendenciaCmvMensal, separarCmvPorMesesDeCustos, somarCmvDosCustos } from "../../utils/cmvUtils";
 import { canEditResource, getAccessLevel } from "../../utils/access";
+import { getCmvPlannings, saveCmvPlanning } from "../../services/cmvPlanning";
 
 function Financial(){
 
@@ -49,13 +50,31 @@ function Financial(){
     const [myOrders, setMyOrders] = useState([]);
     const [myProducts, setMyProducts] = useState([]);
     const [myMenu, setMyMenu] = useState([]);
+    const [cmvPlannings, setCmvPlannings] = useState([]);
     const [loadingCosts, setLoadingCosts] = useState(true);
     const [loadingOrders, setLoadingOrders] = useState(true);
     const [loadingProducts, setLoadingProducts] = useState(true);
+    const [loadingCmvPlannings, setLoadingCmvPlannings] = useState(true);
+    const [isSavingCmvPlanning, setIsSavingCmvPlanning] = useState(false);
     const [costsLoaded, setCostsLoaded] = useState(false);
     const [ordersLoaded, setOrdersLoaded] = useState(false);
     const [productsLoaded, setProductsLoaded] = useState(false);
     const [selectedCost,setSelectedCost] = useState('');
+
+    const totalCombinedCosts = somarCustosFixosEVariaveis(myCosts);
+    const combinedCostsTrend = calcularTendenciaMensal(myCosts);
+    const totalRevenue = calcularFaturamento(myOrders);
+    const totalProductCost = somarCustoProdutos(myProducts);
+
+    const cmvFromCosts = somarCmvDosCustos(myCosts);              // <- aqui, depois do totalProductCost
+    const hasCostCmv = cmvFromCosts > 0;
+    const totalCmv = hasCostCmv ? cmvFromCosts : totalProductCost;
+    const cmvTrend = calcularTendenciaCmvMensal(
+        myProducts, year, hasCostCmv ? separarCmvPorMesesDeCustos(myCosts, year) : null
+    );
+
+    const totalProfit = calcularLucro(totalRevenue, totalCombinedCosts);
+    // ... resto igual
 
     async function handleGetCosts() {
         setLoadingCosts(true);
@@ -74,10 +93,11 @@ function Financial(){
         setLoadingOrders(true);
         setLoadingProducts(true);
 
-        const [ordersRes, productsRes, menuRes] = await Promise.allSettled([
+        const [ordersRes, productsRes, menuRes, cmvPlanningsRes] = await Promise.allSettled([
             getOrders(),
             getFinancialProducts(),
             getAccessLevel() === 'Master' ? getMenu() : Promise.resolve([]),
+            getCmvPlannings(year),
         ]);
 
         if (ordersRes.status === 'fulfilled') {
@@ -101,14 +121,17 @@ function Financial(){
         } else {
             console.error("Não foi possível carregar o cardápio.", menuRes.reason);
         }
-    }
 
-    const totalCombinedCosts = somarCustosFixosEVariaveis(myCosts);
-    const combinedCostsTrend = calcularTendenciaMensal(myCosts);
-    const totalRevenue = calcularFaturamento(myOrders);
-    const totalProductCost = somarCustoProdutos(myProducts);
-    const cmvTrend = calcularTendenciaCmvMensal(myProducts);
-    const totalProfit = calcularLucro(totalRevenue, totalCombinedCosts);
+        if (cmvPlanningsRes.status === 'fulfilled') {
+            setCmvPlannings(Array.isArray(cmvPlanningsRes.value) ? cmvPlanningsRes.value : []);
+        } else {
+            console.error("Não foi possível carregar o planejamento de CMV.", cmvPlanningsRes.reason);
+            setFormError(cmvPlanningsRes.reason?.message || "Não foi possível carregar o planejamento de CMV.");
+            setAlertType('error');
+            setAlertModalIsOpen(true);
+        }
+        setLoadingCmvPlannings(false);
+    }
     const breakEvenDays = calcularPontoDeEquilibrioDias({
         faturamento: totalRevenue,
         cmv: totalProductCost,
@@ -129,9 +152,9 @@ function Financial(){
     const cardsData = [
         {
             label: 'Custo de Mercadoria Vendida',
-            value: loadingProducts ? '...' : productsLoaded ? formatCompactCurrency(totalProductCost) : '--',
+            value: (loadingProducts || loadingCosts) ? '...' : (productsLoaded || costsLoaded) ? formatCompactCurrency(totalCmv) : '--',
             subtitle: loadingProducts ? 'Carregando dados...' : productsLoaded ? `${cmvTrend.percentChange}% vs. mês anterior` : 'Indisponível no momento',
-            button: false,
+            button: true,
             id: 'yellow',
             selected: 'CMV',
             action: ()=>setAddCMVModalIsOpen(!addCMVModalIsOpen),
@@ -149,7 +172,7 @@ function Financial(){
             label: 'Lucro e Ponto de Equilíbrio',
             value: (loadingOrders || loadingCosts) ? '...' : (ordersLoaded && costsLoaded) ? formatCompactCurrency(totalProfit) : '--',
             subtitle: profitSubtitle,
-            button: true,
+            button: false,
             id: 'blue',
             selected: 'Lucro',
             action: ()=>setAddProfitPointModalIsOpen(!addProfitPointModalIsOpen),
@@ -195,6 +218,7 @@ function Financial(){
     }, []);
 
     const [addCostModalIsOpen, setAddCostModalIsOpen] = useState(false);
+    const [addCMVModalIsOpen, setAddCMVModalIsOpen] = useState(false);
     const [addProfitPointModalIsOpen, setAddProfitPointModalIsOpen] = useState(false);
     const [addClientCostModalIsOpen, setAddClientCostModalIsOpen] = useState(false);
 
@@ -229,6 +253,55 @@ function Financial(){
             setFormError(error.message || "Erro ao cadastrar o custo.");
             setAlertType('error');
             setAlertModalIsOpen(true);
+        }
+    }
+
+    async function handleCreateCmvPlanning(event) {
+        event.preventDefault();
+        setFormError('');
+        setFormSuccess('');
+        setAlertType('');
+
+        const form = event.currentTarget;
+        const formData = new FormData(form);
+        const payload = {
+            year: Number(formData.get('year')),
+            month: Number(formData.get('month')),
+            plannedAmount: Number(formData.get('plannedAmount')),
+        };
+
+        if (
+            !Number.isInteger(payload.year) ||
+            !Number.isInteger(payload.month) ||
+            !Number.isFinite(payload.plannedAmount) ||
+            payload.plannedAmount < 0
+        ) {
+            setFormError("Informe mês, ano e uma meta de CMV válida.");
+            setAlertType('error');
+            setAlertModalIsOpen(true);
+            return;
+        }
+
+        setIsSavingCmvPlanning(true);
+        try {
+            const savedPlanning = await saveCmvPlanning(payload);
+            setCmvPlannings((current) => [
+                ...current.filter(
+                    (planning) => planning.year !== savedPlanning.year || planning.month !== savedPlanning.month,
+                ),
+                ...(savedPlanning.year === year ? [savedPlanning] : []),
+            ].sort((a, b) => a.month - b.month));
+            setAddCMVModalIsOpen(false);
+            form.reset();
+            setFormSuccess("Planejamento de CMV salvo com sucesso!");
+            setAlertType('success');
+            setAlertModalIsOpen(true);
+        } catch (error) {
+            setFormError(error.message || "Erro ao salvar o planejamento de CMV.");
+            setAlertType('error');
+            setAlertModalIsOpen(true);
+        } finally {
+            setIsSavingCmvPlanning(false);
         }
     }
 
@@ -318,18 +391,8 @@ function Financial(){
                                 <button className="btn-back-base" onClick={()=>navigate(-1)}><ChevronLeft></ChevronLeft></button>
                                 <h1>Dashboard Financeiro</h1>
                             </div>
-                            <div className="groups-top-container">
-                                <button
-                                    onClick={()=>setSelectedCard('Lucro')}
-                                    className="btn-stock-base">Gerenciar Custos e Lucro
-                                </button>
-                                <button
-                                    onClick={()=>setFilterModalIsOpen(!filterModalIsOpen)}
-                                    className="btn-stock-base btn-funnel-base">Filtrar <Funnel size={20}></Funnel>
-                                </button>
-                            </div>
                         </div>
-                        <p style={{ color: '#777171ff' }}>Unidade XYZ - {month.charAt(0).toUpperCase() + month.slice(1)} {year}</p>
+                        <p style={{ color: '#777171ff' }}>Unidade Sabor&Cia - {month.charAt(0).toUpperCase() + month.slice(1)} {year}</p>
                     </div>
                     <div className="cards-dashboard">
                         {cardsData.map((card,index)=>(
@@ -356,9 +419,72 @@ function Financial(){
                         ))}
                     </div>
                     <div>
-                        {selectCard === 'CMV' ? (<CMV products={myProducts} orders={myOrders} loading={loadingProducts || loadingOrders} />) : selectCard === 'Custos' ? (<Costs costs={myCosts} loading={loadingCosts} />) : selectCard === 'Lucro' ? (<ProfitPoint orders={myOrders} costs={myCosts} products={myProducts} loading={loadingCosts || loadingOrders} />) : selectCard === 'Clientes' ? (<ClientsCosts orders={myOrders} menu={myMenu} products={myProducts} loading={loadingOrders} />) : null}
+                        {selectCard === 'CMV' ? (
+                            <CMV
+                                products={myProducts}
+                                orders={myOrders}
+                                costs={myCosts}
+                                plannings={cmvPlannings}
+                                loading={loadingProducts || loadingOrders || loadingCmvPlannings || loadingCosts}
+                            />
+                        ) : selectCard === 'Custos' ? (
+                            <Costs costs={myCosts} loading={loadingCosts} />
+                        ) : selectCard === 'Lucro' ? (
+                            <ProfitPoint orders={myOrders} costs={myCosts} products={myProducts} loading={loadingCosts || loadingOrders} />
+                        ) : selectCard === 'Clientes' ? (
+                            <ClientsCosts orders={myOrders} menu={myMenu} products={myProducts} loading={loadingOrders} />
+                        ) : null}
                     </div>
                 </div>
+
+                <Modal
+                    isOpen={canEditCosts && addCMVModalIsOpen}
+                    onRequestClose={() => setAddCMVModalIsOpen(false)}
+                    contentLabel="Planejamento mensal de CMV"
+                    style={modalStyle}
+                >
+                    <div className="top-container">
+                        <div className="group-one-top-container">
+                            <h2>Planejamento mensal de CMV</h2>
+                            <button
+                                type="button"
+                                onClick={() => setAddCMVModalIsOpen(false)}
+                                style={{ fontSize: 30 }}
+                            >&times;</button>
+                        </div>
+                        <p style={{ fontSize: 15, color: '#777171ff' }}>
+                            Defina a meta mensal em reais para comparar com o CMV realizado.
+                        </p>
+                    </div>
+                    <form className="form-add-costs" onSubmit={handleCreateCmvPlanning}>
+                        <div className="container-form">
+                            <div className="fields">
+                                <label htmlFor="cmv-planning-month">Mês</label>
+                                <select id="cmv-planning-month" className="input-select-model" name="month" defaultValue={presentDate.getMonth() + 1} required>
+                                    {Array.from({ length: 12 }, (_, index) => (
+                                        <option key={index + 1} value={index + 1}>
+                                            {new Date(2000, index, 1).toLocaleString('pt-BR', { month: 'long' })}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="fields">
+                                <label htmlFor="cmv-planning-year">Ano</label>
+                                <input id="cmv-planning-year" className="input-select-model" type="number" name="year" min="2000" max="3000" step="1" defaultValue={year} required />
+                            </div>
+                            <div className="fields">
+                                <label htmlFor="cmv-planning-amount">Meta de CMV (R$)</label>
+                                <input id="cmv-planning-amount" className="input-select-model" type="number" name="plannedAmount" min="0" step="0.01" placeholder="Ex.: 15000,00" required />
+                            </div>
+                            <div className="fields">
+                                <label style={{ color: 'white' }} htmlFor="">.</label>
+                                <button className="btn-modal-submit menu" type="submit" disabled={isSavingCmvPlanning}>
+                                    {isSavingCmvPlanning ? "Salvando..." : "Salvar planejamento"}
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </Modal>
 
                 <Modal
                     isOpen={canEditCosts && addCostModalIsOpen}

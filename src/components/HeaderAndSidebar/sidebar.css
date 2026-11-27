@@ -78,9 +78,6 @@
     transition-delay: 0.15s;
 }
 
-.sidebar-item:hover .sidebar-label {
-    color: #191444;
-}
 
 @media (max-width: 768px) {
     body:has(main > #sidebar) header #group-one > button {

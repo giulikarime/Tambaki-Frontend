@@ -388,7 +388,7 @@ function Costs({ costs: externalCosts, loading: externalLoading = false }) {
                             ? 'Variação de Custos Variáveis'
                             : 'Variação de Custos Fixos'
                     }
-                    subtitle={`Unidade XYZ - ${currentYear}`}
+                    subtitle={`Unidade Sabor&Cia - ${currentYear}`}
                     costTypeFilter={barChartType}
                     onChangeFilter={setBarChartType}
                 />
