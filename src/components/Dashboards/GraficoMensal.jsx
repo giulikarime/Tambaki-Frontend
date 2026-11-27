@@ -16,7 +16,7 @@ import {
 export function GraficoMensal({
   dados = [],
   titulo = 'Evolução Mensal',
-  unidade = 'Unidade XYZ',
+  unidade = 'Unidade Sabor&Cia',
   labelSerie = 'Valor',
   cor = '#3b82f6',
   isMoeda = true,

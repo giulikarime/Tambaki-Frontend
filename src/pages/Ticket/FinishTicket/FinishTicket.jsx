@@ -3,9 +3,9 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { ChevronDown, ChevronLeft } from "lucide-react";
 import Header from "../../../components/HeaderAndSidebar/Header";
 import Sidebar from "../../../components/HeaderAndSidebar/Sidebar";
-import AlertModal from "../../../components/AlertModal";
 import { closeOrder, getOrderById } from "../../../services/orders";
 import './finish_ticket.css'
+import AlertModals from "../../../components/SucessModals/AlertModals";
 
 const PAYMENT_METHODS = ['Dinheiro', 'Cartão de Crédito', 'Cartão de Débito', 'Pix'];
 
@@ -72,10 +72,10 @@ function FinishTicket() {
         loadOrder();
     }, [orderId, navigate])
 
-    // Depois de finalizar, volta para Abrir Comanda quando o aviso for fechado
+    // Depois de finalizar, volta para Comandas e Reservas Abertas quando o aviso for fechado
     useEffect(() => {
         if (isFinished && !alertModalIsOpen) {
-            navigate('/order_ticket');
+            navigate('/open_all_tickets');
         }
     }, [isFinished, alertModalIsOpen, navigate])
 
@@ -225,7 +225,7 @@ function FinishTicket() {
                     </div>
                 </div>
             </main>
-            <AlertModal
+            <AlertModals
                 phrase={alertPhrase}
                 isOpen={alertModalIsOpen}
                 setIsOpen={setAlertModalIsOpen}

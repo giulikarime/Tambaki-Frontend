@@ -18,6 +18,8 @@ main{
 .content-inputs{
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-end;
     gap: 30px;
 }
 
@@ -29,7 +31,7 @@ main{
 }
 
 .input-client-order-reserve{
-    width: 53%;
+    width: 100%;
     padding: 12px 16px;
     box-sizing: border-box;
     font-size: 18px;
@@ -149,4 +151,12 @@ main{
 
 #btn-select-table:hover{
     box-shadow: 0px 0px 4px rgb(145, 56, 56);
+}
+
+.align-client-table{
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 190px;
+    min-width: 190px;
+    width: auto;
 }

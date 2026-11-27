@@ -1,12 +1,17 @@
 #order-ticket-page {
     --table-size: 84px;
     --table-gap: 16px;
+    --content-center-shift: -40px;
     display: flex;
     flex-direction: row;
     width: 100vw;
     height: auto;
     min-height: 93vh;
     background-color: #fff8e9;
+}
+
+#order-ticket-page:has(> #sidebar.expanded) {
+    --content-center-shift: -110px;
 }
 
 #order-ticket-page #sidebar {
@@ -16,29 +21,41 @@
 
 #order-ticket-page #principal-menu-order {
     position: static;
-    transform: none;
+    transform: translateX(15%) scale(1.1);
     box-sizing: border-box;
     flex: 1;
     min-width: 0;
     width: auto;
     max-width: 960px;
     margin: 0 auto;
-    padding: 5vh 24px 32px;
+    min-height: 93vh;
+    padding: 32px 24px;
     display: flex;
     flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
     gap: 24px;
+    text-align: left;
 }
 
 #order-ticket-page #container {
     display: flex;
     flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
     gap: 12px;
+}
+
+#order-ticket-page #top-container {
+    width: 100%;
 }
 
 #order-ticket-page .groups-top-container {
     display: flex;
     flex-direction: row;
     align-items: center;
+    justify-content: flex-start;
+    width: 100%;
     gap: 16px;
 }
 
@@ -62,8 +79,8 @@
 #order-ticket-page #sec-container {
     display: flex;
     flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
+    align-items: flex-start;
+    justify-content: flex-start;
     gap: 32px;
     width: 100%;
 }
@@ -71,7 +88,8 @@
 #order-ticket-page #tables-list-order {
     box-sizing: content-box;
     flex: 0 0 auto;
-    width: calc(4 * var(--table-size) + 3 * var(--table-gap));
+    margin-inline: 0;
+    width: calc(5 * var(--table-size) + 4 * var(--table-gap));
     padding: 4px;
     display: grid;
     grid-template-rows: repeat(2, var(--table-size));
@@ -172,6 +190,11 @@
     transition: box-shadow 0.2s ease, background-color 0.2s ease;
 }
 
+#order-ticket-page .actions-buttons {
+    justify-content: flex-start;
+    width: 100%;
+}
+
 #order-ticket-page #btn-select-table {
     color: #2b2a2a;
     background-color: #f5ae47;
@@ -257,4 +280,10 @@
     border-radius: 8px;
     padding: 10px 18px;
     cursor: pointer;
+}
+
+@media (max-width: 768px) {
+    #order-ticket-page #principal-menu-order {
+        transform: scale(1.1);
+    }
 }

@@ -117,7 +117,7 @@ function Home() {
                     getReservations(),
                 ]);
                 setBookTableList(reserves);
-                setOrderList(orders);
+                setOrderList(orders.filter((order) => order.status === "Aberta"));
             } catch(error){
                 console.error("Erro ao carregar comandas: ",error.message);
             } finally {

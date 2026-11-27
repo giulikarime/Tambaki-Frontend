@@ -334,9 +334,11 @@
     position: absolute;
     top: 2px;
     right: 6px;
+    max-width: calc(100% - 12px);
     z-index: 3;
     box-shadow: 0 2px 8px rgba(25, 20, 68, 0.14);
-    white-space: nowrap;
+    white-space: normal;
+    text-align: right;
 }
 
 .cmv-donut-content {

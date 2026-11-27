@@ -38,3 +38,10 @@ export function addOrderItem(orderId, payload) {
         body: JSON.stringify(payload),
     }, "Erro ao adicionar item");
 }
+
+export function updateOrderItem(orderId, itemId, payload) {
+    return request(`/orders/${orderId}/items/${itemId}`, {
+        method: "PATCH",
+        body: JSON.stringify(payload),
+    }, "Erro ao atualizar item");
+}

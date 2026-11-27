@@ -54,6 +54,7 @@ export default function Configuration() {
     dateTime: false,
     reset: false,
     about: false,
+    auditLogs: false,
   });
 
   const [terminals, setTerminals] = useState([
@@ -200,46 +201,6 @@ export default function Configuration() {
                     <p>Seu perfil é gerenciado pela {user?.storeUnit?.company_name}. Alterações de cargo e permissões são autorizadas pelo responsável administrativo.</p>
                 </div>
             </div>
-
-            {user?.access_level === "Master" && (
-              <section className="audit-log-card" aria-labelledby="audit-log-title">
-                <div className="audit-log-header">
-                  <h2 id="audit-log-title">Logs do sistema</h2>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setAuditLogsError("");
-                      setIsLoadingAuditLogs(true);
-                      getAuditLogs()
-                        .then(setAuditLogs)
-                        .catch((error) => setAuditLogsError(error.message))
-                        .finally(() => setIsLoadingAuditLogs(false));
-                    }}
-                    disabled={isLoadingAuditLogs}
-                  >
-                    Atualizar
-                  </button>
-                </div>
-                {auditLogsError && <p role="alert">{auditLogsError}</p>}
-                {isLoadingAuditLogs ? (
-                  <p>Carregando logs...</p>
-                ) : auditLogs.length === 0 ? (
-                  <p>Nenhuma ação registrada.</p>
-                ) : (
-                  <div className="audit-log-list">
-                    {auditLogs.map((log) => (
-                      <article className="audit-log-entry" key={log.id}>
-                        <strong>{log.actorName}</strong>
-                        <span>{log.description}</span>
-                        <time dateTime={log.createdAt}>
-                          {new Date(log.createdAt).toLocaleString("pt-BR")}
-                        </time>
-                      </article>
-                    ))}
-                  </div>
-                )}
-              </section>
-            )}
 
             <div className="config-main-card">
 
@@ -667,6 +628,71 @@ export default function Configuration() {
                     )}
                   </div>
                 )}
+                {user?.access_level === "Master"
+                  && isSectionVisible("auditLogs", ["logs do sistema", "auditoria", "ações"])
+                  && (
+                    <div className="config-accordion-item">
+                      <button
+                        type="button"
+                        className="config-accordion-header"
+                        onClick={() => toggleSection("auditLogs")}
+                        aria-expanded={isSectionExpanded("auditLogs", ["logs do sistema", "auditoria", "ações"])}
+                      >
+                        <div className="config-header-title-group">
+                          <Clock size={22} className="config-item-icon" />
+                          <span className="config-item-label">Logs do sistema</span>
+                        </div>
+                        <div className="config-header-arrow">
+                          {isSectionExpanded("auditLogs", ["logs do sistema", "auditoria", "ações"]) ? (
+                            <ChevronDown size={20} />
+                          ) : (
+                            <ChevronRight size={20} />
+                          )}
+                        </div>
+                      </button>
+                      {isSectionExpanded("auditLogs", ["logs do sistema", "auditoria", "ações"]) && (
+                        <div className="config-accordion-body animate-fade-down">
+                          <section className="audit-log-card" aria-labelledby="audit-log-title">
+                            <div className="audit-log-header">
+                              <h2 id="audit-log-title">Logs do sistema</h2>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setAuditLogsError("");
+                                  setIsLoadingAuditLogs(true);
+                                  getAuditLogs()
+                                    .then(setAuditLogs)
+                                    .catch((error) => setAuditLogsError(error.message))
+                                    .finally(() => setIsLoadingAuditLogs(false));
+                                }}
+                                disabled={isLoadingAuditLogs}
+                              >
+                                Atualizar
+                              </button>
+                            </div>
+                            {auditLogsError && <p role="alert">{auditLogsError}</p>}
+                            {isLoadingAuditLogs ? (
+                              <p>Carregando logs...</p>
+                            ) : auditLogs.length === 0 ? (
+                              <p>Nenhuma ação registrada.</p>
+                            ) : (
+                              <div className="audit-log-list">
+                                {auditLogs.map((log) => (
+                                  <article className="audit-log-entry" key={log.id}>
+                                    <strong>{log.actorName}</strong>
+                                    <span>{log.description}</span>
+                                    <time dateTime={log.createdAt}>
+                                      {new Date(log.createdAt).toLocaleString("pt-BR")}
+                                    </time>
+                                  </article>
+                                ))}
+                              </div>
+                            )}
+                          </section>
+                        </div>
+                      )}
+                    </div>
+                  )}
               </div>
             </div>
         </div>

@@ -1,24 +1,18 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ChevronLeft, Utensils } from "lucide-react";
 import Header from "../../components/HeaderAndSidebar/Header";
 import Sidebar from "../../components/HeaderAndSidebar/Sidebar";
-import AlertModal from "../../components/AlertModal";
-import { getMenu } from "../../services/menu";
-import { addOrderItem, getOrderById } from "../../services/orders";
+import AlertModals from "../../components/SucessModals/AlertModals";
+import { getMenu, getMenuEnums } from "../../services/menu";
+import {
+    addOrderItem,
+    createOrder,
+    getOrderById,
+    updateOrderItem,
+} from "../../services/orders";
+import { formatMenuCategoryLabel } from "../../utils/clientsCostsUtils";
 import './menu_ordering.css'
-
-const CATEGORY_TABS = [
-    { key: 'pratos', label: 'Pratos' },
-    { key: 'bebidas', label: 'Bebidas' },
-    { key: 'sobremesas', label: 'Sobremesas' },
-];
-
-function getTabKey(category) {
-    if (category === 'Bebidas') return 'bebidas';
-    if (category === 'Sobremesa') return 'sobremesas';
-    return 'pratos';
-}
 
 function formatPrice(value) {
     return Number(value || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -35,15 +29,23 @@ function MenuOrdering() {
 
     const [expanded, setExpand] = useState(false);
     const [hasInteracted, setHasInteracted] = useState(false);
+    const isDraggingTabs = useRef(false);
+    const hasDraggedTabs = useRef(false);
+    const dragStartX = useRef(0);
+    const initialScrollLeft = useRef(0);
 
     const navigate = useNavigate();
     const location = useLocation();
-    const orderId = location.state?.orderId;
+    const routeOrderId = location.state?.orderId;
+    const draftOrder = location.state?.draftOrder;
+    const [activeOrderId, setActiveOrderId] = useState(routeOrderId ?? null);
+    const [draftClientName, setDraftClientName] = useState(draftOrder?.nameClient ?? "");
 
     const [order, setOrder] = useState(null);
     const [menu, setMenu] = useState([]);
+    const [categories, setCategories] = useState([]);
     const [isLoadingData, setIsLoadingData] = useState(true);
-    const [selectedTab, setSelectedTab] = useState('pratos');
+    const [selectedTab, setSelectedTab] = useState('');
     const [cart, setCart] = useState({});
     const [isSaving, setIsSaving] = useState(false);
 
@@ -57,8 +59,46 @@ function MenuOrdering() {
         setAlertModalIsOpen(true);
     }
 
+    function handleTabsMouseDown(event) {
+        if (event.button !== 0) return;
+        isDraggingTabs.current = true;
+        hasDraggedTabs.current = false;
+        dragStartX.current = event.clientX;
+        initialScrollLeft.current = event.currentTarget.scrollLeft;
+    }
+
+    function handleTabsMouseMove(event) {
+        if (!isDraggingTabs.current) return;
+        const distance = event.clientX - dragStartX.current;
+        if (Math.abs(distance) > 4) {
+            hasDraggedTabs.current = true;
+            event.currentTarget.classList.add('dragging');
+            event.preventDefault();
+            event.currentTarget.scrollLeft = initialScrollLeft.current - distance;
+        }
+    }
+
+    function handleTabsMouseUp(event) {
+        if (!isDraggingTabs.current) return;
+        isDraggingTabs.current = false;
+        event.currentTarget.classList.remove('dragging');
+        if (hasDraggedTabs.current) {
+            window.setTimeout(() => {
+                hasDraggedTabs.current = false;
+            }, 0);
+        }
+    }
+
+    function selectCategory(category) {
+        if (hasDraggedTabs.current) {
+            hasDraggedTabs.current = false;
+            return;
+        }
+        setSelectedTab(category);
+    }
+
     useEffect(() => {
-        if (orderId === undefined) {
+        if (routeOrderId === undefined && !draftOrder) {
             navigate('/order_ticket', { replace: true });
             return;
         }
@@ -66,10 +106,18 @@ function MenuOrdering() {
         async function loadData() {
             setIsLoadingData(true);
             try {
-                const [menuData, orderData] = await Promise.all([
+                const [menuData, menuEnums] = await Promise.all([
                     getMenu(),
-                    getOrderById(orderId),
+                    getMenuEnums(),
                 ]);
+                const orderData = routeOrderId === undefined
+                    ? null
+                    : await getOrderById(routeOrderId);
+                const categoryEnums = menuEnums.category;
+                setCategories(categoryEnums);
+                setSelectedTab((current) =>
+                    categoryEnums.includes(current) ? current : categoryEnums[0] ?? '',
+                );
                 setMenu(menuData.filter((item) => item.available !== false));
                 setOrder(orderData);
             } catch (error) {
@@ -80,12 +128,13 @@ function MenuOrdering() {
             }
         }
         loadData();
-    }, [orderId, navigate])
+    }, [routeOrderId, draftOrder, navigate])
 
-    const visibleMenu = menu.filter((item) => getTabKey(item.category) === selectedTab);
+    const visibleMenu = menu.filter((item) => item.category === selectedTab);
     const cartItems = menu.filter((item) => cart[item.id]);
     const pendingTotal = cartItems.reduce((sum, item) => sum + item.price * cart[item.id], 0);
     const total = (order?.total_value ?? 0) + pendingTotal;
+    const normalizedDraftClientName = draftClientName.trim();
 
     function addToCart(menuId) {
         setCart((current) => ({ ...current, [menuId]: (current[menuId] || 0) + 1 }));
@@ -104,30 +153,90 @@ function MenuOrdering() {
         });
     }
 
+    function getSavedQuantity(menuId) {
+        return (order?.items ?? []).reduce((total, item) => (
+            item.menuId === menuId || item.menu?.id === menuId
+                ? total + item.quantity
+                : total
+        ), 0);
+    }
+
+    async function removeOrderItem(menuId) {
+        const pendingQuantity = cart[menuId] || 0;
+        if (pendingQuantity > 0) {
+            removeFromCart(menuId);
+            return;
+        }
+
+        const savedItem = [...(order?.items ?? [])].reverse().find(
+            (item) => item.menuId === menuId || item.menu?.id === menuId,
+        );
+        if (!savedItem || activeOrderId === null || isSaving) return;
+
+        setIsSaving(true);
+        try {
+            const response = await updateOrderItem(activeOrderId, savedItem.id, {
+                quantity: savedItem.quantity - 1,
+            });
+            setOrder(response.order);
+        } catch (error) {
+            console.error("Erro ao remover item da comanda:", error);
+            showAlert(error.message || "Erro ao remover item da comanda.", "error");
+        } finally {
+            setIsSaving(false);
+        }
+    }
+
     async function handleFinish() {
         const entries = Object.entries(cart);
         if (entries.length === 0) {
+            if (activeOrderId !== null) {
+                navigate("/open_all_tickets");
+                return;
+            }
             showAlert("Adicione pelo menos um item à comanda.", "error");
+            return;
+        }
+        if (activeOrderId === null && !normalizedDraftClientName) {
+            showAlert("Informe o nome da pessoa antes de realizar o pedido.", "error");
             return;
         }
 
         setIsSaving(true);
         const remaining = { ...cart };
+        let orderIdToUpdate = activeOrderId;
         try {
+            if (orderIdToUpdate === null) {
+                const response = await createOrder({
+                    nameClient: normalizedDraftClientName,
+                    tableId: draftOrder.tableId,
+                    service_type: "Mesa",
+                });
+                if (!response.order?.id) {
+                    throw new Error("A comanda não foi criada.");
+                }
+                orderIdToUpdate = response.order.id;
+                setActiveOrderId(orderIdToUpdate);
+                setOrder(response.order);
+            }
+
             for (const [menuId, quantity] of entries) {
-                await addOrderItem(orderId, { menuId: Number(menuId), quantity });
+                await addOrderItem(orderIdToUpdate, { menuId: Number(menuId), quantity });
                 delete remaining[menuId];
             }
             showAlert("Pedido realizado com sucesso!", "success");
+            navigate("/open_all_tickets");
         } catch (error) {
             console.error("Erro ao adicionar itens:", error);
             showAlert(error.message || "Erro ao adicionar itens.", "error");
         } finally {
             setCart(remaining);
-            try {
-                setOrder(await getOrderById(orderId));
-            } catch (error) {
-                console.error("Erro ao recarregar comanda:", error);
+            if (orderIdToUpdate !== null) {
+                try {
+                    setOrder(await getOrderById(orderIdToUpdate));
+                } catch (error) {
+                    console.error("Erro ao recarregar comanda:", error);
+                }
             }
             setIsSaving(false);
         }
@@ -138,13 +247,18 @@ function MenuOrdering() {
             showAlert("Há itens na lista que ainda não foram pedidos. Clique em Realizar pedido antes de finalizar a comanda.", "error");
             return;
         }
-        navigate('/finish_ticket', { state: { orderId } });
+        if (activeOrderId === null) {
+            showAlert("Adicione itens e clique em Realizar pedido antes de finalizar a comanda.", "error");
+            return;
+        }
+        navigate('/finish_ticket', { state: { orderId: activeOrderId } });
     }
 
-    const tableNumber = order?.table?.table_number;
-    const ticketTitle = order
-        ? `${order.nameClient}${tableNumber !== undefined ? ` - Mesa ${String(tableNumber).padStart(2, "0")}` : ''}`
-        : 'Carregando...';
+    const tableNumber = order?.table?.table_number ?? draftOrder?.tableNumber;
+    const clientName = order?.nameClient ?? normalizedDraftClientName;
+    const ticketTitle = clientName
+        ? `${clientName}${tableNumber !== undefined ? ` - Mesa ${String(tableNumber).padStart(2, "0")}` : ''}`
+        : `Nova Comanda${tableNumber !== undefined ? ` - Mesa ${String(tableNumber).padStart(2, "0")}` : ''}`;
     const hasAnyItem = (order?.items?.length ?? 0) > 0 || cartItems.length > 0;
 
     return (
@@ -158,15 +272,21 @@ function MenuOrdering() {
                         <h1>CARDÁPIO</h1>
                     </div>
 
-                    <div className="mo-tabs">
-                        {CATEGORY_TABS.map((tab) => (
+                    <div
+                        className="mo-tabs"
+                        onMouseDown={handleTabsMouseDown}
+                        onMouseMove={handleTabsMouseMove}
+                        onMouseUp={handleTabsMouseUp}
+                        onMouseLeave={handleTabsMouseUp}
+                    >
+                        {categories.map((category) => (
                             <button
                                 type="button"
-                                key={tab.key}
-                                className={`mo-tab ${selectedTab === tab.key ? 'active' : ''}`}
-                                onClick={() => setSelectedTab(tab.key)}
+                                key={category}
+                                className={`mo-tab ${selectedTab === category ? 'active' : ''}`}
+                                onClick={() => selectCategory(category)}
                             >
-                                {tab.label}
+                                {formatMenuCategoryLabel(category)}
                             </button>
                         ))}
                     </div>
@@ -176,7 +296,7 @@ function MenuOrdering() {
                             {visibleMenu.length > 0 ? (
                                 visibleMenu.map((item) => {
                                     const imageUrl = getImageUrl(item);
-                                    const quantity = cart[item.id] || 0;
+                                    const quantity = getSavedQuantity(item.id) + (cart[item.id] || 0);
 
                                     return (
                                         <div
@@ -184,8 +304,8 @@ function MenuOrdering() {
                                             key={item.id}
                                             role="button"
                                             tabIndex={0}
-                                            onClick={() => addToCart(item.id)}
-                                            onKeyDown={(e) => e.key === 'Enter' && addToCart(item.id)}
+                                            onClick={() => !isSaving && addToCart(item.id)}
+                                            onKeyDown={(e) => e.key === 'Enter' && !isSaving && addToCart(item.id)}
                                         >
                                             {imageUrl ? (
                                                 <img src={imageUrl} alt={item.name} className="mo-item-img" />
@@ -199,13 +319,15 @@ function MenuOrdering() {
                                             <div className="mo-item-counter">
                                                 <button
                                                     type="button"
-                                                    onClick={(e) => { e.stopPropagation(); removeFromCart(item.id); }}
+                                                    disabled={isSaving || quantity === 0}
+                                                    onClick={(e) => { e.stopPropagation(); removeOrderItem(item.id); }}
                                                 >
                                                     -
                                                 </button>
                                                 <span>{quantity}</span>
                                                 <button
                                                     type="button"
+                                                    disabled={isSaving}
                                                     onClick={(e) => { e.stopPropagation(); addToCart(item.id); }}
                                                 >
                                                     +
@@ -223,6 +345,19 @@ function MenuOrdering() {
 
                         <aside id="mo-ticket">
                             <div id="mo-ticket-tape"></div>
+                            {activeOrderId === null && draftOrder && !draftOrder.nameClient?.trim() && (
+                                <div className="mo-client-name">
+                                    <label htmlFor="mo-client-name-input">Nome da pessoa</label>
+                                    <input
+                                        id="mo-client-name-input"
+                                        type="text"
+                                        value={draftClientName}
+                                        onChange={(event) => setDraftClientName(event.target.value)}
+                                        placeholder="Insira o nome..."
+                                        autoComplete="off"
+                                    />
+                                </div>
+                            )}
                             <h2>{ticketTitle}</h2>
                             <ul className="mo-ticket-list">
                                 {(order?.items ?? []).map((item) => (
@@ -248,15 +383,12 @@ function MenuOrdering() {
                                 onClick={handleFinish} disabled={isSaving}>
                                 {isSaving ? "Salvando..." : "Realizar pedido"}
                             </button>
-                                <button id="mo-close-order" onClick={handleCloseOrder}
-                                    disabled={isSaving}> Finalizar comanda
-                                </button>
                             </div>
                         </aside>
                     </div>
                 </div>
             </main>
-            <AlertModal
+            <AlertModals
                 phrase={alertPhrase}
                 isOpen={alertModalIsOpen}
                 setIsOpen={setAlertModalIsOpen}

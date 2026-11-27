@@ -2,14 +2,17 @@ import { useEffect, useMemo, useState } from 'react';
 import { getOrders } from '../../services/orders';
 import { getProducts } from '../../services/products';
 import { BRAND_CHART_COLORS, formatFullCurrency, getNiceAxisTicks } from '../../utils/costsUtils';
-import { formatCompactNumber } from '../../utils/profitUtils';
 import {
     calcularCmvPlanejadoVsRealizado,
     calcularCustoPorCategoriaProdutos,
-    calcularResumoCmv,
+    calcularResumoCmv, 
+    calcularPercentualCmvSobreFaturamento,
     calcularTendenciaCmvMensal,
     separarCmvPorMeses,
+    separarCmvPorMesesDeCustos,
+    somarCmvDosCustos,
 } from '../../utils/cmvUtils';
+import { calcularFaturamento, formatCompactNumber } from '../../utils/profitUtils';
 import './cmv.css';
 
 const CATEGORY_COLORS = BRAND_CHART_COLORS;
@@ -57,7 +60,7 @@ function CmvEvolutionChart({ series, year }) {
             <div className="cmv-chart-header">
                 <div>
                     <h3>Evolução do CMV ao Longo dos Meses</h3>
-                    <p className="cmv-subtitle">Unidade XYZ - {year}</p>
+                    <p className="cmv-subtitle">Unidade Sabor&Cia - {year}</p>
                 </div>
             </div>
 
@@ -319,8 +322,12 @@ function PlannedVsRealizedCard({ comparison }) {
             <div className="cmv-chart-wrapper">
                 {hoveredItem && (
                     <span className="cmv-hover-pill cmv-floating-pill">
-                        {hoveredItem.Month}: Plan. {formatFullCurrency(hoveredItem.planned)} | Real. {formatFullCurrency(hoveredItem.realized)}
+                        {hoveredItem.Month}: Planejado {hoveredItem.hasPlanning ? formatFullCurrency(hoveredItem.planned) : "não cadastrado"} | Realizado {formatFullCurrency(hoveredItem.realized)} | Diferença {hoveredItem.difference === null ? "indisponível" : formatFullCurrency(hoveredItem.difference)}
                     </span>
+                )}
+
+                {comparison.length === 0 && (
+                    <p className="cmv-empty-hint">Cadastre um planejamento mensal de CMV para comparar com o realizado.</p>
                 )}
 
                 <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label="CMV | Diferença por Planejamento">
@@ -390,7 +397,7 @@ function PlannedVsRealizedCard({ comparison }) {
     );
 }
 
-function CMV({ products: externalProducts, orders: externalOrders, loading: externalLoading = false }) {
+function CMV({ products: externalProducts, orders: externalOrders, costs = [], plannings = [], loading: externalLoading = false }){
     const [internalData, setInternalData] = useState({ products: [], orders: [] });
     const [internalLoading, setInternalLoading] = useState(false);
 
@@ -424,30 +431,36 @@ function CMV({ products: externalProducts, orders: externalOrders, loading: exte
 
     const currentYear = new Date().getFullYear();
 
-    const { cmvTotal, cmvPercentual } = useMemo(
-        () => calcularResumoCmv(products, orders),
-        [products, orders]
+    const costMonthly = useMemo(() => separarCmvPorMesesDeCustos(costs, currentYear), [costs, currentYear]);
+    const hasCostCmv = costMonthly.some((item) => item.Value > 0);
+
+    const monthlyCmvSeries = useMemo(
+        () => (hasCostCmv ? costMonthly : separarCmvPorMeses(products, currentYear)),
+        [hasCostCmv, costMonthly, products, currentYear]
+    );
+    const cmvTotal = useMemo(
+        () => (hasCostCmv ? somarCmvDosCustos(costs) : calcularResumoCmv(products, orders).cmvTotal),
+        [hasCostCmv, costs, products, orders]
+    );
+    const cmvPercentual = useMemo(
+        () => calcularPercentualCmvSobreFaturamento(cmvTotal, calcularFaturamento(orders)),
+        [cmvTotal, orders]
     );
     const cmvTrend = useMemo(
-        () => calcularTendenciaCmvMensal(products, currentYear),
-        [products, currentYear]
-    );
-    const monthlyCmvSeries = useMemo(
-        () => separarCmvPorMeses(products, currentYear),
-        [products, currentYear]
-    );
-    const categoryBreakdown = useMemo(
-        () => calcularCustoPorCategoriaProdutos(products),
-        [products]
+        () => calcularTendenciaCmvMensal(products, currentYear, hasCostCmv ? costMonthly : null),
+        [products, currentYear, hasCostCmv, costMonthly]
     );
     const plannedVsRealized = useMemo(
-        () => calcularCmvPlanejadoVsRealizado(products, orders, currentYear),
-        [products, orders, currentYear]
+        () => calcularCmvPlanejadoVsRealizado(products, currentYear, plannings, hasCostCmv ? costMonthly : null),
+        [products, currentYear, plannings, hasCostCmv, costMonthly]
     );
+    const categoryBreakdown = useMemo(() => calcularCustoPorCategoriaProdutos(products), [products]);
 
     if (isLoading && products.length === 0) {
         return <div className="cmv-status-message">Carregando custo de mercadoria vendida...</div>;
     }
+
+    
 
     return (
         <div className="cmv-dashboard">

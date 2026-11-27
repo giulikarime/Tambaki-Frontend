@@ -3,7 +3,7 @@ import {
     transformarDataParaMes,
     verificarMesAcabou,
 } from './costsUtils';
-import { calcularFaturamento, separarFaturamentoPorMeses, somarCustoProdutos } from './profitUtils';
+import { calcularFaturamento, somarCustoProdutos } from './profitUtils';
 
 export const PRODUCT_CATEGORY_LABELS = {
     Carnes_e_Pescados: 'Carnes e Pescados',
@@ -156,51 +156,94 @@ export function separarCmvPorMeses(products = [], year = new Date().getFullYear(
     });
 }
 
+const CMV_COST_CATEGORY = 'Insumos_Ingredientes';
+
+function getCostDateParts(cost) {
+    const raw = cost?.date || cost?.createAt || cost?.createdAt;
+    if (!raw) return null;
+    if (typeof raw === 'string') {
+        const m = raw.match(/^(\d{4})-(\d{2})/);
+        if (m) return { year: Number(m[1]), monthIndex: Number(m[2]) - 1 };
+    }
+    const d = raw instanceof Date ? raw : new Date(raw);
+    if (Number.isNaN(d.getTime())) return null;
+    return { year: d.getUTCFullYear(), monthIndex: d.getUTCMonth() };
+}
+
+/** CMV realizado = compras de insumos (Cost.costCategory === Insumos_Ingredientes). */
+export function separarCmvPorMesesDeCustos(costs = [], year = new Date().getFullYear()) {
+    const monthlyTotals = new Array(12).fill(0);
+
+    if (Array.isArray(costs)) {
+        for (const cost of costs) {
+            if (cost?.costCategory !== CMV_COST_CATEGORY) continue;
+            const parts = getCostDateParts(cost);
+            if (!parts || parts.year !== year) continue;
+            monthlyTotals[parts.monthIndex] += Number(cost?.amount) || 0;
+        }
+    }
+
+    const referenceDate = new Date();
+    return MONTH_ABBREVIATIONS.map((monthLabel, index) => ({
+        Month: monthLabel,
+        Value: Number(monthlyTotals[index].toFixed(2)),
+        monthIndex: index,
+        isFinished: verificarMesAcabou(new Date(Date.UTC(year, index, 1)), referenceDate),
+    }));
+}
+
+export function somarCmvDosCustos(costs = []) {
+    if (!Array.isArray(costs)) return 0;
+    return Number(
+        costs
+            .filter((c) => c?.costCategory === CMV_COST_CATEGORY)
+            .reduce((total, c) => total + (Number(c?.amount) || 0), 0)
+            .toFixed(2)
+    );
+}
+
 /**
- * Compara CMV Planejado (30% do faturamento mensal ou custo mínimo de estoque) vs Realizado por mês.
+ * Compara a meta mensal cadastrada com o CMV realizado.
  */
 export function calcularCmvPlanejadoVsRealizado(
     products = [],
-    orders = [],
     year = new Date().getFullYear(),
-    targetCmvRatio = 0.3
+    plannings = [],
+    monthlyOverride = null  
 ) {
-    const monthlyCmv = separarCmvPorMeses(products, year);
-    const monthlyRevenue = separarFaturamentoPorMeses(orders, year);
+    const monthlyCmv = monthlyOverride || separarCmvPorMeses(products, year);
+    const planningByMonth = new Map(
+        plannings
+            .filter((planning) => Number(planning.year) === year)
+            .map((planning) => [Number(planning.month), Number(planning.plannedAmount) || 0]),
+    );
 
     const activeMonths = monthlyCmv
         .map((cmvItem, idx) => {
-            const revValue = monthlyRevenue[idx]?.Value || 0;
             const realized = cmvItem.Value;
-            const planned =
-                revValue > 0 ? Number((revValue * targetCmvRatio).toFixed(2)) : realized;
+            const month = idx + 1;
+            const hasPlanning = planningByMonth.has(month);
+            const planned = planningByMonth.get(month) ?? 0;
 
             return {
                 Month: cmvItem.Month,
                 planned,
                 realized,
+                difference: hasPlanning ? Number((realized - planned).toFixed(2)) : null,
+                hasPlanning,
                 monthIndex: idx,
             };
         })
-        .filter((item) => item.planned > 0 || item.realized > 0);
+        .filter((item) => item.hasPlanning || item.realized > 0);
 
-    if (activeMonths.length > 0) {
-        return activeMonths.slice(-4);
-    }
-
-    return monthlyCmv.slice(0, 3).map((item) => ({
-        Month: item.Month,
-        planned: 0,
-        realized: 0,
-        monthIndex: item.monthIndex,
-    }));
+    return activeMonths.slice(-4);
 }
 
 /**
  * Calcula tendência mensal do CMV em comparação ao mês anterior.
  */
-export function calcularTendenciaCmvMensal(products = [], year = new Date().getFullYear()) {
-    const monthly = separarCmvPorMeses(products, year);
+export function calcularTendenciaCmvMensal(products = [], year = new Date().getFullYear(),monthlyOverride = null) {
+    const monthly = monthlyOverride || separarCmvPorMeses(products, year); 
     const nowMonth = new Date().getMonth();
     const currentValue = monthly[nowMonth]?.Value || 0;
     const prevValue = nowMonth > 0 ? monthly[nowMonth - 1]?.Value || 0 : 0;
