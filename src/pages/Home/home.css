@@ -20,14 +20,21 @@ button:hover {
 
 #principal-menu {
     width: 70%;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%,-50%);
+    position: relative;
+    min-width: 0;
+    margin: auto;
     display: flex;
     flex-direction: column;
     gap: 100px;
     align-items: center;
+}
+
+.home-page main {
+    display: flex;
+    width: 100%;
+    height: auto;
+    min-height: 93vh;
+    box-sizing: border-box;
 }
 
 #btn-group {
