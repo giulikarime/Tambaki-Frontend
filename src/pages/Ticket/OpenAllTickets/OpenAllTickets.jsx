@@ -5,13 +5,38 @@ import './open_all_tickets.css'
 import { ChevronLeft, Edit } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { getTables } from "../../../services/tables";
-import { closeOrder, getOrders } from "../../../services/orders";
-import { getReservations } from "../../../services/reserves";
+import { closeOrder, getOpenOrders } from "../../../services/orders";
+import { getOpenReservations } from "../../../services/reserves";
 import AlertModals from "../../../components/SucessModals/AlertModals";
 import {
     getReservationDateTime,
     isPendingReservationOverdue,
 } from "../../../utils/reservationTime";
+import { getCached, hasCached } from "../../../services/cache";
+
+function getCachedOrders() {
+    const openOrders = getCached('orders:open');
+    if (Array.isArray(openOrders)) return openOrders;
+
+    const orders = getCached('orders:list');
+    return Array.isArray(orders) ? orders.filter((order) => order.status === "Aberta") : [];
+}
+
+function getCachedReservations() {
+    const openReservations = getCached('reservations:open');
+    if (Array.isArray(openReservations)) return openReservations;
+
+    const reservations = getCached('reservations:list');
+    return Array.isArray(reservations)
+        ? reservations.filter((reservation) => ["Pendente", "Confirmada"].includes(reservation.status))
+        : [];
+}
+
+function hasCachedOpenTicketsData() {
+    return hasCached('tables:list') &&
+        (hasCached('orders:open') || hasCached('orders:list')) &&
+        (hasCached('reservations:open') || hasCached('reservations:list'));
+}
 
 function OpenAllTickets(){
 
@@ -19,12 +44,12 @@ function OpenAllTickets(){
     const [hasInteracted, setHasInteracted] = useState(false);
     const navigate = useNavigate()
 
-    const [tables,setTables] = useState([])
-    const [isLoadingOpenTickets, setIsLoadingOpenTickets] = useState(true);
+    const [tables,setTables] = useState(() => getCached('tables:list') ?? []);
+    const [isLoadingOpenTickets, setIsLoadingOpenTickets] = useState(() => !hasCachedOpenTicketsData());
     const [currentTime, setCurrentTime] = useState(() => new Date());
     const [selectedTable,setSelectedTable] = useState(null);
-    const [orders,setOrders] = useState([]);
-    const [reservations,setReservations] = useState([]);
+    const [orders,setOrders] = useState(getCachedOrders);
+    const [reservations,setReservations] = useState(getCachedReservations);
     const [alertPhrase,setAlertPhrase] = useState("");
     const [alertType,setAlertType] = useState("success");
     const [alertModalIsOpen,setAlertModalIsOpen] = useState(false);
@@ -38,12 +63,12 @@ function OpenAllTickets(){
     }
 
     async function loadOpenTickets(){
-        setIsLoadingOpenTickets(true);
+        if (!hasCachedOpenTicketsData()) setIsLoadingOpenTickets(true);
         try{
             const [tables, orders, reservations] = await Promise.all([
                 getTables(),
-                getOrders(),
-                getReservations(),
+                getOpenOrders(),
+                getOpenReservations(),
             ]);
             setTables(tables);
             setOrders(orders);
@@ -272,7 +297,7 @@ function OpenAllTickets(){
                                     )
                                 })
                         ) : (
-                            <p>Nenhuma mesa ocupada ou reservada.</p>
+                            <p className="tickets-empty-message">Nenhuma mesa ocupada ou reservada.</p>
                         )}
                     </div>
                     <div className="clients-list">

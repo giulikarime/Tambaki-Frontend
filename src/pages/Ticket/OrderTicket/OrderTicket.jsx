@@ -5,26 +5,59 @@ import './order_ticket.css';
 import "../../../App.css";
 import { ChevronLeft } from "lucide-react";
 import { getTables } from "../../../services/tables";
-import { getOrders } from "../../../services/orders";
-import { getReservations } from "../../../services/reserves";
+import { getOpenOrders } from "../../../services/orders";
+import { getOpenReservations } from "../../../services/reserves";
 import { useNavigate } from "react-router-dom";
 import AlertModals from "../../../components/SucessModals/AlertModals";
+import { getCached, hasCached } from "../../../services/cache";
 import {
     getReservationDateTime,
     isPendingReservationOverdue,
 } from "../../../utils/reservationTime";
+
+function getCachedOrderTables() {
+    const tables = getCached('tables:list');
+    return Array.isArray(tables)
+        ? [...tables].sort((a, b) => Number(a.table_number) - Number(b.table_number))
+        : [];
+}
+
+function getCachedOrders() {
+    const openOrders = getCached('orders:open');
+    if (Array.isArray(openOrders)) return openOrders;
+
+    const orders = getCached('orders:list');
+    return Array.isArray(orders) ? orders.filter((order) => order.status === "Aberta") : [];
+}
+
+function getCachedReservations() {
+    const openReservations = getCached('reservations:open');
+    if (Array.isArray(openReservations)) return openReservations;
+
+    const reservations = getCached('reservations:list');
+    return Array.isArray(reservations)
+        ? reservations.filter((reservation) => ["Pendente", "Confirmada"].includes(reservation.status))
+        : [];
+}
+
+function hasCachedOrderTicketData() {
+    return hasCached('tables:list') &&
+        (hasCached('orders:open') || hasCached('orders:list')) &&
+        (hasCached('reservations:open') || hasCached('reservations:list'));
+}
 
 function OpenTicket() {
 
     const [expanded, setExpand] = useState(false);
     const [hasInteracted, setHasInteracted] = useState(false);
 
-    const [orderTables, setOrderTables] = useState([]);
-    const [orders, setOrders] = useState([]);
-    const [reservations, setReservations] = useState([]);
+    const [orderTables, setOrderTables] = useState(getCachedOrderTables);
+    const [orders, setOrders] = useState(getCachedOrders);
+    const [reservations, setReservations] = useState(getCachedReservations);
     const [selectedTable, setSelectedTable] = useState(null);
     const [currentTime, setCurrentTime] = useState(() => new Date());
-    const [isLoadingData, setIsLoadingData] = useState(true);
+    const [isLoadingData, setIsLoadingData] = useState(() => !hasCachedOrderTicketData());
+    const [isRefreshingData, setIsRefreshingData] = useState(hasCachedOrderTicketData);
     const [alertPhrase, setAlertPhrase] = useState("");
     const [alertType, setAlertType] = useState("success");
     const [alertModalIsOpen, setAlertModalIsOpen] = useState(false);
@@ -45,12 +78,14 @@ function OpenTicket() {
     }
 
     async function loadData() {
-        setIsLoadingData(true);
+        const hasInitialData = hasCachedOrderTicketData();
+        if (!hasInitialData) setIsLoadingData(true);
+        setIsRefreshingData(hasInitialData);
         try {
             const [tables, ordersData, reservationsData] = await Promise.all([
                 getTables(),
-                getOrders(),
-                getReservations(),
+                getOpenOrders(),
+                getOpenReservations(),
             ]);
             setOrderTables(
                 [...tables].sort((a, b) => Number(a.table_number) - Number(b.table_number))
@@ -62,6 +97,7 @@ function OpenTicket() {
             showAlert(error.message || "Erro ao carregar mesas e reservas.", "error");
         } finally {
             setIsLoadingData(false);
+            setIsRefreshingData(false);
         }
     }
 
@@ -179,6 +215,11 @@ function OpenTicket() {
                             required
                         />
                         <p style={{ color: '#777171ff' }}>Selecione a mesa do cliente e monte seu pedido.</p>
+                        {isRefreshingData && (
+                            <p className="availability-refresh-message" role="status">
+                                Atualizando disponibilidade das mesas...
+                            </p>
+                        )}
                     </div>
                     <div id="sec-container">
                         <div
@@ -200,6 +241,7 @@ function OpenTicket() {
 
                                     return (
                                         <button
+                                            disabled={isRefreshingData}
                                             onClick={() => {
                                                 if (!isTableAvailable(table, new Date())) {
                                                     showAlert("Esta mesa está ocupada ou reservada neste horário.", "error");
@@ -224,7 +266,7 @@ function OpenTicket() {
                     </div>
                     <div className="actions-buttons" style={{ display: 'flex', gap: '16px' }}>
                         <button type="button"
-                            onClick={handleStartOrder} id='btn-select-table'>
+                            onClick={handleStartOrder} id='btn-select-table' disabled={isRefreshingData}>
                             Iniciar comanda
                         </button>
                     </div>

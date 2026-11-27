@@ -1,4 +1,5 @@
 import { useLocation, Link } from 'react-router-dom';
+import './error.css';
 
 function Error(){
     
@@ -7,10 +8,13 @@ function Error(){
     const mensagem = location.state?.mensagem || 'A página que você procura não existe.';
 
     return(
-        <main>
-            <h1>Erro {codigo}</h1>
-            <p>{mensagem}</p>
-            <Link to="/">Voltar para a página inicial</Link>
+        <main className="error-page">
+            <section className="error-card" aria-labelledby="error-title">
+                <p className="error-code">Erro {codigo}</p>
+                <h1 id="error-title">Ops, algo deu errado</h1>
+                <p className="error-message">{mensagem}</p>
+                <Link className="error-home-link" to="/">Voltar para a página inicial</Link>
+            </section>
         </main>
     );
 }

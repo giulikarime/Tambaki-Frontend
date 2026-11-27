@@ -8,7 +8,7 @@ main{
 #principal-menu-stock{
     width: 70%;
     position: absolute;
-    top: 150px;
+    top: 130px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;

@@ -7,6 +7,7 @@ const generations = new Map();
 const STORAGE_PREFIX = 'tambaki:api-cache:v1:';
 let cacheEpoch = 0;
 let storageWarningShown = false;
+let persistenceWarningShown = false;
 
 function getSessionStorage() {
     if (typeof window === 'undefined') return null;
@@ -51,11 +52,72 @@ function persistEntry(key, entry) {
     const storage = getSessionStorage();
     if (!storage) return;
 
+    const storageKey = `${STORAGE_PREFIX}${key}`;
+    let serialized;
     try {
-        storage.setItem(`${STORAGE_PREFIX}${key}`, JSON.stringify(entry));
+        serialized = JSON.stringify(entry);
     } catch (error) {
-        console.warn(`Não foi possível salvar o cache "${key}" nesta sessão.`, error);
+        console.warn(`Não foi possível serializar o cache "${key}".`, error);
+        return;
     }
+
+    try {
+        storage.setItem(storageKey, serialized);
+        return;
+    } catch (error) {
+        if (!isQuotaExceeded(error)) {
+            console.warn(`Não foi possível salvar o cache "${key}" nesta sessão.`, error);
+            return;
+        }
+    }
+
+    removePersistentEntry(storage, key);
+
+    try {
+        storage.setItem(storageKey, serialized);
+        return;
+    } catch (error) {
+        if (!isQuotaExceeded(error)) {
+            console.warn(`Não foi possível salvar o cache "${key}" nesta sessão.`, error);
+            return;
+        }
+    }
+
+    const keysToEvict = getPersistentKeys(storage)
+        .filter((persistentKey) => persistentKey !== storageKey)
+        .map((persistentKey) => {
+            let expires = 0;
+            try {
+                const cachedEntry = JSON.parse(storage.getItem(persistentKey));
+                if (typeof cachedEntry?.expires === 'number') expires = cachedEntry.expires;
+            } catch {
+                // Invalid entries are removed before valid cache entries.
+            }
+            return { key: persistentKey, expires };
+        })
+        .sort((a, b) => a.expires - b.expires);
+
+    for (const persistentEntry of keysToEvict) {
+        try {
+            storage.removeItem(persistentEntry.key);
+            storage.setItem(storageKey, serialized);
+            return;
+        } catch (error) {
+            if (!isQuotaExceeded(error)) {
+                console.warn(`Não foi possível salvar o cache "${key}" nesta sessão.`, error);
+                return;
+            }
+        }
+    }
+
+    if (!persistenceWarningShown) {
+        console.warn(`Não foi possível salvar o cache "${key}" nesta sessão; os dados continuam disponíveis em memória.`);
+        persistenceWarningShown = true;
+    }
+}
+
+function isQuotaExceeded(error) {
+    return error?.name === 'QuotaExceededError' || error?.code === 22 || error?.code === 1014;
 }
 
 function removePersistentEntry(storage, key) {

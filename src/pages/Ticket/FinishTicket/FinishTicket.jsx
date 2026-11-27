@@ -185,7 +185,7 @@ function FinishTicket() {
                                 onClick={handleFinalize}
                                 disabled={isSaving || isFinished}
                             >
-                                {isSaving ? "Finalizando..." : "Finalizar Comanda"}
+                                {isSaving ? "Finalizando..." : isFinished ? "Finalizado" : "Finalizar Comanda"}
                             </button>
                         </section>
 

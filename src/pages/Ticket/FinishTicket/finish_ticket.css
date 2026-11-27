@@ -1,7 +1,8 @@
 #finish-ticket-page{
     display: flex;
     flex-direction: row;
-    width: 100vw;
+    width: 100%;
+    min-width: 0;
     height: auto;
     min-height: 93vh;
     background-color: #fff8e9;
@@ -14,14 +15,15 @@
 
 #finish-ticket-page #ft-container{
     box-sizing: border-box;
-    flex: 1;
+    flex: 0 1 70%;
     min-width: 0;
-    max-width: 960px;
+    width: 70%;
+    max-width: none;
     margin: 0 auto;
-    padding: 5vh 24px 32px;
+    padding: 100px 0 50px;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 30px;
 }
 
 #finish-ticket-page .ft-top{
@@ -32,7 +34,7 @@
 }
 
 #finish-ticket-page .ft-top h1{
-    font-size: 22px;
+    font-size: 30px;
     color: #1b1343;
 }
 
@@ -40,29 +42,29 @@
     display: flex;
     flex-direction: row;
     align-items: flex-start;
-    gap: 32px;
+    gap: 40px;
 }
 
 #finish-ticket-page #ft-card{
     box-sizing: border-box;
-    flex: 0 1 430px;
+    flex: 1 1 0;
     min-width: 0;
-    padding: 28px 32px 32px;
+    padding: 32px;
     border-radius: 36px;
     background-color: #1b1343;
     color: #fff;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 14px;
 }
 
 #finish-ticket-page #ft-card h2{
-    font-size: 20px;
+    font-size: 24px;
 }
 
 #finish-ticket-page .ft-card-sub{
-    margin-top: -6px;
-    font-size: 10px;
+    margin-top: -8px;
+    font-size: 14px;
     font-weight: bold;
     color: #f5ae47;
 }
@@ -72,10 +74,10 @@
     margin-top: 14px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    max-height: 200px;
+    gap: 10px;
+    max-height: 260px;
     overflow-y: auto;
-    font-size: 12px;
+    font-size: 16px;
 }
 
 #finish-ticket-page .ft-items li{
@@ -90,7 +92,7 @@
 
 #finish-ticket-page .ft-divider{
     height: 1px;
-    margin: 14px 0 6px;
+    margin: 16px 0 8px;
     background-color: #6b6390;
 }
 
@@ -98,30 +100,30 @@
     display: flex;
     justify-content: space-between;
     gap: 12px;
-    font-size: 12px;
+    font-size: 16px;
     font-weight: bold;
 }
 
 #finish-ticket-page .ft-line.ft-total{
-    margin-top: 4px;
-    font-size: 15px;
+    margin-top: 6px;
+    font-size: 20px;
 }
 
 #finish-ticket-page .ft-line.ft-total span:last-child{
     color: #f5ae47;
-    font-size: 16px;
+    font-size: 21px;
 }
 
 #finish-ticket-page #ft-finalize{
     align-self: flex-start;
-    margin-top: 12px;
-    padding: 9px 26px;
+    margin-top: 14px;
+    padding: 12px 28px;
     border: none;
     border-radius: 20px;
     background-color: #f5ae47;
     color: #1b1343;
     font-family: inherit;
-    font-size: 12px;
+    font-size: 16px;
     font-weight: bold;
     cursor: pointer;
 }
@@ -132,17 +134,18 @@
 }
 
 #finish-ticket-page #ft-options{
+    box-sizing: border-box;
     flex: 0 0 auto;
-    width: clamp(200px, 24vw, 260px);
+    width: clamp(260px, 28vw, 360px);
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    padding-top: 6px;
+    gap: 10px;
+    padding-top: 8px;
 }
 
 #finish-ticket-page #ft-options label{
-    margin-top: 10px;
-    font-size: 15px;
+    margin-top: 12px;
+    font-size: 17px;
     font-weight: bold;
     color: #1b1343;
 }
@@ -155,13 +158,13 @@
 #finish-ticket-page #ft-payment{
     box-sizing: border-box;
     width: 100%;
-    padding: 9px 14px;
+    padding: 12px 16px;
     border: none;
     border-radius: 12px;
     background-color: #ffd36e;
     color: #1b1343;
     font-family: inherit;
-    font-size: 12px;
+    font-size: 16px;
     outline: none;
 }
 
@@ -189,6 +192,45 @@
 }
 
 #finish-ticket-page .ft-error{
-    font-size: 11px;
+    font-size: 13px;
     color: #b3261e;
+}
+
+@media (max-width: 1200px) {
+    #finish-ticket-page #ft-container{
+        flex: 1;
+        width: auto;
+        padding: 40px 24px;
+        gap: 24px;
+    }
+}
+
+@media (max-width: 768px) {
+    #finish-ticket-page #ft-container{
+        padding: 32px 16px 40px;
+    }
+
+    #finish-ticket-page .ft-top h1{
+        font-size: 24px;
+    }
+
+    #finish-ticket-page .ft-layout{
+        flex-direction: column;
+        gap: 24px;
+    }
+
+    #finish-ticket-page #ft-card,
+    #finish-ticket-page #ft-options{
+        width: 100%;
+    }
+
+    #finish-ticket-page #ft-card{
+        flex: none;
+        padding: 24px;
+    }
+
+    #finish-ticket-page #ft-options{
+        flex: none;
+        padding-top: 0;
+    }
 }

@@ -243,7 +243,7 @@ function Home() {
                             <p>Selecione a mesa e os itens do cardápio para abrir uma comanda.</p>
                         </button>}
                         {canEditHome && <button onClick={()=>redirect('/open_all_tickets')} style={{ backgroundColor: '#f3b45c', color: 'black'}} className="principal-btn">
-                            <CalendarFold color="black" size={50} style={{backgroundColor:'#dda761', borderRadius:'16px', padding:'8px'}}></CalendarFold>
+                            <CalendarFold color="black" size={30} style={{backgroundColor:'#dda761', borderRadius:'16px', padding:'8px'}}></CalendarFold>
                             <h2>Comandas e Reservas Abertas</h2>
                             {isLoadingOrders ? (
                                 <p>Carregando comandas e reservas...</p>
@@ -260,7 +260,7 @@ function Home() {
                         </button>}
                         {!canEditHome && (
                             <div className="principal-btn" style={{ backgroundColor: '#f3b45c', color: 'black' }}>
-                                <CalendarFold color="black" size={50} style={{backgroundColor:'#dda761', borderRadius:'16px', padding:'8px'}}></CalendarFold>
+                                <CalendarFold color="black" size={30} style={{backgroundColor:'#dda761', borderRadius:'16px', padding:'8px'}}></CalendarFold>
                                 <h2>Comandas e Reservas Abertas</h2>
                                 {isLoadingOrders ? (
                                     <p>Carregando comandas e reservas...</p>

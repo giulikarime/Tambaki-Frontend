@@ -76,6 +76,11 @@
     outline: none;
 }
 
+#order-ticket-page .availability-refresh-message {
+    color: #777171;
+    font-size: 14px;
+}
+
 #order-ticket-page #sec-container {
     display: flex;
     flex-direction: row;
