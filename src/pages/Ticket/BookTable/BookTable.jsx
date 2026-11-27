@@ -233,7 +233,7 @@ function BookTable(){
     }
 
     const selectedTableIssue = selectedTable ? getTableIssue(selectedTable) : null;
-    const recommendedTable = selectedTableIssue ? getRecommendedTable() : null;
+    const recommendedTable = getRecommendedTable();
 
     return(
         <>

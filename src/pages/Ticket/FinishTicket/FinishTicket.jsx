@@ -72,10 +72,10 @@ function FinishTicket() {
         loadOrder();
     }, [orderId, navigate])
 
-    // Depois de finalizar, volta para Comandas e Reservas Abertas quando o aviso for fechado
+    // Depois de finalizar, volta para Abrir Comanda quando o aviso for fechado.
     useEffect(() => {
         if (isFinished && !alertModalIsOpen) {
-            navigate('/open_all_tickets');
+            navigate('/order_ticket', { replace: true });
         }
     }, [isFinished, alertModalIsOpen, navigate])
 
@@ -137,7 +137,9 @@ function FinishTicket() {
                 <div id="ft-container">
                     <div className="ft-top">
                         <button
-                            onClick={() => navigate('/menu_ordering', { state: { orderId } })}
+                            onClick={() => isFinished
+                                ? navigate('/order_ticket', { replace: true })
+                                : navigate('/menu_ordering', { state: { orderId } })}
                             className="btn-back-base"
                         >
                             <ChevronLeft></ChevronLeft>
